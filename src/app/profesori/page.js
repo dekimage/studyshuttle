@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { CtaDialog, ProffesorCard, RocketCta } from "../page";
 import { proffesorsData } from "@/src/data";
 import { ChevronLeft, ChevronRight, Search } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 
 const filtersData = [
@@ -14,6 +14,15 @@ const filtersData = [
 
 const SearchPingIcon = ({ searchText, setSearchText }) => {
   const [isSelected, setIsSelected] = useState(false);
+  const inputRef = useRef(null); // Create a ref to the input element
+
+  const handleClick = () => {
+    setIsSelected(true);
+    setTimeout(() => {
+      inputRef.current.focus();
+    }, 50); // Adjust the timeout as needed
+  };
+
   return (
     <div className="relative my-16 w-full border-t">
       {/* Ping Effect */}
@@ -24,6 +33,7 @@ const SearchPingIcon = ({ searchText, setSearchText }) => {
       {/* Center Icon */}
       {isSelected ? (
         <Input
+          ref={inputRef}
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
           placeholder="Search"
@@ -32,11 +42,7 @@ const SearchPingIcon = ({ searchText, setSearchText }) => {
       ) : (
         <div
           className="absolute left-[50%] top-[-30px] flex h-[60px] w-[60px] -translate-x-1/2 cursor-pointer items-center justify-center rounded-full border bg-white text-center"
-          onClick={() => {
-            if (!isSelected) {
-              setIsSelected(true);
-            }
-          }}
+          onClick={handleClick}
         >
           <div className="relative flex items-center justify-center">
             <div className="absolute left-[16] top-[-16px] h-[50px] w-[50px]  animate-ping rounded-full bg-blue-500 opacity-50"></div>

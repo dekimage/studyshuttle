@@ -90,6 +90,37 @@ export const Header = () => {
               Универзитет
             </div>
           </Link>
+          <Link href="/skolarina" className="w-full cursor-pointer text-end">
+            <div
+              className="w-full p-3 pr-8 text-[20px] font-bold text-sky"
+              style={
+                isSkolarina
+                  ? { color: "white", backgroundColor: "#48badd" }
+                  : {}
+              }
+            >
+              Школарина
+            </div>
+          </Link>
+          <Link href="/profesori" className="w-full cursor-pointer text-end">
+            <div
+              className="w-full p-3 pr-8 text-[20px] font-bold text-sky"
+              style={
+                isProfesori
+                  ? { color: "white", backgroundColor: "#48badd" }
+                  : {}
+              }
+            >
+              Професори
+            </div>
+          </Link>
+          <CtaDialog
+            cta={
+              <div className="w-full p-3 pr-8 text-end text-[20px] font-bold text-sky">
+                Најави Се
+              </div>
+            }
+          />
         </div>
       )}
 

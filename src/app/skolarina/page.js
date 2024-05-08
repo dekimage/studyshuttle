@@ -5,10 +5,10 @@ import { CtaDialog } from "../page";
 const SkolarinaPage = () => {
   return (
     <div className="flex flex-col items-center justify-center">
-      <div className="mt-16 text-[25px] font-bold uppercase lg:text-[65px]">
+      <div className="mt-16 text-center text-[25px] font-bold uppercase lg:text-[65px]">
         Наши платежни планови
       </div>
-      <div className="mb-8 mt-4 px-16 text-[25px] font-bold">
+      <div className="mb-8 mt-4 px-16 text-center text-[25px] font-bold">
         Купете си Study Shuttle токени и ајде да учиме заедно! <br />{" "}
         Трансакцијата на часовите се врши со токени:
       </div>
@@ -19,7 +19,7 @@ const SkolarinaPage = () => {
 
       <div className="flex flex-col gap-8 lg:h-[800px] lg:flex-row">
         <div className="my-32 mb-64 flex h-[550px] items-center justify-center gap-8">
-          <div className="flex w-[430px] flex-col rounded-xl bg-sky p-8">
+          <div className="flex w-[300px] flex-col rounded-xl bg-sky p-8  lg:w-[430px]">
             <div className="text-[35px] font-semibold text-white">
               Основен План
             </div>
@@ -41,7 +41,7 @@ const SkolarinaPage = () => {
           </div>
         </div>
         <div className="my-32 mb-64 flex h-[550px] items-center justify-center gap-8">
-          <div className="flex w-[430px] flex-col rounded-xl bg-sun p-8">
+          <div className="flex w-[300px] flex-col rounded-xl bg-sun p-8  lg:w-[430px]">
             <div className="text-[35px] font-semibold text-white">
               Основен План
             </div>

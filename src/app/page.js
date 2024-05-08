@@ -79,7 +79,7 @@ export const Hero = ({ heroData }) => {
   const { color, headline, subheadline, description, image } = heroData;
   return (
     <div className="mt-16 flex flex-col">
-      <div className="max-w-[1000px] pl-8 lg:pl-32">
+      <div className="mb-24 max-w-[1000px] px-8 lg:mb-0 lg:pl-32 ">
         <div className="slide-in-bottom text-[35px] font-bold lg:text-[65px]">
           Study Shuttle за{" "}
         </div>
@@ -126,7 +126,7 @@ export const Hero = ({ heroData }) => {
         />
 
         {/* Inner Content Positioned Correctly */}
-        <div className="relative z-50 my-8 flex w-full flex-col items-center px-16 lg:px-32">
+        <div className="relative z-50 my-24 flex w-full flex-col items-center px-16 lg:my-8 lg:px-32">
           <div className="mb-16 mb-2 pb-8 pt-32 text-center text-[16px] font-semibold lg:text-[24px]">
             {description}
           </div>
@@ -285,7 +285,7 @@ export const RocketCta = ({ isRed, active, isProf }) => {
   );
 };
 
-const FlagHero = ({ data, active, setActive }) => {
+const FlagHero = ({ data, active, setActive, setIsOnceClicked }) => {
   const { title, description, image, color } = data;
   const dotts = [0, 1, 2, 3, 4];
 
@@ -300,7 +300,7 @@ const FlagHero = ({ data, active, setActive }) => {
             {description}
           </div>
 
-          <div className="flex items-center justify-start gap-3 px-8 pt-16   lg:justify-start">
+          <div className="relative z-[1000] flex items-center justify-start gap-3 px-8 pt-16 lg:justify-start">
             {dotts.map((dot, index) => {
               const isActive = active === dot;
               return (
@@ -312,7 +312,10 @@ const FlagHero = ({ data, active, setActive }) => {
                       : { backgroundColor: "#ffd02f" }
                   }
                   className="h-4 w-4 cursor-pointer rounded-full bg-chili"
-                  onClick={() => setActive(dot)}
+                  onClick={() => {
+                    setIsOnceClicked(true);
+                    setActive(dot);
+                  }}
                 ></div>
               );
             })}
@@ -439,12 +442,12 @@ const Stats = () => {
           <div className="text-[24px]">Студенти</div>
         </div>
         <div className="my-8 flex flex-col items-center justify-center gap-2 lg:my-0 lg:gap-8">
-          <div className="text-center text-[65px] font-bold">23</div>
+          <div className="text-center text-[65px] font-bold">6</div>
           <div className="text-[24px]">Професори</div>
         </div>
         <div className="my-8 flex flex-col items-center justify-center gap-2 lg:my-0 lg:gap-8">
-          <div className="text-center text-[65px] font-bold">34</div>
-          <div className="text-[24px]">Предмети</div>
+          <div className="text-center text-[65px] font-bold">9</div>
+          <div className="text-[24px]">Предмети и Курсеви</div>
         </div>
       </div>
     </div>
@@ -455,7 +458,7 @@ export const ProffesorCard = ({ proffesor, isLanding }) => {
   const { name, title, scope, subjects, image } = proffesor;
   return (
     <div
-      className="flex min-h-[487px] w-[295px] flex-col items-center rounded-[20px] border border-[3px] border-sun bg-white px-[12px] text-center"
+      className="flex h-[540px] w-[295px] flex-col items-center rounded-[20px] border border-[3px] border-sun bg-white px-[12px] text-center"
       style={isLanding ? { border: "none" } : {}}
     >
       <div
@@ -516,7 +519,7 @@ const ProfessorsSection = () => {
       </div> */}
       <Carousel className="my-8 w-[80%]">
         <CarouselContent className="-ml-4">
-          {proffesorsData.slice(0, 3).map((proffesor, index) => (
+          {proffesorsData.map((proffesor, index) => (
             <CarouselItem
               className="flex items-center justify-center px-4 md:basis-1/2 lg:basis-1/3"
               key={index}
@@ -534,20 +537,27 @@ const ProfessorsSection = () => {
 
 const LandingPage = () => {
   const [active, setActive] = useState(0);
+  const [isOnceClicked, setIsOnceClicked] = useState(false);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setActive((prevActive) => (prevActive + 1) % stepsData.length);
-    }, 4500);
+    let intervalId; // Declare the intervalId variable
 
-    return () => clearInterval(interval);
-  }, []);
+    if (!isOnceClicked) {
+      intervalId = setInterval(() => {
+        setActive((prevActive) => (prevActive + 1) % (stepsData.length + 1));
+      }, 4500);
+    }
+
+    return () => clearInterval(intervalId); // Clear on cleanup
+  }, [isOnceClicked]);
+
   return (
     <div className="">
       <FlagHero
         data={flagHeroData[active]}
         active={active}
         setActive={setActive}
+        setIsOnceClicked={setIsOnceClicked}
       />
       <RocketCta active={active + 1} isRed />
       <div>
@@ -556,10 +566,10 @@ const LandingPage = () => {
         ))}
       </div>
 
-      <div className="flex items-center justify-center py-16 pt-8">
+      <div className="flex items-center justify-center py-16">
         <CtaDialog
           cta={
-            <Button className="h-[48px] rounded-full bg-sky text-[24px] lg:bg-chili lg:text-[35px]">
+            <Button className="rounded-full bg-sky lg:bg-chili">
               Регистрирај се
             </Button>
           }
@@ -570,8 +580,8 @@ const LandingPage = () => {
       <ProfessorsSection />
       <div className="my-8 mb-24 flex items-center justify-center">
         <Link href="/profesori">
-          <Button className="rounded-full bg-sky">
-            Запознајте ги нашите Професори
+          <Button className="rounded-full bg-sky py-8 lg:px-8 lg:text-[24px]">
+            Запознајте ги нашите професори
           </Button>
         </Link>
       </div>

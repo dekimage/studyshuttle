@@ -1,4 +1,4 @@
-import { Facebook, Instagram, Phone, Twitter } from "lucide-react";
+import { Facebook, Instagram, Linkedin, Phone, Twitter } from "lucide-react";
 import logoImg from "../assets/logo.png";
 import Image from "next/image";
 import Link from "next/link";
@@ -18,12 +18,12 @@ const socialIcons = [
     link: "https://www.instagram.com/studyshuttle.mk/",
   },
   {
-    icon: <Twitter color="#ed1b31" size={18} style={{ fill: "#ed1b31" }} />,
-    link: "https://twitter.com/studyshuttle",
+    icon: <Linkedin color="#ed1b31" size={18} style={{ fill: "#ed1b31" }} />,
+    link: "https://www.linkedin.com/company/study-shuttle/",
   },
   {
     icon: <Phone color="#ed1b31" size={18} />,
-    link: "https://www.viber.com",
+    link: "tel:+38971620370",
   },
 ];
 
@@ -79,7 +79,7 @@ export const Footer = () => {
       <div className="mb-6 flex w-full flex-col gap-2 text-center lg:mb-0 lg:text-start">
         <div className="bolded text-[22px] font-bold">Контакт</div>
         {/* <div className="text-lg">info@studyshuttle.mk</div> */}
-        <div className="flex flex-col items-center gap-4 lg:flex-row">
+        <div className="flex flex-col items-center gap-4 ">
           <Input
             className="max-w-[400px] focus:ring-2 focus:ring-blue-500"
             placeholder="Емаил адреса"
