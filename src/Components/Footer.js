@@ -30,10 +30,10 @@ const socialIcons = [
 export const Footer = () => {
   return (
     <div
-      className="flex h-full flex-col  items-center justify-between gap-8 px-8 pt-8 lg:h-[353px] lg:flex-row lg:gap-32 lg:px-32 lg:pt-0"
+      className="flex h-full flex-col  items-center justify-between gap-8 px-8 pt-8 lg:h-[353px] lg:flex-row lg:items-start lg:gap-32 lg:px-32 lg:pt-0"
       style={{ background: "linear-gradient(to bottom, white, #48badd)" }}
     >
-      <div className="flex flex-col items-center gap-2">
+      <div className="flex w-full flex-col items-center gap-2 lg:items-start">
         <Link href="/" className="flex">
           <Image src={logoImg} width={200} height={200} alt="logo" />
         </Link>
@@ -47,7 +47,7 @@ export const Footer = () => {
         </div>
       </div>
 
-      <div className="flex flex-col gap-2 text-center lg:text-start">
+      <div className="flex w-full flex-col items-center gap-2 text-center lg:items-start lg:text-start">
         <div className="bolded text-[22px] font-bold">Навигација</div>
         <Link href="/osnovno">
           <div className="w-fit border-b border-transparent text-lg hover:border-b hover:border-black">
@@ -76,12 +76,12 @@ export const Footer = () => {
         </Link>
       </div>
 
-      <div className="mb-6 flex flex-col gap-2 text-center lg:mb-0 lg:text-start">
+      <div className="mb-6 flex w-full flex-col gap-2 text-center lg:mb-0 lg:text-start">
         <div className="bolded text-[22px] font-bold">Контакт</div>
-        <div className="text-lg">info@studyshuttle.mk</div>
+        {/* <div className="text-lg">info@studyshuttle.mk</div> */}
         <div className="flex flex-col items-center gap-4 lg:flex-row">
           <Input
-            className="focus:ring-2 focus:ring-blue-500"
+            className="max-w-[400px] focus:ring-2 focus:ring-blue-500"
             placeholder="Емаил адреса"
           />
           <CtaDialog

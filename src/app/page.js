@@ -52,18 +52,21 @@ export const CtaDialog = ({ cta }) => {
           <div className="flex gap-2">
             <Phone />
             {/* `tel:` links will open the phone dialer app */}
-            <a href="tel:071620370" className="text-blue-500 hover:underline">
-              071 620 370
+            <a
+              href="tel:+38971620370"
+              className="text-blue-500 hover:underline"
+            >
+              +389 71 620 370
             </a>
           </div>
           <div className="flex gap-2">
             <Mail />
             {/* `mailto:` links will open the default email client */}
             <a
-              href="mailto:andrej.ilievski1998@gmail.com"
+              href="mailto:andrej.ilievski@studyshuttle.mk"
               className="text-blue-500 hover:underline"
             >
-              andrej.ilievski1998@gmail.com
+              schedule@studyshuttle.mk
             </a>
           </div>
         </div>
@@ -76,7 +79,7 @@ export const Hero = ({ heroData }) => {
   const { color, headline, subheadline, description, image } = heroData;
   return (
     <div className="mt-16 flex flex-col">
-      <div className="max-w-[860px] pl-8 lg:pl-32">
+      <div className="max-w-[1000px] pl-8 lg:pl-32">
         <div className="slide-in-bottom text-[35px] font-bold lg:text-[65px]">
           Study Shuttle за{" "}
         </div>
@@ -251,12 +254,18 @@ export const RocketCta = ({ isRed, active, isProf }) => {
         </div>
         <CtaDialog
           cta={
-            <Button
-              variant="outline"
-              className="b-sky w-fit rounded-full border text-sky"
-            >
-              Регистрирај се
-            </Button>
+            isProf ? (
+              <Button className="w-fit rounded-full border bg-sky text-white">
+                Регистрирај се
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                className="b-sky w-fit rounded-full border text-sky"
+              >
+                Регистрирај се
+              </Button>
+            )
           }
         />
 

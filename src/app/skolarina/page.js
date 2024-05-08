@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { CheckCircle } from "lucide-react";
+import { CtaDialog } from "../page";
 
 const SkolarinaPage = () => {
   return (
@@ -34,8 +35,9 @@ const SkolarinaPage = () => {
             <div className="b-white my-6 w-full border border-dashed"></div>
 
             <div className="mb-48 text-[35px] font-bold">1000 МКД</div>
-
-            <Button className="w-full bg-sun">Одбери</Button>
+            <CtaDialog
+              cta={<Button className="w-full bg-sun">Одбери</Button>}
+            ></CtaDialog>
           </div>
         </div>
         <div className="my-32 mb-64 flex h-[550px] items-center justify-center gap-8">
@@ -56,7 +58,9 @@ const SkolarinaPage = () => {
 
             <div className="mb-48 text-[35px] font-bold">3000 МКД</div>
 
-            <Button className="w-full bg-sky">Одбери</Button>
+            <CtaDialog
+              cta={<Button className="w-full bg-sky">Одбери</Button>}
+            ></CtaDialog>
           </div>
         </div>
       </div>
