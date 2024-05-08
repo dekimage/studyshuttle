@@ -55,7 +55,7 @@ export const Header = () => {
       </div>
       {menuOpen && (
         <div
-          className="lg:hidde absolute left-0 top-[80px] z-[1000] flex w-full flex-col items-end bg-white"
+          className="lg:hidde absolute left-0 top-[80px] z-[1000000] z-[1000] flex w-full flex-col items-end bg-white"
           onClick={() => setMenuOpen(!menuOpen)}
         >
           <Link href="/osnovno" className="w-full cursor-pointer  text-end">
@@ -114,13 +114,11 @@ export const Header = () => {
               Професори
             </div>
           </Link>
-          <CtaDialog
-            cta={
-              <div className="w-full p-3 pr-8 text-end text-[20px] font-bold text-sky">
-                Најави Се
-              </div>
-            }
-          />
+          <Link href="/najava" className="w-full cursor-pointer text-end">
+            <div className="relative z-[100000] w-full cursor-pointer p-3 pr-8 text-end text-[20px] font-bold text-sky">
+              Најави Се
+            </div>
+          </Link>
         </div>
       )}
 

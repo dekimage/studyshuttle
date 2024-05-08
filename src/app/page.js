@@ -292,15 +292,22 @@ const FlagHero = ({ data, active, setActive, setIsOnceClicked }) => {
   return (
     <div className="flex flex-col pb-12 lg:px-32">
       <div className="flex justify-between">
-        <div className="mt-16 flex max-w-[600px] flex-col">
+        <div className="mt-16 flex max-w-[800px] flex-col">
           <div className="mb-6 px-8 text-[35px] font-bold  lg:text-[65px]">
-            {title}
+            {active == 0 ? (
+              <div>
+                Добредојдовте во{" "}
+                <span className="w-full text-sky">Study Shuttle</span>
+              </div>
+            ) : (
+              <div>{title}</div>
+            )}
           </div>
-          <div className="px-8 text-[16px] font-bold  lg:text-[25px]">
+          <div className="max-w-[600px] px-8 text-[16px]  font-bold lg:text-[25px]">
             {description}
           </div>
 
-          <div className="relative z-[1000] flex items-center justify-start gap-3 px-8 pt-16 lg:justify-start">
+          <div className="relative z-[150] mt-16 flex items-center justify-start gap-3 px-8 lg:justify-start">
             {dotts.map((dot, index) => {
               const isActive = active === dot;
               return (
@@ -345,12 +352,17 @@ const FlagHero = ({ data, active, setActive, setIsOnceClicked }) => {
               <div className="mt-32 text-[35px] font-semibold">
                 Сеуште немаш профил?
               </div>
-              <Button
-                variant="outline"
-                className="b-sky b-2 rounded-full border text-sky"
-              >
-                Регистрирај се
-              </Button>
+              <CtaDialog
+                cta={
+                  <Button
+                    variant="outline"
+                    className="b-sky w-fit rounded-full border text-sky"
+                  >
+                    Регистрирај се
+                  </Button>
+                }
+              />
+
               <div className="flex gap-2">
                 <div className="text-[19px] font-semibold">
                   Види ги чекорите
@@ -569,7 +581,7 @@ const LandingPage = () => {
       <div className="flex items-center justify-center py-16">
         <CtaDialog
           cta={
-            <Button className="rounded-full bg-sky lg:bg-chili">
+            <Button className="rounded-full bg-sky py-8 lg:bg-chili lg:px-8 lg:text-[24px]">
               Регистрирај се
             </Button>
           }
