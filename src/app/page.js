@@ -8,18 +8,33 @@ import { ChevronDown, Mail, Phone } from "lucide-react";
 import { flagHeroData, proffesorsData, stepsData } from "@/src/data";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { DialogTrigger } from "@radix-ui/react-dialog";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 import Link from "next/link";
 import useOnScreen from "../hooks/useOnScreen";
 
-const SlideInWhenVisible = ({ children }) => {
+export const SlideInWhenVisible = ({ children }) => {
   // Trigger the animation once and not repeatedly
   const [ref, hasBeenVisible] = useOnScreen({ threshold: 0.1 });
 
   return (
-    <div
-      ref={ref}
-      className={`text-xl font-bold ${hasBeenVisible ? "slide-in-bottom" : ""}`}
-    >
+    <div ref={ref} className={` ${hasBeenVisible ? "slide-in-bottom" : ""}`}>
+      {children}
+    </div>
+  );
+};
+
+export const SlideInRightWhenVisible = ({ children }) => {
+  // Trigger the animation once and not repeatedly
+  const [ref, hasBeenVisible] = useOnScreen({ threshold: 0.1 });
+
+  return (
+    <div ref={ref} className={`${hasBeenVisible ? "slide-in-right" : ""}`}>
       {children}
     </div>
   );
@@ -80,7 +95,7 @@ export const Hero = ({ heroData }) => {
             <Button
               style={{ border: `2px solid ${color}`, color: color }}
               variant="outline"
-              className="rounded-full"
+              className="animate-heartbeat rounded-full"
             >
               Регистрирај се
             </Button>
@@ -266,14 +281,71 @@ const FlagHero = ({ data, active, setActive }) => {
   const dotts = [0, 1, 2, 3, 4];
 
   return (
-    <div className="flex flex-col px-8 pb-12 lg:px-32">
+    <div className="flex flex-col pb-12 lg:px-32">
       <div className="flex justify-between">
         <div className="mt-16 flex max-w-[600px] flex-col">
-          <div className="mb-6 text-[35px] font-bold lg:text-[65px]">
+          <div className="mb-6 px-8 text-[35px] font-bold  lg:text-[65px]">
             {title}
           </div>
-          <div className="text-[16px] font-bold lg:text-[25px]">
+          <div className="px-8 text-[16px] font-bold  lg:text-[25px]">
             {description}
+          </div>
+
+          <div className="flex items-center justify-start gap-3 px-8 pt-16   lg:justify-start">
+            {dotts.map((dot, index) => {
+              const isActive = active === dot;
+              return (
+                <div
+                  key={index}
+                  style={
+                    isActive
+                      ? { backgroundColor: "#ed1b31" }
+                      : { backgroundColor: "#ffd02f" }
+                  }
+                  className="h-4 w-4 cursor-pointer rounded-full bg-chili"
+                  onClick={() => setActive(dot)}
+                ></div>
+              );
+            })}
+          </div>
+
+          <div className="relative mt-8 flex h-full w-full flex-col items-center justify-center lg:hidden">
+            {/* Clipped Background */}
+            <div
+              style={{
+                background: `linear-gradient(to right, ${color}, white)`,
+                clipPath: "polygon(0 34%, 100% 0, 100% 100%, 0% 100%)",
+              }}
+              className="absolute inset-0 z-0"
+            ></div>
+
+            {/* Image Positioned Above Clipping Path */}
+            <Image
+              src={image}
+              width={220}
+              height={220}
+              alt="hero"
+              className="absolute right-[50px] top-[-50px] z-[100] h-[180px] w-[180px] lg:right-[150px] lg:top-[-160px] lg:h-[320px] lg:w-[320px]"
+            />
+
+            {/* Inner Content Positioned Correctly */}
+            <div className="relative z-50 my-8 flex w-full flex-col items-start gap-8 px-4 lg:px-32">
+              <div className="mt-32 text-[35px] font-semibold">
+                Сеуште немаш профил?
+              </div>
+              <Button
+                variant="outline"
+                className="b-sky b-2 rounded-full border text-sky"
+              >
+                Регистрирај се
+              </Button>
+              <div className="flex gap-2">
+                <div className="text-[19px] font-semibold">
+                  Види ги чекорите
+                </div>
+                <ChevronDown />
+              </div>
+            </div>
           </div>
         </div>
         {/* <Image
@@ -283,6 +355,7 @@ const FlagHero = ({ data, active, setActive }) => {
           alt="flag"
           className="block lg:hidden"
         /> */}
+
         <div
           className="hidden h-[450px] w-[250px] lg:block"
           style={{
@@ -292,29 +365,12 @@ const FlagHero = ({ data, active, setActive }) => {
         >
           <Image
             src={image}
-            width={550}
-            height={500}
+            width={300}
+            height={300}
             alt="flag"
-            className="absolute right-[-2%] top-[20%]"
+            className="absolute right-[7%] top-[25%]"
           />
         </div>
-      </div>
-      <div className="flex items-center justify-start gap-3 pt-16 lg:justify-center">
-        {dotts.map((dot, index) => {
-          const isActive = active === dot;
-          return (
-            <div
-              key={index}
-              style={
-                isActive
-                  ? { backgroundColor: "#ed1b31" }
-                  : { backgroundColor: "#ffd02f" }
-              }
-              className="h-4 w-4 cursor-pointer rounded-full bg-chili"
-              onClick={() => setActive(dot)}
-            ></div>
-          );
-        })}
       </div>
     </div>
   );
@@ -328,8 +384,9 @@ const SingleStep = ({ isLeft, data }) => {
     <div
       className={`flex flex-col lg:flex-row ${
         isLeft ? "lg:flex-row-reverse" : "flex-row"
-      } my-32 items-center justify-between  px-8 text-center lg:gap-24 lg:px-32 lg:text-start`}
+      } mx-8  my-8 items-center  justify-center text-center lg:my-32 lg:gap-32 lg:px-32 lg:text-start`}
     >
+      {/* <SlideInRightWhenVisible> */}
       <Image
         src={image}
         width={isMobile ? 250 : 400}
@@ -337,34 +394,37 @@ const SingleStep = ({ isLeft, data }) => {
         alt="step"
         className="mb-6 lg:mb-0"
       />
-      <div className="max-w-[540px]">
-        <div
-          className="animate-popup text-[60px] font-bold lg:text-[90px]"
-          style={{ color: color }}
-        >
-          {title}
+      {/* </SlideInRightWhenVisible> */}
+      <SlideInWhenVisible>
+        <div className="">
+          <div
+            className="animate-popup text-[60px] font-bold lg:text-[90px]"
+            style={{ color: color }}
+          >
+            {title}
+          </div>
+          <div
+            className="text-[24px] font-bold lg:text-[34px]"
+            style={{ color: color }}
+          >
+            {subtitle}
+          </div>
+          <div className="mt-8 text-[16px] font-bold lg:mt-0 lg:text-[24px]">
+            {description}
+          </div>
         </div>
-        <div
-          className="text-[24px] font-bold lg:text-[34px]"
-          style={{ color: color }}
-        >
-          {subtitle}
-        </div>
-        <div className="text-[16px] font-bold lg:text-[24px]">
-          {description}
-        </div>
-      </div>
+      </SlideInWhenVisible>
     </div>
   );
 };
 
 const Stats = () => {
   return (
-    <div className="bg-sun p-4 lg:p-32">
+    <div className="bg-sun p-4 lg:p-24">
       <div className="mb-16 mt-8 text-center text-[24px] font-bold lg:mt-0 lg:text-[48px]">
         Подобрете го Вашето образование
       </div>
-      <div className="flex flex-col justify-around lg:flex-row">
+      <div className="flex flex-col justify-center lg:flex-row lg:gap-32">
         <div className="my-8 flex flex-col items-center justify-center gap-2 lg:my-0 lg:gap-8">
           <div className="text-center text-[65px] font-bold">19</div>
           <div className="text-[24px]">Студенти</div>
@@ -386,7 +446,7 @@ export const ProffesorCard = ({ proffesor, isLanding }) => {
   const { name, title, scope, subjects, image } = proffesor;
   return (
     <div
-      className="flex h-[487px] w-[295px] flex-col items-center rounded-[20px] border border-[3px] border-sun bg-white px-[12px] text-center"
+      className="flex min-h-[487px] w-[295px] flex-col items-center rounded-[20px] border border-[3px] border-sun bg-white px-[12px] text-center"
       style={isLanding ? { border: "none" } : {}}
     >
       <div
@@ -434,17 +494,31 @@ export const ProffesorCard = ({ proffesor, isLanding }) => {
 const ProfessorsSection = () => {
   return (
     <div
-      className="flex h-[600px] flex-col items-center justify-center"
+      className="flex h-[800px] flex-col items-center justify-center"
       style={{ background: "linear-gradient(to top, white, #ffd02f)" }}
     >
-      <div className="border-b border-black text-center text-[24px]  font-bold lg:text-[34px]">
+      <div className="mb-16 border-b border-black text-center  text-[24px] font-bold lg:text-[34px]">
         Запознајте ги нашите професори
       </div>
-      <div className="my-8 flex gap-8">
+      {/* <div className="my-8 flex gap-8">
         {proffesorsData.slice(0, 3).map((proffesor, index) => (
           <ProffesorCard proffesor={proffesor} isLanding key={index} />
         ))}
-      </div>
+      </div> */}
+      <Carousel className="my-8 w-[80%]">
+        <CarouselContent className="-ml-4">
+          {proffesorsData.slice(0, 3).map((proffesor, index) => (
+            <CarouselItem
+              className="flex items-center justify-center px-4 md:basis-1/2 lg:basis-1/3"
+              key={index}
+            >
+              <ProffesorCard proffesor={proffesor} isLanding key={index} />
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+        <CarouselPrevious className="bg-chili text-white" />
+        <CarouselNext className="bg-chili text-white" />
+      </Carousel>
     </div>
   );
 };

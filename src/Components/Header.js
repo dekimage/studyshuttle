@@ -4,14 +4,19 @@ import logoImg from "../assets/logo.png";
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Menu } from "lucide-react";
 import { CtaDialog } from "../app/page";
 
 export const Header = () => {
   const [isHovering, setIsHovering] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const pathname = usePathname();
+
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [pathname]);
 
   const isObrazovanie =
     pathname.includes("osnovno") ||
@@ -27,7 +32,7 @@ export const Header = () => {
 
   return (
     <div
-      className="flex h-[100px] w-full justify-between px-8 lg:h-[147px] lg:px-32"
+      className="relative z-[1000] flex h-[100px] w-full justify-between px-8 lg:h-[147px] lg:px-32"
       style={{
         boxShadow:
           "0 3px 2px -3px rgba(0, 0, 0, 0.1), 0 4px 1px 0px rgba(0, 0, 0, 0.02)",
@@ -42,9 +47,52 @@ export const Header = () => {
           className="w-[100px] lg:w-[147px]"
         />
       </Link>
-      <div className="flex cursor-pointer items-center justify-center lg:hidden">
+      <div
+        className="relative flex cursor-pointer items-center justify-center lg:hidden"
+        onClick={() => setMenuOpen(!menuOpen)}
+      >
         <Menu size={48} />
       </div>
+      {menuOpen && (
+        <div
+          className="lg:hidde absolute left-0 top-[80px] z-[1000] flex w-full flex-col items-end bg-white"
+          onClick={() => setMenuOpen(!menuOpen)}
+        >
+          <Link href="/osnovno" className="w-full cursor-pointer  text-end">
+            <div
+              className="w-full  p-3 pr-8 text-[20px] font-bold text-sky"
+              style={
+                isOsnovno ? { color: "white", backgroundColor: "#48badd" } : {}
+              }
+            >
+              Основно
+            </div>
+          </Link>
+          <Link href="/sredno" className="w-full  cursor-pointer  text-end">
+            <div
+              className="w-full p-3 pr-8 text-[20px] font-bold text-sky"
+              style={
+                isSredno ? { color: "white", backgroundColor: "#48badd" } : {}
+              }
+            >
+              Средно
+            </div>
+          </Link>
+          <Link href="/univerzitet" className="w-full cursor-pointer text-end">
+            <div
+              className="w-full p-3 pr-8 text-[20px] font-bold text-sky"
+              style={
+                isUniverzitet
+                  ? { color: "white", backgroundColor: "#48badd" }
+                  : {}
+              }
+            >
+              Универзитет
+            </div>
+          </Link>
+        </div>
+      )}
+
       <div className="hidden flex-grow items-center justify-end gap-8 lg:flex">
         <div
           onMouseEnter={() => setIsHovering(true)}

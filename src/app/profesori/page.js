@@ -1,9 +1,10 @@
 "use client";
 import { Input } from "@/components/ui/input";
-import { ProffesorCard, RocketCta } from "../page";
+import { CtaDialog, ProffesorCard, RocketCta } from "../page";
 import { proffesorsData } from "@/src/data";
 import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 
 const filtersData = [
   { title: "основно образование", color: "chili", filter: "основно" },
@@ -63,7 +64,13 @@ const FilterBtn = ({ data, isSelected, onClick }) => {
   );
 };
 
-const PaginationExample = ({ proffesorsData, filter, searchText }) => {
+const PaginationExample = ({
+  proffesorsData,
+  filter,
+  searchText,
+  currentPage,
+  setCurrentPage,
+}) => {
   const filterBySearch = searchText
     ? proffesorsData.filter((p) => {
         // Convert search text to lowercase for case-insensitive comparisons
@@ -107,7 +114,6 @@ const PaginationExample = ({ proffesorsData, filter, searchText }) => {
     ? filterBySearch.filter((p) => p.filters.includes(filter))
     : filterBySearch;
   const itemsPerPage = 9;
-  const [currentPage, setCurrentPage] = useState(1);
 
   // Calculate the total number of pages
   const totalPages = Math.ceil(filteredProffesors.length / itemsPerPage);
@@ -189,6 +195,12 @@ const PaginationExample = ({ proffesorsData, filter, searchText }) => {
 const ProffesorsPage = () => {
   const [filter, setFilter] = useState(false);
   const [searchText, setSearchText] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const handleFilterClick = (data) => {
+    setFilter(data.filter);
+    setSearchText("");
+    setCurrentPage(1);
+  };
   return (
     <div className="flex flex-col">
       <SearchPingIcon searchText={searchText} setSearchText={setSearchText} />
@@ -196,7 +208,7 @@ const ProffesorsPage = () => {
         {filtersData.map((data, index) => (
           <FilterBtn
             data={data}
-            onClick={() => setFilter(data.filter)}
+            onClick={() => handleFilterClick(data)}
             isSelected={filter == data.filter}
             key={index}
           />
@@ -211,9 +223,24 @@ const ProffesorsPage = () => {
         filter={filter}
         searchText={searchText}
         proffesorsData={proffesorsData}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
       />
 
       <RocketCta isProf active={6} />
+
+      <div className="my-8 flex flex-col items-center justify-center gap-8 lg:hidden">
+        <div className="text-center text-[35px] font-semibold text-chili">
+          Сеуште немаш профил?
+        </div>
+        <CtaDialog
+          cta={
+            <Button className="w-fit rounded-full bg-sky text-white">
+              Регистрирај се
+            </Button>
+          }
+        />
+      </div>
     </div>
   );
 };

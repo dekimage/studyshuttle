@@ -41,12 +41,24 @@ module.exports = {
             opacity: 1,
           },
         },
+        "slide-in-right": {
+          "0%": {
+            transform: "translateX(1000px)",
+            opacity: 0,
+          },
+          "100%": {
+            transform: "translateX(0)",
+            opacity: 1,
+          },
+        },
       },
 
       animation: {
         ping: "ping 0.8s ease-in-out infinite both",
         "slide-in-bottom":
-          "slide-in-bottom 0.5s cubic-bezier(.25,.46,.45,.94) both",
+          "slide-in-bottom 1.5s cubic-bezier(.25,.46,.45,.94) both",
+        "slide-in-right":
+          "slide-in-right 1.5s cubic-bezier(.25,.46,.45,.94) both",
       },
       fontWeight: { bolded: "600" },
       colors: {

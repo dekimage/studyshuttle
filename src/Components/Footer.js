@@ -34,7 +34,7 @@ export const Footer = () => {
       style={{ background: "linear-gradient(to bottom, white, #48badd)" }}
     >
       <div className="flex flex-col items-center gap-2">
-        <Link href="" className="flex">
+        <Link href="/" className="flex">
           <Image src={logoImg} width={200} height={200} alt="logo" />
         </Link>
         <div className="mb-4 text-[22px] font-semibold ">Учиме заедно!</div>
