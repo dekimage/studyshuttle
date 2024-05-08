@@ -1,3 +1,7 @@
+const ProfPage = () => {
+  return <div>prof page</div>;
+};
+export default ProfPage;
 // "use client";
 
 // import EditProfile from "../_components/edit-profile";
