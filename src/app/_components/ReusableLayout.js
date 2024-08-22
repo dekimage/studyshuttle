@@ -5,14 +5,20 @@ import { Separator } from "@/components/ui/separator";
 import { VerticalNavbar } from "./VerticalNavbar";
 
 import {
+  Activity,
   CalendarDays,
+  CalendarRange,
   CircleUser,
+  FolderLock,
   GaugeCircle,
+  GraduationCap,
+  Headphones,
   LogOut,
   ShieldQuestion,
   ShieldQuestionIcon,
   ShoppingBag,
   Ticket,
+  UserRound,
   Users,
 } from "lucide-react";
 
@@ -27,50 +33,46 @@ import MobileHeader from "./MobileHeader";
 // import { ClerkLoaded, ClerkLoading, SignedIn, UserButton } from "@clerk/nextjs";
 import { ModeToggle } from "@/components/ui/themeButton";
 import { mixInitials } from "@/src/util/utils";
+import { FaChartBar } from "react-icons/fa";
 
 export const NAVIGATION_LINKS = [
   {
     title: "Почетна",
     checkUrl: "Events",
-    icon: Ticket,
+    icon: Activity,
     href: "pocetna",
   },
   {
     title: "Распоред",
-    icon: CalendarDays,
+    icon: CalendarRange,
     href: "schedule",
   },
   {
     title: "Професори",
-    icon: Users,
+    icon: GraduationCap,
     href: "professors",
   },
 
   {
     title: "Профил",
-    icon: CircleUser,
+    icon: UserRound,
     href: "profile",
   },
   {
     title: "Аналитика",
-    icon: GaugeCircle,
+    icon: FaChartBar,
     href: "analytics",
   },
   {
     title: "ИТ Поддршка",
-    icon: ShieldQuestion,
+    icon: Headphones,
     href: "support",
   },
-  // {
-  //   title: "Ценовник",
-  //   icon: ShoppingBag,
-  //   href: "pricing",
-  // },
   {
     title: "Одјави се",
     icon: LogOut,
     action: "logout",
-    href: "/",
+    // href: "logout",
   },
 ];
 
@@ -92,7 +94,7 @@ const ReusableLayout = observer(({ children }) => {
   if (user?.role === "professor") {
     navigationLinks.push({
       title: "Professor Admin",
-      icon: ShieldQuestionIcon,
+      icon: FolderLock,
       href: "professor-admin",
     });
   }
@@ -107,13 +109,20 @@ const ReusableLayout = observer(({ children }) => {
           <ResizablePanel
             defaultSize={defaultLayout[0]}
             maxSize={20}
-            className="h-[950px] min-w-[200px] max-w-[200px]"
+            className="h-screen min-w-[290px] max-w-[345px]"
           >
             <div className="flex flex-col items-center justify-center px-2">
-              <div>{mixInitials(user)}</div>
-              <div>{user?.name}</div>
-              <div>student</div>
-              <div>tokens: 5</div>
+              <div className="my-6 flex h-[95px] w-[95px] items-center justify-center rounded-full bg-chili">
+                <div className="text-[45px] text-white">
+                  {mixInitials(user)}
+                </div>
+              </div>
+
+              <div className="mb-4 text-[25px] font-bold">{user?.name}</div>
+              <div className="text-darkGrey my-2 font-bold">Студент</div>
+              <div className="text-darkGrey font-bold">
+                Токени: {user?.yellowTokens || 0}
+              </div>
             </div>
 
             <VerticalNavbar

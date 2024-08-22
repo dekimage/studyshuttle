@@ -13,16 +13,14 @@ const SupportPage = () => {
     // sendMessageApi(subject, message)
   };
   return (
-    <div className="flex flex-col">
-      <Title>ИТ Поддршка</Title>
-
-      <div className="border-200-gray flex w-full max-w-[480px] flex-col items-center justify-center gap-4 border p-4">
-        <div className="text-2xl">Пријави проблем</div>
+    <div className="bg-lightGrey flex h-screen items-center justify-center">
+      <div className=" flex w-full max-w-[480px] flex-col items-center justify-center gap-4 rounded-lg bg-white p-8">
+        <div className="text-[35px] font-bold">Пријави проблем</div>
         <div className="w-full space-y-2">
           <Label htmlFor="name">Наслов</Label>
           <Input
             id="name"
-            placeholder="Enter the subject..."
+            placeholder="Внесете го насловот"
             onChange={(e) => setSubject(e.target.value)}
           />
         </div>
@@ -33,11 +31,16 @@ const SupportPage = () => {
             multiline
             rows="4"
             cols="50"
-            placeholder="Enter your message..."
+            placeholder="Внесе ја пораката"
             onChange={(e) => setMessage(e.target.value)}
           />
         </div>
-        <Button onClick={() => sendMessage()}>Испрати Порака</Button>
+        <Button
+          className="bg-darkGrey hover:bg-darkGrey w-full"
+          onClick={() => sendMessage()}
+        >
+          Испрати
+        </Button>
       </div>
     </div>
   );
