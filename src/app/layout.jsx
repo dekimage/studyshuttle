@@ -27,12 +27,11 @@ export default function RootLayout({ children }) {
         )}
       >
         <ThemeProvider attribute="class" defaultTheme="system">
-          {/* <ReusableLayout> */}
-          <Header />
-          {children}
-          <Footer />
-
-          {/* </ReusableLayout> */}
+          <ReusableLayout>
+            {/* <Header /> */}
+            {children}
+            {/* <Footer /> */}
+          </ReusableLayout>
         </ThemeProvider>
       </body>
     </html>

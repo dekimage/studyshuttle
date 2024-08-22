@@ -1,5 +1,5 @@
 "use client";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
@@ -15,6 +15,7 @@ const SupportPage = () => {
   return (
     <div className="flex flex-col">
       <Title>ИТ Поддршка</Title>
+
       <div className="border-200-gray flex w-full max-w-[480px] flex-col items-center justify-center gap-4 border p-4">
         <div className="text-2xl">Пријави проблем</div>
         <div className="w-full space-y-2">
