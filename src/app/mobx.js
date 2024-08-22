@@ -31,6 +31,7 @@ import {
 const DEFAULT_USER = {
   yellowTokens: 0,
   blueTokens: 0,
+  redTokens: 0,
   role: "user",
 };
 

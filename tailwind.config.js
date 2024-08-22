@@ -98,6 +98,7 @@ module.exports = {
         sun: "#ffd02f",
         sky: "#48badd",
         chili: "#ed1b31",
+        grey: "#DADADA",
       },
       borderRadius: {
         lg: "var(--radius)",

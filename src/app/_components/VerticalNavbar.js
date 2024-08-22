@@ -5,8 +5,10 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 import { buttonVariants } from "@/components/ui/button";
+import MobxStore from "../mobx";
 
 export function VerticalNavbar({ links }) {
+  const { logout } = MobxStore;
   return (
     <div className="group flex w-full flex-col gap-4 py-2">
       <nav className="grid gap-1 px-2">
@@ -14,6 +16,7 @@ export function VerticalNavbar({ links }) {
           <Link
             onClick={() => {
               link.callBack && link.callBack();
+              link.action == "logout" && logout();
             }}
             key={index}
             href={`/${link.href}`}

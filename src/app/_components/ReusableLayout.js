@@ -69,7 +69,8 @@ export const NAVIGATION_LINKS = [
   {
     title: "Одјави се",
     icon: LogOut,
-    href: "logout",
+    action: "logout",
+    href: "/",
   },
 ];
 
@@ -84,14 +85,14 @@ const ReusableLayout = observer(({ children }) => {
     if (route.checkUrl == "Events") {
       return pathname == "/" ? "default" : "ghost";
     }
-    return pathname.endsWith(route.href.toLowerCase()) ? "default" : "ghost";
+    return pathname.endsWith(route.href?.toLowerCase()) ? "default" : "ghost";
   };
 
   const navigationLinks = [...NAVIGATION_LINKS];
   if (user?.role === "professor") {
     navigationLinks.push({
       title: "Professor Admin",
-      icon: ShieldQuestionIcon, // You can choose a different icon if needed
+      icon: ShieldQuestionIcon,
       href: "professor-admin",
     });
   }
