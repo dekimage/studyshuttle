@@ -38,7 +38,7 @@ import { FaChartBar } from "react-icons/fa";
 export const NAVIGATION_LINKS = [
   {
     title: "Почетна",
-    checkUrl: "Events",
+    // checkUrl: "Events",
     icon: Activity,
     href: "pocetna",
   },
@@ -119,8 +119,8 @@ const ReusableLayout = observer(({ children }) => {
               </div>
 
               <div className="mb-4 text-[25px] font-bold">{user?.name}</div>
-              <div className="text-darkGrey my-2 font-bold">Студент</div>
-              <div className="text-darkGrey font-bold">
+              <div className="my-2 font-bold text-darkGrey">Студент</div>
+              <div className="font-bold text-darkGrey">
                 Токени: {user?.yellowTokens || 0}
               </div>
             </div>

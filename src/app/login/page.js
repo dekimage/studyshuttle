@@ -2,42 +2,31 @@
 
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-
 import { CgSpinner } from "react-icons/cg";
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import Link from "next/link";
 import { useState } from "react";
-
-import { observer } from "mobx-react";
 import { useRouter } from "next/navigation";
+import { observer } from "mobx-react";
 import MobxStore from "../mobx";
 
+// Validation schema
 const formSchema = z.object({
   password: z.string().min(6, {
-    message: "Password must be at least 6 characters.",
+    message: "Лозинката мора да содржи најмалку 6 карактери.",
   }),
   email: z.string().email({
-    message: "Please enter a valid email.",
+    message: "Ве молиме внесете валидна емаил адреса.",
   }),
 });
 
@@ -47,6 +36,7 @@ export const LoginForm = observer(() => {
   const isAuthenticated = !!user;
 
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false); // State to manage password visibility
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -78,24 +68,23 @@ export const LoginForm = observer(() => {
       <form
         id="login"
         onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-8"
+        className="space-y-4"
       >
         <FormField
           control={form.control}
           name="email"
           render={({ field }) => (
             <FormItem className="grid gap-2">
-              <FormLabel>Email</FormLabel>
+              <FormLabel>Емаил адреса</FormLabel>
               <FormControl>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="Email Address"
+                  placeholder="Внесете ја вашата емаил адреса"
                   disabled={isLoading}
                   {...field}
                 />
               </FormControl>
-
               <FormMessage />
             </FormItem>
           )}
@@ -106,77 +95,62 @@ export const LoginForm = observer(() => {
           name="password"
           render={({ field }) => (
             <FormItem className="grid gap-2">
-              <FormLabel>Password</FormLabel>
+              <FormLabel>Лозинка</FormLabel>
               <FormControl>
                 <Input
                   id="password"
-                  type="password"
-                  placeholder="Password"
+                  type={showPassword ? "text" : "password"} // Toggle between password and text
+                  placeholder="Внесете ја вашата лозинка"
                   disabled={isLoading}
                   {...field}
                 />
               </FormControl>
-
               <FormMessage />
             </FormItem>
           )}
         />
-        <Button className="w-full" type="submit" disabled={isLoading}>
+
+        <div
+          className="w-fit cursor-pointer text-xs text-gray-400"
+          onClick={() => setShowPassword(!showPassword)}
+        >
+          {showPassword ? "Сокриј лозинка" : "Покажи лозинка"}
+        </div>
+
+        <Button
+          className="w-full bg-sun font-bold text-black hover:bg-sun"
+          type="submit"
+          disabled={isLoading}
+        >
           {isLoading && <CgSpinner className="mr-2 h-4 w-4 animate-spin" />}
-          Login
+          Најави се
         </Button>
+
+        <div className="cursor-pointer text-blue-400">
+          Ја заборавивте лознката?
+        </div>
       </form>
     </Form>
   );
 });
 
-const LoginCard = observer(() => {
-  const router = useRouter();
-  const { signInWithGoogle } = MobxStore;
-  const handleGoogleSignIn = async () => {
-    await signInWithGoogle();
-    router.push("/dashboard");
-  };
-  return (
-    <Card className="min-w-3xl">
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl">Welcome Back!</CardTitle>
-        <CardDescription>
-          Glad to see you again! Log in to continue your journey.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="grid gap-4">
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background px-2 text-muted-foreground">
-              Or continue with
-            </span>
-          </div>
-        </div>
-        <LoginForm />
-      </CardContent>
-      <CardFooter>
-        <div className="flex w-full flex-col gap-2 text-center text-sm">
-          Don&apos;t have account?&nbsp;
-          <Link href="/signup">
-            <Button variant="outline" className="w-full">
-              Create Account
-            </Button>
-          </Link>
-        </div>
-      </CardFooter>
-    </Card>
-  );
-});
-
 const LoginPage = () => {
   return (
-    <div className="mt-8 flex items-center justify-center">
-      <LoginCard />
+    <div className="mt-8 flex items-center justify-center px-4 sm:px-8">
+      <div className="w-full max-w-[850px]">
+        <div className="mb-8 text-center text-[32px] font-bold text-sun sm:text-[65px]">
+          Најави се
+        </div>
+        <LoginForm />
+        <div className="mt-4 text-center">
+          Немате профил?
+          <Link className="ml-1 cursor-pointer text-blue-400" href="/signup">
+            Регистрирај се
+          </Link>
+        </div>
+      </div>
     </div>
   );
 };
+
 export default LoginPage;

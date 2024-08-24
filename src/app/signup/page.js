@@ -1,18 +1,9 @@
 "use client";
-
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -20,7 +11,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 
-import { FaGoogle } from "react-icons/fa";
 import { CgSpinner } from "react-icons/cg";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -32,30 +22,52 @@ import { useRouter } from "next/navigation";
 
 import { observer } from "mobx-react";
 import MobxStore from "../mobx";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
+// Validation schema
 const formSchema = z.object({
-  name: z.string().min(4, {
-    message: "Name must be at least 4 characters.",
+  name: z.string().min(3, {
+    message: "Името мора да содржи најмалку 3 карактери.",
   }),
-  lastname: z.string().min(4, {
-    message: "Lastname must be at least 4 characters.",
+  lastname: z.string().min(3, {
+    message: "Презимето мора да содржи најмалку 3 карактери.",
   }),
   password: z.string().min(6, {
-    message: "Password must be at least 6 characters.",
+    message: "Лозинката мора да содржи најмалку 6 карактери.",
   }),
+  confirmPassword: z
+    .string()
+    .min(6, {
+      message: "Потврдата на лозинката мора да содржи најмалку 6 карактери.",
+    })
+    .refine((value, ctx) => value === ctx?.options?.parent?.password, {
+      message: "Лозинките мора да се совпаѓаат.",
+    }),
   email: z.string().email({
-    message: "Please enter a valid email.",
+    message: "Ве молиме внесете валидна емаил адреса.",
+  }),
+  academicLevel: z.enum(["osnovno", "sredno", "visoko"], {
+    required_error: "Ве молиме одберете академско ниво.",
   }),
 });
 
 export const SignupForm = observer(() => {
   const { signupWithEmail } = MobxStore;
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [academicLevel, setAcademicLevel] = useState("osnovno");
   const router = useRouter();
+
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
+      lastname: "",
+      password: "",
+      confirmPassword: "",
+      email: "",
+      academicLevel: "osnovno",
     },
   });
 
@@ -80,44 +92,23 @@ export const SignupForm = observer(() => {
       <form
         id="signup"
         onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-8"
+        className="space-y-4"
       >
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem className="grid gap-2">
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="Email Address"
-                  disabled={isLoading}
-                  {...field}
-                />
-              </FormControl>
-
-              <FormMessage />
-            </FormItem>
-          )}
-        />
         <FormField
           control={form.control}
           name="name"
           render={({ field }) => (
             <FormItem className="grid gap-2">
-              <FormLabel>Name</FormLabel>
+              <FormLabel>Име</FormLabel>
               <FormControl>
                 <Input
                   id="name"
                   type="string"
-                  placeholder="Име"
+                  placeholder="Внесете го вашето име"
                   disabled={isLoading}
                   {...field}
                 />
               </FormControl>
-
               <FormMessage />
             </FormItem>
           )}
@@ -127,37 +118,100 @@ export const SignupForm = observer(() => {
           name="lastname"
           render={({ field }) => (
             <FormItem className="grid gap-2">
-              <FormLabel>Lastname</FormLabel>
+              <FormLabel>Презиме</FormLabel>
               <FormControl>
                 <Input
                   id="lastname"
                   type="string"
-                  placeholder="Презиме"
+                  placeholder="Внесете го вашето презиме"
                   disabled={isLoading}
                   {...field}
                 />
               </FormControl>
-
               <FormMessage />
             </FormItem>
           )}
         />
         <FormField
           control={form.control}
-          name="academicLevel"
+          name="email"
           render={({ field }) => (
             <FormItem className="grid gap-2">
-              <FormLabel>Academy Level</FormLabel>
+              <FormLabel>Емаил адреса</FormLabel>
               <FormControl>
                 <Input
-                  id="academicLevel"
-                  type="string"
-                  placeholder="академско ниво"
+                  id="email"
+                  type="email"
+                  placeholder="Внесете ја вашата емаил адреса"
                   disabled={isLoading}
                   {...field}
                 />
               </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
+        <FormField
+          control={form.control}
+          name="academicLevel"
+          render={({ field }) => (
+            <FormItem className="grid gap-2">
+              <FormLabel>Академско ниво</FormLabel>
+              <FormControl>
+                <div className="relative">
+                  <button
+                    type="button"
+                    className="flex w-full items-center justify-between rounded border bg-white px-2 py-1 hover:bg-gray-100"
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  >
+                    {academicLevel === "osnovno"
+                      ? "Основно"
+                      : academicLevel === "sredno"
+                        ? "Средно"
+                        : "Високо"}
+                    {isDropdownOpen ? (
+                      <ChevronUp className="h-4 w-4" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4" />
+                    )}
+                  </button>
+                  {isDropdownOpen && (
+                    <div className="absolute z-10 mt-1 w-full rounded-md border bg-white shadow-lg">
+                      <div
+                        className="cursor-pointer p-2 hover:bg-sun"
+                        onClick={() => {
+                          setAcademicLevel("osnovno");
+                          setIsDropdownOpen(false);
+                          field.onChange("osnovno");
+                        }}
+                      >
+                        Основно
+                      </div>
+                      <div
+                        className="cursor-pointer p-2 hover:bg-sky"
+                        onClick={() => {
+                          setAcademicLevel("sredno");
+                          setIsDropdownOpen(false);
+                          field.onChange("sredno");
+                        }}
+                      >
+                        Средно
+                      </div>
+                      <div
+                        className="cursor-pointer p-2 hover:bg-chili"
+                        onClick={() => {
+                          setAcademicLevel("visoko");
+                          setIsDropdownOpen(false);
+                          field.onChange("visoko");
+                        }}
+                      >
+                        Високо
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
@@ -168,64 +222,77 @@ export const SignupForm = observer(() => {
           name="password"
           render={({ field }) => (
             <FormItem className="grid gap-2">
-              <FormLabel>Password</FormLabel>
+              <FormLabel>Лозинка</FormLabel>
               <FormControl>
                 <Input
                   id="password"
-                  type="password"
-                  placeholder="Password (8+ characters)"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Внесете ја вашата лозинка"
                   disabled={isLoading}
                   {...field}
                 />
               </FormControl>
-
               <FormMessage />
             </FormItem>
           )}
         />
-        <Button className="w-full" type="submit" disabled={isLoading}>
+
+        <FormField
+          control={form.control}
+          name="confirmPassword"
+          render={({ field }) => (
+            <FormItem className="grid gap-2">
+              <FormLabel>Потврдете ја лозинката</FormLabel>
+              <FormControl>
+                <Input
+                  id="confirmPassword"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Потврдете ја вашата лозинка"
+                  disabled={isLoading}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div
+          className="w-fit cursor-pointer text-xs text-gray-400"
+          onClick={() => setShowPassword(!showPassword)}
+        >
+          {showPassword ? "Сокриј лозинка" : "Покажи лозинка"}
+        </div>
+
+        <Button
+          className="w-full bg-sky hover:bg-sky"
+          type="submit"
+          disabled={isLoading}
+        >
           {isLoading && <CgSpinner className="mr-2 h-4 w-4 animate-spin" />}
-          Create Account
+          Регистријај се
         </Button>
       </form>
     </Form>
   );
 });
 
-const SignupCard = observer(() => {
-  const router = useRouter();
-
-  return (
-    <Card className="min-w-3xl">
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl">Create Account</CardTitle>
-      </CardHeader>
-      <CardContent className="grid gap-4">
-        <SignupForm />
-      </CardContent>
-      <CardFooter className="flex flex-col">
-        <div className="text-center text-sm text-muted-foreground">
-          By continuing, you agree to Pathway&apos;s{" "}
-          <Link href="/terms">Terms & Conditions</Link> and
-          <Link href="/privacy"> Privacy Policy</Link>
-        </div>
-        <div className="mt-4 flex flex-col gap-2 text-center text-sm">
-          Already Have An Account?{" "}
-          <Link href="/login">
-            <Button variant="outline" className="w-full">
-              Login
-            </Button>
-          </Link>
-        </div>
-      </CardFooter>
-    </Card>
-  );
-});
-
 const Signup = () => {
   return (
-    <div className="mt-8 flex items-center justify-center">
-      <SignupCard />
+    <div className="mt-8 flex items-center justify-center px-4 sm:px-8">
+      <div className="w-full max-w-[850px]">
+        <div className="mb-8 text-center text-[32px] font-bold sm:text-[65px]">
+          Регистрирај се на <br />
+          <span className="text-sun">Study Shuttle!</span>
+        </div>
+        <SignupForm />
+        <div className="mt-4 text-center">
+          Веќе имате профил?{" "}
+          <Link className="ml-1 cursor-pointer text-blue-400" href="/login">
+            Најавете се
+          </Link>
+        </div>
+      </div>
     </div>
   );
 };
