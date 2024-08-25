@@ -44,6 +44,7 @@ class Store {
   professors = [];
   user = null;
   userReady = null;
+  professors = [];
 
   // Static Data
 
@@ -93,6 +94,9 @@ class Store {
 
     this.fetchUserProfileById = this.fetchUserProfileById.bind(this);
     this.fetchUserGradesById = this.fetchUserGradesById.bind(this);
+    this.fetchAllProfessors = this.fetchAllProfessors.bind(this);
+
+    this.checkUserReview = this.checkUserReview.bind(this);
   }
 
   initializeAuth() {
@@ -139,6 +143,26 @@ class Store {
   }
 
   // MAIN PAGES
+
+  async fetchAllProfessors() {
+    try {
+      const professorsCollection = collection(db, "professors"); // Replace "professors" with your Firestore collection name
+      const professorsSnapshot = await getDocs(professorsCollection);
+      const fetchedProfessors = professorsSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      runInAction(() => {
+        this.professors = fetchedProfessors; // Store fetched professors in MobX store
+      });
+
+      return { success: true };
+    } catch (error) {
+      console.log("Error fetching professors:", error);
+      return { error: "Error fetching professors" };
+    }
+  }
 
   // New function to fetch user profile by ID
   async fetchUserProfileById(userId) {
@@ -571,8 +595,37 @@ class Store {
       return { error: "Error creating order or updating tokens" };
     }
   }
+  async checkUserReview(professorId) {
+    try {
+      const reviewQuery = query(
+        collection(db, "reviews"),
+        where("professorId", "==", professorId),
+        where("userId", "==", this.user.uid),
+      );
 
-  async submitReview(professorId, stars, comment = "") {
+      const reviewSnapshot = await getDocs(reviewQuery);
+
+      if (!reviewSnapshot.empty) {
+        const reviewDoc = reviewSnapshot.docs[0]; // Fetch the first matching review
+        return {
+          success: true,
+          reviewed: true,
+          review: { id: reviewDoc.id, ...reviewDoc.data() },
+        }; // Corrected structure to match the usage
+      } else {
+        return { success: true, reviewed: false, review: null };
+      }
+    } catch (error) {
+      console.error("Error fetching review:", error);
+      return { success: false, error: "Error fetching review" };
+    }
+  }
+  async submitReview(
+    professorId,
+    stars,
+    existingReviewStars = null,
+    reviewId = null,
+  ) {
     if (!this.user) {
       console.log("No user logged in.");
       return { error: "No user logged in" };
@@ -583,29 +636,69 @@ class Store {
       return { error: "Invalid star rating" };
     }
 
-    const newReview = {
-      userId: this.user.uid,
-      professorId,
-      stars,
-      comment,
-      date: new Date(),
-    };
+    const reviewDocRef = doc(db, "reviews", reviewId);
+    const latestReviewDoc = await getDoc(reviewDocRef);
+
+    if (!latestReviewDoc.exists()) {
+      console.log("Review not found.");
+      return { error: "Review not found." };
+    }
+
+    const latestReviewData = latestReviewDoc.data();
+    const currentStars = latestReviewData.stars;
+
+    if (currentStars === stars) {
+      console.log(
+        "New rating is the same as the current rating. No update needed.",
+      );
+      return {
+        error:
+          "New rating is the same as the current rating. No update needed.",
+      };
+    }
 
     try {
-      // Add the review to the reviews collection
-      await addDoc(collection(db, "reviews"), newReview);
+      if (reviewId) {
+        // Update the existing review
+        const reviewDocRef = doc(db, "reviews", reviewId); // Use the provided review ID
+        await updateDoc(reviewDocRef, {
+          stars,
 
-      // Update the professor's average rating with the new rating
-      await this.updateProfessorAverageRating(professorId, stars);
+          date: new Date(),
+        });
 
-      return { success: true };
+        // Update the professor's average rating with the new rating
+        await this.updateProfessorAverageRating(
+          professorId,
+          stars,
+          existingReviewStars,
+        );
+
+        return { success: true, updated: true };
+      } else {
+        // Create a new review
+        const newReview = {
+          userId: this.user.uid,
+          professorId,
+          stars,
+
+          date: new Date(),
+        };
+
+        await addDoc(collection(db, "reviews"), newReview);
+
+        // Update the professor's average rating with the new rating
+        await this.updateProfessorAverageRating(professorId, stars);
+
+        return { success: true, updated: false };
+      }
     } catch (error) {
       console.log("Error submitting review:", error);
       return { error: "Error submitting review" };
     }
   }
-
-  async updateProfessorAverageRating(professorId, newRating) {
+  async updateProfessorAverageRating(professorId, newRating, oldRating = null) {
+    console.log({ newRating, oldRating });
     try {
       const professorDocRef = doc(db, "professors", professorId);
       const professorDoc = await getDoc(professorDocRef);
@@ -618,15 +711,22 @@ class Store {
       const professorData = professorDoc.data();
       const { averageRating = 0, reviewCount = 0 } = professorData;
 
-      // Calculate the new average rating
-      const newReviewCount = reviewCount + 1;
-      const newAverageRating =
-        (averageRating * reviewCount + newRating) / newReviewCount;
+      let newAverageRating, newReviewCount;
+      if (oldRating !== null) {
+        // Adjust the average rating calculation if updating an existing review
+        newAverageRating =
+          (averageRating * reviewCount - oldRating + newRating) / reviewCount;
+      } else {
+        // Calculate the new average rating for a new review
+        newReviewCount = reviewCount + 1;
+        newAverageRating =
+          (averageRating * reviewCount + newRating) / newReviewCount;
+      }
 
       // Update the professor's document with the new average rating and review count
       await updateDoc(professorDocRef, {
         averageRating: newAverageRating,
-        reviewCount: newReviewCount,
+        reviewCount: oldRating !== null ? reviewCount : newReviewCount,
       });
 
       return { success: true };
