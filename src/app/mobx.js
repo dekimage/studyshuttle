@@ -88,6 +88,11 @@ class Store {
       this.fetchUpcomingEventsForUser.bind(this);
     this.fetchAcademyGroupsForUser = this.fetchAcademyGroupsForUser.bind(this);
     this.fetchUserGrades = this.fetchUserGrades.bind(this);
+    this.fetchUserProfileWithGrades =
+      this.fetchUserProfileWithGrades.bind(this);
+
+    this.fetchUserProfileById = this.fetchUserProfileById.bind(this);
+    this.fetchUserGradesById = this.fetchUserGradesById.bind(this);
   }
 
   initializeAuth() {
@@ -134,6 +139,66 @@ class Store {
   }
 
   // MAIN PAGES
+
+  // New function to fetch user profile by ID
+  async fetchUserProfileById(userId) {
+    try {
+      const userDocRef = doc(db, "users", userId);
+      const userDoc = await getDoc(userDocRef);
+
+      if (userDoc.exists()) {
+        return { success: true, data: userDoc.data() };
+      } else {
+        return { success: false, error: "User not found" };
+      }
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+      return { error: "Error fetching user profile" };
+    }
+  }
+
+  // New function to fetch a specific user's grades by user ID
+  async fetchUserGradesById(userId) {
+    try {
+      const gradesRef = collection(db, "users", userId, "subjects");
+      const gradesSnapshot = await getDocs(gradesRef);
+
+      const grades = {};
+      gradesSnapshot.forEach((doc) => {
+        grades[doc.id] = doc.data();
+      });
+
+      return { success: true, data: grades };
+    } catch (error) {
+      console.error("Error fetching user grades:", error);
+      return { error: "Error fetching user grades" };
+    }
+  }
+
+  async fetchUserProfileWithGrades(userId) {
+    try {
+      const profileResult = await this.fetchUserProfileById(userId);
+      if (!profileResult.success) {
+        return { success: false, error: profileResult.error };
+      }
+
+      const gradesResult = await this.fetchUserGradesById(userId);
+      if (!gradesResult.success) {
+        return { success: false, error: gradesResult.error };
+      }
+
+      return {
+        success: true,
+        data: {
+          userProfile: profileResult.data,
+          userGrades: gradesResult.data,
+        },
+      };
+    } catch (error) {
+      console.error("Error fetching user profile with grades:", error);
+      return { error: "Error fetching user profile with grades" };
+    }
+  }
 
   async fetchUserGrades() {
     if (!this.user) {

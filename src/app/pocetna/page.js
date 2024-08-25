@@ -6,6 +6,7 @@ import logoImg from "../../assets/logo.png";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Copy } from "lucide-react";
+import Loader from "../_components/Loader";
 
 const AcademyGroupsPage = observer(() => {
   const [selectedGroup, setSelectedGroup] = useState(null);
@@ -167,7 +168,7 @@ const OverviewPage = observer(() => {
 
   const { user } = MobxStore;
 
-  if (!user) return <div>Loading..</div>;
+  if (!user) return <Loader />;
 
   return (
     <div className="bg-lightGrey p-4 sm:p-8">
@@ -189,9 +190,8 @@ const OverviewPage = observer(() => {
 
       <div className="mt-4 text-[15px] sm:text-[19px]">
         На вашата почетна страна можете да ги погледнете своите{" "}
-        <span className="font-bold">СЛЕДНИ НАСТАНИ</span>
-        или <span className="font-bold">АКАДЕМСКИ ГРУПИ</span> каде сте
-        претплатени.
+        <span className="font-bold">СЛЕДНИ НАСТАНИ</span> или{" "}
+        <span className="font-bold">АКАДЕМСКИ ГРУПИ</span> каде сте претплатени.
       </div>
       <div className="text-[15px] sm:text-[19px]">
         Доколку не сте член на група или немаате настани погледнете ги нашите

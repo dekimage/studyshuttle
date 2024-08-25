@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 import MobxStore from "../mobx";
 import { FileWarning } from "lucide-react";
+import Loader from "./Loader";
 
 const Event = observer(({ event }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -188,7 +189,7 @@ const EventList = observer(() => {
   }, []);
 
   if (loading) {
-    return <div>Loading events...</div>; // Show loading state
+    return <Loader />; 
   }
 
   return (

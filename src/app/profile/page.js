@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import MobxStore from "../mobx";
 import { observer } from "mobx-react";
 import { useState } from "react";
+import Loader from "../_components/Loader";
 
 const CheckmarkIcon = ({ isBlack = false }) => {
   return isBlack ? (
@@ -96,7 +97,7 @@ const ProfilePage = observer(() => {
 
   const [selectedPlan, setSelectedPlan] = useState(null);
 
-  if (!user) return <div>Loading Profile...</div>;
+  if (!user) return <Loader />;
   const { yellowTokens, blueTokens, redTokens } = user;
 
   return (

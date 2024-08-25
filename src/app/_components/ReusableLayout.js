@@ -79,7 +79,7 @@ export const NAVIGATION_LINKS = [
 const defaultLayout = [20, 80];
 
 const ReusableLayout = observer(({ children }) => {
-  const { isMobileOpen, setIsMobileOpen, user } = MobxStore;
+  const { user } = MobxStore;
 
   const pathname = usePathname();
 
@@ -90,7 +90,14 @@ const ReusableLayout = observer(({ children }) => {
     return pathname.endsWith(route.href?.toLowerCase()) ? "default" : "ghost";
   };
 
-  const navigationLinks = [...NAVIGATION_LINKS];
+  const navigationLinks = NAVIGATION_LINKS.filter((link) => {
+    if (user?.role === "professor" && link.href === "profile") {
+      return false; // Exclude the 'Профил' link for professors
+    }
+    return true; // Include all other links
+  });
+
+  // Add 'Professor Admin' link if the user is a professor
   if (user?.role === "professor") {
     navigationLinks.push({
       title: "Professor Admin",
@@ -98,7 +105,6 @@ const ReusableLayout = observer(({ children }) => {
       href: "professor-admin",
     });
   }
-
   return (
     <div>
       <div className="hidden sm:block">

@@ -1,9 +1,12 @@
+
 "use client";
 import React, { useState, useEffect } from "react";
 import { observer } from "mobx-react-lite";
 import MobxStore from "../mobx";
 import RadarChart from "react-svg-radar-chart";
 import "react-svg-radar-chart/build/css/index.css";
+import { Button } from "@/components/ui/button";
+import Loader from "../_components/Loader";
 
 const subjects = [
   { label: "Mathematics", id: "123" },
@@ -13,32 +16,70 @@ const subjects = [
   { label: "Physical Education", id: "pe" },
 ];
 
+const bgColorMap = {
+  attention: "bg-sun",
+  memory: "bg-sky",
+  interest: "bg-chili",
+  skill: "bg-darkGrey",
+  average: "bg-white",
+};
+
+const translationMap = {
+  attention: "Внимание",
+  memory: "Меморија",
+  skill: "Вештина",
+  interest: "Интерес",
+  average: "Просек",
+};
+
+const translateObjectValues = (obj) => {
+  const translatedObj = {};
+
+  Object.entries(obj).forEach(([key, value]) => {
+    translatedObj[key] = translationMap[value.toLowerCase()] || value;
+  });
+
+  return translatedObj;
+};
+
+const getTranslatedLabel = (label) => {
+  return translationMap[label] || label;
+};
+
+const convertToOriginalRating = (normalizedValue) => {
+  return (normalizedValue * 5).toFixed(2); // Display up to 2 decimal points
+};
+
 const AnalyticsPage = observer(() => {
   const [selectedSubject, setSelectedSubject] = useState(subjects[0].id);
   const [chartData, setChartData] = useState([]);
+  const [fetchedUserProfile, setFetchedUserProfile] = useState(null); // For professor view
+  const [fetchedUserGrades, setFetchedUserGrades] = useState(null); // For professor view
+  const [inputUserId, setInputUserId] = useState(""); // For professor view
 
   useEffect(() => {
     const fetchData = async () => {
       await MobxStore.userReady; // Ensure user is ready before fetching grades
 
-      if (MobxStore.user) {
+      if (MobxStore.user && MobxStore.user.role === "student") {
         const result = await MobxStore.fetchUserGrades();
         if (!result?.success) {
           console.log(result.error);
         } else {
-          // Trigger data calculation after fetching
-          calculateChartData(subjects[0].id);
+          calculateChartData(selectedSubject); // Ensure calculation after fetching
         }
-      } else {
-        console.log("User data is not available.");
       }
     };
 
-    fetchData();
-  }, []);
+    if (MobxStore.user?.role === "student") {
+      fetchData();
+    }
+  }, [MobxStore.userReady, MobxStore.user]);
 
-  const calculateChartData = (subjectId) => {
-    const subjectData = MobxStore.analytics[subjectId];
+  const calculateChartData = (subjectId, userGrades = null) => {
+    const subjectData = userGrades
+      ? userGrades[subjectId] // Use fetched user's grades if available
+      : MobxStore.analytics[subjectId];
 
     if (subjectData) {
       const totalScores = subjectData.totalScores || {
@@ -91,8 +132,28 @@ const AnalyticsPage = observer(() => {
   };
 
   useEffect(() => {
-    calculateChartData(selectedSubject);
-  }, [selectedSubject]);
+    // Recalculate chart data when the subject changes
+    if (MobxStore.user?.role === "student") {
+      calculateChartData(selectedSubject);
+    } else if (fetchedUserGrades) {
+      calculateChartData(selectedSubject, fetchedUserGrades);
+    }
+  }, [selectedSubject, fetchedUserGrades, MobxStore.analytics]);
+
+  const handleLoadProfile = async () => {
+    try {
+      const result = await MobxStore.fetchUserProfileWithGrades(inputUserId);
+      if (result.success) {
+        setFetchedUserProfile(result.data.userProfile);
+        setFetchedUserGrades(result.data.userGrades);
+        calculateChartData(selectedSubject, result.data.userGrades); // Load data for the first subject
+      } else {
+        console.log("Error fetching user profile: ", result.error);
+      }
+    } catch (error) {
+      console.log("Error loading profile:", error);
+    }
+  };
 
   const captions = {
     attention: "Attention",
@@ -102,28 +163,119 @@ const AnalyticsPage = observer(() => {
     average: "Average",
   };
 
+  const { user } = MobxStore;
+
+  if (!user) return <Loader />;
+
   return (
-    <div className="p-5">
-      <h2 className="mb-4 text-2xl font-bold">Analytics</h2>
+    <div className="h-screen bg-lightGrey px-2 md:px-8">
+      <h2 className="mb-4 text-[29px] font-bold sm:text-[45px]">Аналитика</h2>
 
-      <div className="mb-4">
-        <label className="mr-2">Select Subject:</label>
-        <select
-          value={selectedSubject}
-          onChange={(e) => setSelectedSubject(e.target.value)}
-          className="rounded border px-2 py-1"
-        >
-          {subjects.map((subject) => (
-            <option key={subject.id} value={subject.id}>
-              {subject.label}
-            </option>
-          ))}
-        </select>
-      </div>
+      {user.role === "professor" ? (
+        <div className="mb-4 flex flex-col gap-4">
+          <input
+            type="text"
+            value={inputUserId}
+            onChange={(e) => setInputUserId(e.target.value)}
+            placeholder="Enter User ID"
+            className="rounded border px-2 py-1"
+          />
+          <Button onClick={handleLoadProfile}>Load Profile</Button>
 
-      <div className="mb-4">
-        <RadarChart captions={captions} data={chartData} size={450} />
-      </div>
+          {fetchedUserProfile && (
+            <>
+              <div>
+                Showing data for: {fetchedUserProfile.name}{" "}
+                {fetchedUserProfile.lastname}
+              </div>
+              <div className="mb-4 flex max-w-[900px] flex-col items-center gap-8 rounded-[19px] border-2 border-sun bg-white p-8">
+                <RadarChart
+                  captions={translateObjectValues(captions)}
+                  data={chartData}
+                  size={350}
+                />
+                <div className="flex flex-wrap justify-center gap-8">
+                  {Object.entries(chartData[0]?.data || {}).map(
+                    ([key, value], i) => {
+                      const bgColorClass = bgColorMap[key] || "bg-gray-200";
+
+                      return (
+                        <div key={i} className="flex items-center space-x-2">
+                          <div
+                            className={`mr-1 rounded-full border-2 border-black p-2 ${bgColorClass}`}
+                          ></div>
+                          {getTranslatedLabel(key)}:{" "}
+                          {convertToOriginalRating(value)}
+                        </div>
+                      );
+                    },
+                  )}
+                </div>
+                <div className="flex flex-col justify-end">
+                  <label className="mr-2">Предмет:</label>
+                  <select
+                    value={selectedSubject}
+                    onChange={(e) => setSelectedSubject(e.target.value)}
+                    className="rounded border px-2 py-1"
+                  >
+                    {subjects.map((subject) => (
+                      <option key={subject.id} value={subject.id}>
+                        {subject.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      ) : (
+        // For student role
+        <div className="mb-4 flex max-w-[900px] flex-col items-center gap-8 rounded-[19px] border-2 border-sun bg-white p-8">
+          <RadarChart
+            captions={translateObjectValues(captions)}
+            data={chartData}
+            size={350}
+          />
+          <div className="flex flex-wrap justify-center gap-8">
+            {Object.entries(chartData[0]?.data || {}).map(([key, value], i) => {
+              const bgColorClass = bgColorMap[key] || "bg-gray-200";
+
+              return (
+                <div key={i} className="flex items-center space-x-2">
+                  <div
+                    className={`mr-1 rounded-full border-2 border-black p-2 ${bgColorClass}`}
+                  ></div>
+                  {getTranslatedLabel(key)}: {convertToOriginalRating(value)}
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="flex w-full flex-wrap justify-between gap-4">
+            <div>
+              <div>
+                Студент: {user.name} {user.lastname}
+              </div>
+              <div>ID: {user.uid}</div>
+            </div>
+            <div className="flex flex-col justify-end">
+              <label className="mr-2">Предмет:</label>
+              <select
+                value={selectedSubject}
+                onChange={(e) => setSelectedSubject(e.target.value)}
+                className="rounded border px-2 py-1"
+              >
+                {subjects.map((subject) => (
+                  <option key={subject.id} value={subject.id}>
+                    {subject.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 });
