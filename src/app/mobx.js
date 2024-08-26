@@ -97,6 +97,10 @@ class Store {
     this.fetchAllProfessors = this.fetchAllProfessors.bind(this);
 
     this.checkUserReview = this.checkUserReview.bind(this);
+
+    this.fetchAcademyGroupsByProfessor =
+      this.fetchAcademyGroupsByProfessor.bind(this);
+    this.joinGroup = this.joinGroup.bind(this);
   }
 
   initializeAuth() {
@@ -143,6 +147,61 @@ class Store {
   }
 
   // MAIN PAGES
+
+  async fetchAcademyGroupsByProfessor(professorId) {
+    try {
+      const q = query(
+        collection(db, "academyGroups"),
+        where("professorId", "==", professorId),
+      );
+
+      const querySnapshot = await getDocs(q);
+      const academyGroups = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      return { success: true, data: academyGroups }; // Return data directly
+    } catch (error) {
+      console.error("Error fetching academy groups:", error);
+      return { success: false, error: "Error fetching academy groups" };
+    }
+  }
+
+  async joinGroup(groupId) {
+    if (!this.user || this.user.role !== "student") {
+      return { success: false, error: "Only students can join groups." };
+    }
+
+    if (this.user.blueTokens < 1) {
+      return { success: false, error: "Not enough blue tokens." };
+    }
+
+    try {
+      // Fetch the group document
+      const groupDocRef = doc(db, "academyGroups", groupId);
+      const groupDoc = await getDoc(groupDocRef);
+      if (!groupDoc.exists()) {
+        return { success: false, error: "Group not found." };
+      }
+
+      const groupData = groupDoc.data();
+      const newUserList = [...(groupData.users || []), this.user.uid];
+
+      // Update the group with the new user list
+      await updateDoc(groupDocRef, { users: newUserList });
+
+      // Update user's tokens (this would involve another Firestore call)
+      await updateDoc(doc(db, "users", this.user.uid), {
+        blueTokens: this.user.blueTokens - 1,
+      });
+
+      return { success: true }; // Return success without modifying MobX state
+    } catch (error) {
+      console.error("Error joining group:", error);
+      return { success: false, error: "Error joining group." };
+    }
+  }
 
   async fetchAllProfessors() {
     try {
@@ -899,6 +958,15 @@ class Store {
     classType,
     notes,
   }) {
+    console.log({
+      date,
+      timeRange,
+      userId,
+      professorId,
+      subject,
+      classType,
+      notes,
+    });
     try {
       const professorDocRef = doc(db, "professors", professorId);
       const professorSnapshot = await getDoc(professorDocRef);

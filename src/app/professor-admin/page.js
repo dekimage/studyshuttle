@@ -546,7 +546,11 @@ const Termini = observer(() => {
         Add Schedule Entry
       </button>
       <div className="mt-10">
-        <Calendar schedule={MobxStore.user?.schedule} />
+        <Calendar
+          schedule={MobxStore.user?.schedule}
+          professor={MobxStore.user}
+          isAdmin
+        />
       </div>
     </div>
   );
