@@ -1,4 +1,3 @@
-
 "use client";
 import React, { useState, useEffect } from "react";
 import { observer } from "mobx-react-lite";
@@ -7,6 +6,7 @@ import RadarChart from "react-svg-radar-chart";
 import "react-svg-radar-chart/build/css/index.css";
 import { Button } from "@/components/ui/button";
 import Loader from "../_components/Loader";
+import { SubjectDropdown } from "@/src/constants";
 
 const subjects = [
   { label: "Mathematics", id: "123" },
@@ -213,7 +213,11 @@ const AnalyticsPage = observer(() => {
                 </div>
                 <div className="flex flex-col justify-end">
                   <label className="mr-2">Предмет:</label>
-                  <select
+                  <SubjectDropdown
+                    onChange={(e) => setSelectedSubject(e.target.value)}
+                    selectedSubject={selectedSubject}
+                  />
+                  {/* <select
                     value={selectedSubject}
                     onChange={(e) => setSelectedSubject(e.target.value)}
                     className="rounded border px-2 py-1"
@@ -223,7 +227,7 @@ const AnalyticsPage = observer(() => {
                         {subject.label}
                       </option>
                     ))}
-                  </select>
+                  </select> */}
                 </div>
               </div>
             </>
@@ -261,17 +265,10 @@ const AnalyticsPage = observer(() => {
             </div>
             <div className="flex flex-col justify-end">
               <label className="mr-2">Предмет:</label>
-              <select
-                value={selectedSubject}
+              <SubjectDropdown
                 onChange={(e) => setSelectedSubject(e.target.value)}
-                className="rounded border px-2 py-1"
-              >
-                {subjects.map((subject) => (
-                  <option key={subject.id} value={subject.id}>
-                    {subject.label}
-                  </option>
-                ))}
-              </select>
+                selectedSubject={selectedSubject}
+              />
             </div>
           </div>
         </div>

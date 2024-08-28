@@ -2,6 +2,12 @@
 import React, { useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 import MobxStore from "../mobx";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, ArrowRight } from "lucide-react";
+
+import logoImg from "../../assets/logo.png";
+import Image from "next/image";
+import { AcademyGroupModal } from "../pocetna/page";
 
 const CalendarView = observer(() => {
   const [viewMode, setViewMode] = useState("week"); // "week" or "month"
@@ -65,26 +71,35 @@ const CalendarView = observer(() => {
       return day;
     });
 
+    const formatDayWithSuffix = (date) => {
+      const day = date.getDate();
+      const suffix =
+        day % 10 === 1 && day !== 11
+          ? "st"
+          : day % 10 === 2 && day !== 12
+            ? "nd"
+            : day % 10 === 3 && day !== 13
+              ? "rd"
+              : "th";
+      const dayName = dayNames[date.getDay()];
+      return `${dayName}, ${day}${suffix}`;
+    };
+
     return (
       <div>
-        <div className="mb-4 flex items-center justify-between">
-          <button onClick={handlePrevWeek}>&lt; Previous Week</button>
-          <div>
-            {startOfWeek.toLocaleString("default", {
-              month: "long",
-              year: "numeric",
-            })}
-            {" - "}
-            {daysOfWeek[6].toLocaleString("default", {
-              month: "long",
-              year: "numeric",
-            })}
-          </div>
-          <button onClick={handleNextWeek}>Next Week &gt;</button>
+        <div className="mb-4 flex  items-center justify-center gap-3">
+          <Button onClick={handlePrevWeek}>
+            <ArrowLeft />
+          </Button>
+          <div>{formatDayWithSuffix(currentWeek)}</div>
+          <Button onClick={handleNextWeek}>
+            <ArrowRight />
+          </Button>
         </div>
-        <div className="grid grid-cols-7 gap-4">
+        <div className="flex flex-wrap gap-4">
+          {/* grid grid-cols-7  */}
           {daysOfWeek.map((day, index) => (
-            <div key={index} className="rounded border p-4">
+            <div key={index} className="w-[150px] rounded border bg-white p-4">
               <div className="font-bold">{dayNames[day.getDay()]}</div>
               <div className="mt-1">{day.getDate()}</div>
               <div className="mt-2">
@@ -164,15 +179,19 @@ const CalendarView = observer(() => {
 
     return (
       <div>
-        <div className="mb-4 flex items-center justify-between">
-          <button onClick={handlePrevMonth}>&lt; Previous Month</button>
+        <div className="mb-4 flex items-center justify-center gap-3">
+          <Button onClick={handlePrevMonth}>
+            <ArrowLeft />
+          </Button>
           <div>
             {currentMonth.toLocaleString("default", {
               month: "long",
               year: "numeric",
             })}
           </div>
-          <button onClick={handleNextMonth}>Next Month &gt;</button>
+          <Button onClick={handleNextMonth}>
+            <ArrowRight />
+          </Button>
         </div>
         <div className="grid grid-cols-7 gap-4 text-center font-bold">
           {dayNames.map((dayName, index) => (
@@ -181,7 +200,7 @@ const CalendarView = observer(() => {
         </div>
         <div className="grid grid-cols-7 gap-4">
           {daysInMonth.map((day, index) => (
-            <div key={index} className="rounded border p-4">
+            <div key={index} className="rounded border bg-white p-4">
               <div className="font-bold">{day.getDate()}</div>
               <div className="mt-2">
                 {/* Render events */}
@@ -246,78 +265,25 @@ const CalendarView = observer(() => {
         onClick={() => setSelectedEvent(null)}
       >
         <div
-          className="w-full max-w-lg rounded-lg bg-white p-6 shadow-lg"
-          onClick={(e) => e.stopPropagation()} // Prevents clicks inside the modal from closing it
+          className="w-full max-w-lg rounded-lg bg-white p-2 shadow-lg sm:p-6"
+          onClick={(e) => e.stopPropagation()}
         >
-          {isEvent ? (
-            <>
-              <h3 className="mb-4 text-2xl font-bold">
-                {selectedEvent.subject}
-              </h3>
-              <p>
-                <strong>Class Type:</strong> {selectedEvent.classType}
-              </p>
-              <p>
-                <strong>Professor:</strong>{" "}
-                {selectedEvent.professorName || "Unknown"}
-              </p>
-              <p>
-                <strong>Date:</strong> {selectedEvent.date}
-              </p>
-              <p>
-                <strong>Time Range:</strong> {selectedEvent.timeRange.from} -{" "}
-                {selectedEvent.timeRange.to}
-              </p>
-              <p>
-                <strong>Notes:</strong>{" "}
-                {selectedEvent.notes || "No additional notes"}
-              </p>
-              <p>
-                <strong>Participants:</strong>
-              </p>
-              <ul className="list-disc pl-5">
-                <li>{selectedEvent.participantName}</li>
-              </ul>
-            </>
-          ) : (
-            <>
-              <h3 className="mb-4 text-2xl font-bold">{selectedEvent.name}</h3>
-              <p>
-                <strong>Subject:</strong> {selectedEvent.subject}
-              </p>
-              <p>
-                <strong>Student Type:</strong> {selectedEvent.studentType}
-              </p>
-              <p>
-                <strong>Professor ID:</strong> {selectedEvent.professorId}
-              </p>
-
-              <p>
-                <strong>Max Users:</strong> {selectedEvent.maxUsers}
-              </p>
-              <p>
-                <strong>Active Users:</strong> {selectedEvent.activeUsers}
-              </p>
-              <p>
-                <strong>Schedule:</strong>
-              </p>
-              <ul className="list-disc pl-5">
-                {selectedEvent.schedule.map((schedule, index) => (
-                  <li key={index}>
-                    {schedule.day}: {schedule.startTime} - {schedule.endTime}
-                  </li>
-                ))}
-              </ul>
-              <p>
-                <strong>Participants:</strong>
-              </p>
-              <ul className="list-disc pl-5">
-                {selectedEvent.userNames.map((userId, index) => (
-                  <li key={index}>{userId}</li>
-                ))}
-              </ul>
-            </>
+          {!isEvent && (
+            <AcademyGroupModal
+              selectedGroup={selectedEvent}
+              onClose={() => setSelectedEvent(null)}
+            />
           )}
+
+          {isEvent && (
+            <AcademyGroupModal
+              selectedGroup={selectedEvent}
+              onClose={() => setSelectedEvent(null)}
+              isEvent
+            />
+          )}
+
+          {/* Close button */}
           <button
             onClick={() => setSelectedEvent(null)}
             className="mt-4 rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600"
@@ -330,21 +296,28 @@ const CalendarView = observer(() => {
   };
 
   return (
-    <div className="p-6">
-      <h2 className="mb-6 text-3xl font-bold">Event Calendar</h2>
+    <div className="h-full min-h-screen bg-lightGrey p-2 sm:p-6">
+      <div className="flex w-full justify-between">
+        <h2 className="mb-6 text-3xl font-bold"></h2>
+        <Image src={logoImg} alt="logo" width={200} height={200} />
+      </div>
       <div className="mb-4">
-        <button
+        <Button
           onClick={() => setViewMode("week")}
-          className={`mr-4 ${viewMode === "week" ? "font-bold underline" : ""}`}
+          className={`hover:bg-300 mr-4 bg-red-300 ${
+            viewMode === "week" ? "bg-chili hover:bg-chili" : ""
+          }`}
         >
-          Week View
-        </button>
-        <button
+          Недела
+        </Button>
+        <Button
           onClick={() => setViewMode("month")}
-          className={`${viewMode === "month" ? "font-bold underline" : ""}`}
+          className={`hover:bg-300 mr-4 bg-red-300 ${
+            viewMode === "month" ? "bg-chili hover:bg-chili" : ""
+          }`}
         >
-          Month View
-        </button>
+          Месец
+        </Button>
       </div>
       {viewMode === "week" ? renderWeekView() : renderMonthView()}
       {renderModal()}

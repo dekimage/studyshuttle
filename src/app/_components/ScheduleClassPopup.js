@@ -1,10 +1,15 @@
 import React, { useState } from "react";
 import MobxStore from "../mobx";
+import {
+  OddDropdown,
+  SubjectDropdown,
+  filterSubjectsByIds,
+} from "@/src/constants";
 
 const ScheduleClassPopup = ({
   selectedDate,
   timeRange,
-  professorId,
+  professor,
   onClose,
 }) => {
   const [subject, setSubject] = useState("");
@@ -21,7 +26,7 @@ const ScheduleClassPopup = ({
       date: selectedDate,
       timeRange,
       userId: MobxStore.user.uid,
-      professorId,
+      professorId: professor.id,
       subject,
       classType,
       notes,
@@ -30,56 +35,71 @@ const ScheduleClassPopup = ({
     if (result.success) {
       console.log("Class scheduled successfully");
       onClose(); // Close the popup after successful scheduling
+      if (typeof window !== "undefined") {
+        window.location.reload();
+      }
     } else {
       console.log(result.error);
     }
   };
 
+  const maxCharacters = 500;
+  const handleNotesChange = (e) => {
+    const input = e.target.value;
+    if (input.length <= maxCharacters) {
+      setNotes(input);
+    }
+  };
+
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="w-1/3 rounded bg-white p-5 shadow-lg">
-        <h2 className="mb-4 text-2xl font-bold">Schedule a Class</h2>
+    <div className="fixed inset-0 flex items-center justify-center  bg-black bg-opacity-50">
+      <div className="w-1/3 rounded border-4 border-sky bg-white p-5 shadow-lg">
         <div className="mb-4">
-          <label className="mb-2 block font-semibold">Subject</label>
-          <input
-            type="text"
-            value={subject}
+          <label className="mb-2 flex font-semibold">Одбери предмет</label>
+          <SubjectDropdown
             onChange={(e) => setSubject(e.target.value)}
-            className="w-full rounded border p-2"
-            placeholder="Enter subject"
+            selectedSubject={subject}
+            subjects={filterSubjectsByIds(professor.subjects)}
           />
         </div>
         <div className="mb-4">
-          <label className="mb-2 block font-semibold">Class Type</label>
-          <input
-            type="text"
-            value={classType}
+          <label className="mb-2 flex font-semibold">
+            Селектирај ја годината на образование
+          </label>
+          <OddDropdown
             onChange={(e) => setClassType(e.target.value)}
-            className="w-full rounded border p-2"
-            placeholder="Enter class type"
+            selectedSubject={classType}
           />
         </div>
         <div className="mb-4">
-          <label className="mb-2 block font-semibold">Notes</label>
-          <textarea
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            className="w-full rounded border p-2"
-            placeholder="Additional notes"
-          />
+          <label className="mb-2 flex font-semibold">
+            {" "}
+            Што би сакале да работиме на часот?
+          </label>
+          <div>
+            <textarea
+              value={notes}
+              onChange={handleNotesChange}
+              className="w-full rounded border p-2"
+              placeholder=""
+            />
+            <div className="text-right text-sm text-gray-500">
+              {notes.length}/{maxCharacters}
+            </div>
+          </div>
         </div>
         <div className="flex justify-end space-x-4">
           <button
             onClick={onClose}
             className="rounded bg-gray-500 px-4 py-2 text-white hover:bg-gray-600"
           >
-            Cancel
+            Откажи ги промените
           </button>
           <button
             onClick={handleSubmit}
-            className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+            className="rounded bg-sky px-4 py-2 text-white hover:bg-sky"
           >
-            Schedule
+            Зачувај и закажи
           </button>
         </div>
       </div>

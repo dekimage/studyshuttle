@@ -10,28 +10,29 @@ import Calendar from "../_components/Calendar";
 import Image from "next/image";
 import blueTokenImg from "../../assets/bluecoin.png";
 import { ChevronLeft } from "lucide-react";
+import confetiImg from "../../assets/confeti.png";
+import { filterSubjectsByIds } from "@/src/constants";
 
 function isAvailableEventInNextXDays(schedule, days) {
-  const now = new Date();
+  const now = new Date(); // Current date and time
   const futureDate = new Date();
-  futureDate.setDate(now.getDate() + days);
-
-  // Convert date string to Date object for comparison
-  const parseDate = (dateString) => new Date(dateString);
+  futureDate.setDate(now.getDate() + days); // Date 30 days from now
 
   // Iterate over the schedule array to find any event in the range
   for (const event of schedule) {
-    const eventDate = parseDate(event.date);
+    const eventDate = new Date(event.date);
 
+    // Check if the event date is within the range
     if (eventDate >= now && eventDate <= futureDate) {
       // If event date is within the range and has at least one scheduled time range
-      if (event.timeRanges.some((timeRange) => timeRange.isScheduled)) {
-        return true;
+      if (event.timeRanges.some((timeRange) => !timeRange.isScheduled)) {
+        return true; // We found a valid event
       }
+    } else {
     }
   }
 
-  return false;
+  return false; // No events found in the given range
 }
 
 const Modal = ({ children, onClose }) => {
@@ -51,6 +52,8 @@ const AcademyGroups = ({ professor }) => {
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [joinGroupId, setJoinGroupId] = useState(null);
 
+  const [congratsModal, setCongratsModal] = useState(false);
+
   useEffect(() => {
     const fetchGroups = async () => {
       const result = await fetchAcademyGroupsByProfessor(professor.id);
@@ -69,7 +72,7 @@ const AcademyGroups = ({ professor }) => {
     const result = await joinGroup(groupId);
     if (result.success) {
       console.log("Joined group successfully.");
-      // Optionally update local state to reflect the join
+      setCongratsModal(true);
     } else {
       console.log("Error joining group:", result.error);
     }
@@ -90,134 +93,177 @@ const AcademyGroups = ({ professor }) => {
     }
   };
 
+  if (congratsModal) {
+    return (
+      <Modal onClose={() => setCongratsModal(false)}>
+        <div className="flex h-[400px] w-full flex-col items-center justify-center sm:w-[650px]">
+          <div className="flex h-[200px] w-full flex-col items-center justify-between rounded-lg bg-sky p-8 sm:w-[500px] sm:flex-row">
+            <Image
+              src={confetiImg}
+              height={200}
+              width={300}
+              alt="confeti"
+              className="mt-[-70px] h-[150px] w-[150px] sm:ml-[-50px] sm:h-[250px] sm:w-[250px]"
+            />
+            <div className="text-[45px] text-white">Честитки</div>
+          </div>
+
+          <div className="mt-4 font-bold">
+            Со ова искористивте еден син токен.
+          </div>
+          <Button
+            className="mt-4 w-[100px] rounded-full bg-sky hover:bg-sky"
+            onClick={() => {
+              setCongratsModal(false);
+              if (typeof window !== "undefined") {
+                window.location.reload();
+              }
+            }}
+          >
+            Затвори
+          </Button>
+        </div>
+      </Modal>
+    );
+  }
+
   return (
     <div className="flex w-full flex-col gap-2">
       {academyGroups.length > 0 &&
-        academyGroups.map((group) => (
-          <div
-            key={group.id}
-            className="my-4 flex w-full flex-col items-start rounded-lg border border-[3px] border-sky bg-white p-4"
-          >
-            <div className="flex w-full justify-between">
-              <div className="text-lg font-bold">{group.name}</div>
-              <div className="flex gap-2 text-xs font-bold">
-                Тип на токен кој ви е потребен:{" "}
-                <Image
-                  src={blueTokenImg}
-                  width={40}
-                  height={40}
-                  alt="blue token"
-                />
-              </div>
-            </div>
+        academyGroups.map((group) => {
+          const isUserInGroup = group.users.includes(user.uid); // Check if the user is already in the group
 
-            <div className="mt-4 flex w-full items-center justify-between">
-              <div className="flex gap-2 text-sm">
-                Број на членови:{" "}
-                <div
-                  className={statusBorderClass(
-                    group.activeUsers,
-                    group.maxUsers,
-                  )}
-                >
-                  {group.activeUsers}/{group.maxUsers}
+          return (
+            <div
+              key={group.id}
+              className="my-4 flex w-full flex-col items-start rounded-lg border border-[3px] border-sky bg-white p-4"
+            >
+              <div className="flex w-full flex-wrap justify-between">
+                <div className="text-lg font-bold">{group.name}</div>
+                <div className="flex gap-2 text-xs font-bold">
+                  Тип на токен кој ви е потребен:{" "}
+                  <Image
+                    src={blueTokenImg}
+                    width={40}
+                    height={40}
+                    alt="blue token"
+                  />
                 </div>
               </div>
-              <div>
-                Термини на часови:{" "}
-                <Button
-                  className="bg-sky text-[14px] hover:bg-sky"
-                  onClick={() => setSelectedGroup(group)}
-                >
-                  Види детали
-                </Button>
+
+              <div className="mt-4 flex w-full flex-wrap items-center justify-between gap-2">
+                <div className="flex gap-2 text-sm">
+                  Број на членови:{" "}
+                  <div
+                    className={statusBorderClass(
+                      group.users?.length,
+                      group.maxUsers,
+                    )}
+                  >
+                    {group.users?.length}/{group.maxUsers}
+                  </div>
+                </div>
+                <div className="text-sm">
+                  Термини на часови:{" "}
+                  <Button
+                    className="bg-sky text-[14px] hover:bg-sky"
+                    onClick={() => setSelectedGroup(group)}
+                  >
+                    Види детали
+                  </Button>
+                </div>
+
+                {/* Conditionally render the button based on user's group membership */}
+                {user.role === "student" &&
+                !isUserInGroup &&
+                !(group.users?.length >= group.maxUsers) ? (
+                  <Button
+                    className="bg-chili text-[18px] text-white hover:bg-chili"
+                    onClick={() => setJoinGroupId(group.id)}
+                  >
+                    Одбери
+                  </Button>
+                ) : (
+                  <div className="bg-lightGrey p-2">
+                    {isUserInGroup ? "Вие сте дел од групата" : "Полна"}
+                  </div>
+                )}
               </div>
-              {user.role == "student" &&
-              !(group.activeUsers >= group.maxUsers) ? (
-                <Button
-                  className="bg-chili text-[18px] text-white hover:bg-chili"
-                  onClick={() => setJoinGroupId(group.id)}
-                >
-                  Одбери
-                </Button>
-              ) : (
-                <div className="bg-lightGrey p-2">Полна</div>
+
+              {/* Schedule Modal */}
+              {selectedGroup && selectedGroup.id === group.id && (
+                <Modal>
+                  <h3 className="text-[29px] font-bold">Термини на часови:</h3>
+                  <div className="flex flex-col">
+                    {selectedGroup.schedule.map((sched, idx) => (
+                      <div
+                        key={idx}
+                        className="my-4 flex items-center justify-between rounded border-2 border-sky p-2"
+                      >
+                        <div>{sched.day}</div>
+                        <div>
+                          {sched.startTime} - {sched.endTime} часот
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <Button
+                    className="mt-4 w-[100px] rounded-full bg-sky hover:bg-sky"
+                    onClick={() => setSelectedGroup(null)}
+                  >
+                    Затвори
+                  </Button>
+                </Modal>
+              )}
+
+              {/* Join Group Confirmation Modal */}
+              {joinGroupId && joinGroupId === group.id && (
+                <Modal onClose={() => setJoinGroupId(null)}>
+                  <div className="flex h-[300px] w-[300px] flex-col items-center justify-center">
+                    {user.blueTokens < 1 ? (
+                      <div>
+                        Имате 0{" "}
+                        <Image
+                          src={blueTokenImg}
+                          height={40}
+                          width={40}
+                          alt="blue token"
+                        />
+                        сини токени на сметка.
+                        <Link className="/profile">
+                          <Button className="bg-sky hover:bg-sky">
+                            Надополнете тука
+                          </Button>
+                        </Link>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="text-[20px] font-bold">
+                          Дали сте сигурни дека сакате да ја одберете оваа
+                          академска група?
+                        </div>
+                        <div className="mt-8 flex gap-4">
+                          <Button
+                            className="w-[100px] rounded-full bg-sky hover:bg-sky"
+                            onClick={() => handleJoinGroup(group.id)}
+                          >
+                            Да
+                          </Button>
+                          <Button
+                            className="w-[100px] rounded-full"
+                            onClick={() => setJoinGroupId(null)}
+                          >
+                            Затвори
+                          </Button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </Modal>
               )}
             </div>
-
-            {/* Schedule Modal */}
-            {selectedGroup && selectedGroup.id === group.id && (
-              <Modal>
-                <h3 className="text-[29px] font-bold">Термини на часови:</h3>
-                <div className="flex flex-col">
-                  {selectedGroup.schedule.map((sched, idx) => (
-                    <div
-                      key={idx}
-                      className="my-4 flex items-center justify-between rounded border-2 border-sky p-2"
-                    >
-                      <div>{sched.day}</div>
-                      <div>
-                        {sched.startTime} - {sched.endTime} часот
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <Button
-                  className="mt-4 w-[100px] rounded-full bg-sky hover:bg-sky"
-                  onClick={() => setSelectedGroup(null)}
-                >
-                  Затвори
-                </Button>
-              </Modal>
-            )}
-
-            {/* Join Group Confirmation Modal */}
-            {joinGroupId && joinGroupId === group.id && (
-              <Modal onClose={() => setJoinGroupId(null)}>
-                <div className="flex h-[300px] w-[300px] flex-col items-center justify-center">
-                  {user.blueTokens < 1 ? (
-                    <div>
-                      Имате 0{" "}
-                      <Image
-                        src={blueTokenImg}
-                        height={40}
-                        width={40}
-                        alt="blue token"
-                      />
-                      сини токени на сметка.
-                      <Link className="/profile">
-                        <Button className="bg-sky hover:bg-sky">
-                          Надополнете тука
-                        </Button>
-                      </Link>
-                    </div>
-                  ) : (
-                    <>
-                      <div className="text-[20px] font-bold">
-                        Дали сте сигурни дека сакате да ја одберете оваа
-                        академска група?
-                      </div>
-                      <div className="mt-8 flex gap-4">
-                        <Button
-                          className="w-[100px] rounded-full bg-sky hover:bg-sky"
-                          onClick={() => handleJoinGroup(group.id)}
-                        >
-                          Да
-                        </Button>
-                        <Button
-                          className="w-[100px] rounded-full"
-                          onClick={() => setJoinGroupId(null)}
-                        >
-                          Затвори
-                        </Button>
-                      </div>
-                    </>
-                  )}
-                </div>
-              </Modal>
-            )}
-          </div>
-        ))}
+          );
+        })}
     </div>
   );
 };
@@ -262,18 +308,20 @@ const ProffesorCard = ({
 
   return (
     <div
-      style={isDetails ? { width: "100%" } : { width: "298px" }}
-      className="relative flex max-w-[920px] items-center rounded-[20px] border border-2 border-[3px] border-sun border-sun bg-white text-center"
+      style={
+        isDetails ? { width: "100%" } : { width: "298px", height: "650px" }
+      }
+      className="relative flex max-w-[920px] flex-col items-center rounded-[20px] border border-2 border-[3px] border-sun border-sun bg-white text-center lg:flex-row"
     >
-      <div className="flex  w-[290px] flex-col items-center rounded-[20px]  bg-white px-[12px] py-8 text-center">
+      <div className="flex  w-[290px] flex-col items-center rounded-[20px]  bg-white px-[12px] py-2 text-center">
         {image && (
           <div
-            className={`mb-4 mt-8 flex h-[120px] w-[120px] items-center justify-center rounded-full border border-[3px] ${
+            className={`mb-4 flex h-[120px] w-[120px] items-center justify-center rounded-full border border-[3px] ${
               isLanding ? "border-chili" : "border-sun"
             }`}
           >
             <Image
-              src={image}
+              src={`/${image}.png`}
               width={150}
               height={150}
               alt="profesor"
@@ -288,8 +336,8 @@ const ProffesorCard = ({
         <div className="mt-4 text-[20px] font-semibold">{title}</div>
 
         <div className="text-20px my-4 text-center font-bold">ПРЕДМЕТИ:</div>
-        <div className="mx-8 flex w-[160px] flex-col">
-          {subjects?.map((subject, index) => (
+        <div className="mx-8 mb-2 flex w-[160px] flex-col">
+          {filterSubjectsByIds(subjects || [])?.map((subject, index) => (
             <div
               key={index}
               style={{
@@ -299,7 +347,7 @@ const ProffesorCard = ({
               
             `}
             >
-              {subject}
+              {subject.label}
             </div>
           ))}
         </div>
@@ -366,7 +414,7 @@ const ProffesorCard = ({
           </div>
         )}
 
-        {isLanding && !isDetails && (
+        {!isLanding && !isDetails && (
           <Button
             onClick={() => loadProfessor(professor)}
             className="mt-4 w-full rounded-[10px] bg-chili hover:bg-chili"
@@ -378,7 +426,7 @@ const ProffesorCard = ({
 
       {isDetails && (
         <div className="flex h-[900px] w-full flex-col justify-between rounded-[16px] bg-sun p-4">
-          <div className="h-[450px] pt-4">
+          <div className="h-full pt-4 md:h-[450px]">
             <div className="text-[25px] font-bold">
               Слободни термини за часови:
             </div>
@@ -392,7 +440,7 @@ const ProffesorCard = ({
             )}
           </div>
 
-          <div className="mt-4 h-[450px] border-t-4 border-white pt-4">
+          <div className="mt-4 h-full border-t-4 border-white pt-4 md:h-[450px]">
             <div className="text-[25px] font-bold">Академски групи:</div>
             <AcademyGroups professor={professor} />
           </div>
@@ -412,7 +460,7 @@ const ProfPage = observer(() => {
   } = MobxStore;
 
   const [profDetails, setProfDetails] = useState(null);
-  const [existingReview, setExistingReview] = useState(null); // State for existing review
+  const [existingReview, setExistingReview] = useState(null);
 
   const loadProfessor = async (professor) => {
     setProfDetails({ professor });
@@ -480,7 +528,6 @@ const ProfPage = observer(() => {
             key={profDetails.professor?.id}
             professor={profDetails.professor}
             isDetails
-            isLanding
             existingReview={existingReview}
             onReviewSubmit={handleReviewSubmit}
             setIsDetails={setProfDetails}
@@ -489,13 +536,12 @@ const ProfPage = observer(() => {
       ) : (
         <div>
           <div className="text-[29px] font-bold sm:text-[45px]">Професори</div>
-          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-6 grid h-screen gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {professors.map((professor) => (
               <ProffesorCard
                 key={professor.id}
                 professor={professor}
                 loadProfessor={loadProfessor}
-                isLanding
               />
             ))}
           </div>

@@ -181,11 +181,18 @@ class Store {
       // Fetch the group document
       const groupDocRef = doc(db, "academyGroups", groupId);
       const groupDoc = await getDoc(groupDocRef);
+
       if (!groupDoc.exists()) {
         return { success: false, error: "Group not found." };
       }
 
       const groupData = groupDoc.data();
+
+      // Check if the user is already in the group
+      if (groupData.users && groupData.users.includes(this.user.uid)) {
+        return { success: false, error: "User is already in the group." };
+      }
+
       const newUserList = [...(groupData.users || []), this.user.uid];
 
       // Update the group with the new user list
@@ -339,6 +346,7 @@ class Store {
 
       // Check if the user is a professor
       let nameDetails = {};
+      let link = "";
 
       if (this.user.role === "professor") {
         // Extract unique user IDs
@@ -351,6 +359,7 @@ class Store {
             nameDetails[userId] = `${userDoc.data().name} ${
               userDoc.data().lastname
             }`;
+            console.log(userDoc.data().name);
           } else {
             nameDetails[userId] = "Unknown User";
           }
@@ -371,6 +380,7 @@ class Store {
           const professorDoc = await getDoc(doc(db, "professors", professorId));
           if (professorDoc.exists()) {
             nameDetails[professorId] = professorDoc.data().name;
+            link = professorDoc.data().link;
           } else {
             nameDetails[professorId] = "Unknown Professor";
           }
@@ -379,6 +389,7 @@ class Store {
         // Map professor names back to events
         events.forEach((event) => {
           event.professorName = nameDetails[event.professorId];
+          event.link = link;
         });
       }
 
@@ -1336,8 +1347,7 @@ class Store {
         createdAt: new Date(),
         name: name,
         lastname: lastname,
-        // academicLevel: academicLevel,
-        academicLevel: "student",
+        academicLevel: academicLevel,
         email: email,
         uid: userCredential.user.uid,
       };

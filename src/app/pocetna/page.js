@@ -7,6 +7,143 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Copy } from "lucide-react";
 import Loader from "../_components/Loader";
+import { filterOddByIds } from "@/src/constants";
+
+export const AcademyGroupModal = ({
+  selectedGroup,
+  onClose,
+  isEvent = false,
+}) => {
+  const { user } = MobxStore;
+  return (
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+      <div className="flex w-full max-w-lg flex-col justify-between gap-2 rounded-lg border-4 border-sky bg-white p-8 shadow-lg sm:min-w-[600px] sm:flex-row">
+        <div className="flex w-full flex-col justify-start gap-2 pr-4 sm:gap-4 sm:border-r-4 sm:border-sky">
+          {selectedGroup.name && (
+            <div className="text-[19px] font-bold sm:text-[29px]">
+              {selectedGroup.name}
+            </div>
+          )}
+
+          {selectedGroup.description && <div>{selectedGroup.description}</div>}
+
+          <div className="my-2">
+            <div className="text-[19px] font-bold sm:text-[29px]">Предмет:</div>
+            <div className="text-[15px] font-bold sm:text-[19px]">
+              {selectedGroup.subject}
+            </div>
+          </div>
+          <div className="my-2">
+            <div className="text-[19px] font-bold sm:text-[29px]">
+              {user.role == "professor" ? " Студент" : "Професор"}:
+            </div>
+            <div className="text-[15px] font-bold sm:text-[19px]">
+              {user.role == "professor"
+                ? selectedGroup.participantName
+                : selectedGroup.professorName}
+            </div>
+          </div>
+          {user.role == "professor" && isEvent && (
+            <>
+              <div className="text-[19px] font-bold sm:text-[29px]">
+                Ниво на Ученик:
+              </div>
+              <div>{filterOddByIds(selectedGroup.classType).label}</div>
+            </>
+          )}
+          {!isEvent && (
+            <div className="my-2">
+              <div className=" text-[19px] font-bold sm:text-[29px]">
+                Статус:
+              </div>
+              <div className="text-[15px] font-bold sm:text-[19px]">
+                {selectedGroup.activeUsers} / {selectedGroup.maxUsers}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="flex w-full flex-col gap-2 pl-4 sm:gap-4">
+          <div className="text-[19px] font-bold sm:text-[29px]">
+            Термини на часови:
+          </div>
+          {isEvent && <div>{selectedGroup.date}</div>}
+          <div>
+            {selectedGroup.timeRange?.from} - {selectedGroup.timeRange?.to}
+          </div>
+          <ul className="mt-2">
+            {selectedGroup.schedule?.map((slot, index) => (
+              <li
+                key={index}
+                className="my-2 w-full border-[3px] border-sky p-2"
+              >
+                {slot.day}: {slot.startTime} - {slot.endTime} часот
+              </li>
+            ))}
+          </ul>
+
+          {user.role == "professor" && isEvent && (
+            <div>
+              <div className="text-[19px] font-bold sm:text-[29px]">
+                Белешка:
+              </div>
+              <div>{selectedGroup.notes}</div>
+            </div>
+          )}
+
+          {user.role == "student" && (
+            <>
+              <div className="text-[19px] font-bold sm:text-[29px]">
+                Линк за {isEvent ? "часот:" : "часовите:"}
+              </div>
+              <div className="flex w-full justify-between border-[3px] border-black p-2">
+                {selectedGroup.link && (
+                  <div>
+                    {" "}
+                    {selectedGroup.link.length > 25
+                      ? `${selectedGroup.link.slice(0, 25)}...`
+                      : selectedGroup.link}
+                  </div>
+                )}
+
+                <Copy
+                  className="cursor-pointer text-sky"
+                  onClick={() => {
+                    // Copy link to clipboard
+                    navigator.clipboard
+                      .writeText(selectedGroup.link)
+                      .then(() => {
+                        alert("Link copied to clipboard!"); // Optional: Provide feedback to the user
+                      })
+                      .catch((err) => {
+                        console.error("Failed to copy: ", err);
+                      });
+                  }}
+                />
+              </div>
+            </>
+          )}
+          <Button
+            onClick={onClose}
+            className="mt-4 rounded-full bg-sky  text-white hover:bg-sky"
+          >
+            Затвори
+          </Button>
+        </div>
+        {/* {MobxStore.user.role === "professor" && (
+        <div className="mt-4">
+          <strong>Ученици/Студенти:</strong>
+          <ul className="mt-2 list-disc pl-5">
+            {selectedGroup.userNames.map((name, index) => (
+              <li key={index}>{name}</li>
+            ))}
+          </ul>
+        </div>
+      )} */}
+      </div>
+    </div>
+  );
+};
 
 const AcademyGroupsPage = observer(() => {
   const [selectedGroup, setSelectedGroup] = useState(null);
@@ -71,83 +208,8 @@ const AcademyGroupsPage = observer(() => {
           </div>
         </div>
       </div>
-
       {selectedGroup && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="flex w-full max-w-lg flex-col justify-between gap-2 rounded-lg border-4 border-sky bg-white p-8 shadow-lg sm:flex-row">
-            <div className="flex w-full flex-col gap-2 pr-4 sm:gap-4 sm:border-r-4 sm:border-sky">
-              <div className="text-[19px] font-bold sm:text-[29px]">
-                {selectedGroup.name}
-              </div>
-              <div>{selectedGroup.description}</div>
-
-              <div className="my-2">
-                <div className="text-[19px] font-bold sm:text-[29px]">
-                  Предмет:
-                </div>
-                <div className="text-[15px] font-bold sm:text-[19px]">
-                  {selectedGroup.subject}
-                </div>
-              </div>
-              <div className="my-2">
-                <div className="text-[19px] font-bold sm:text-[29px]">
-                  Професор:
-                </div>
-                <div className="text-[15px] font-bold sm:text-[19px]">
-                  {selectedGroup.professorName}
-                </div>
-              </div>
-              <div className="my-2">
-                <div className=" text-[19px] font-bold sm:text-[29px]">
-                  Статус:
-                </div>
-                <div className="text-[15px] font-bold sm:text-[19px]">
-                  {selectedGroup.activeUsers} / {selectedGroup.maxUsers}
-                </div>
-              </div>
-            </div>
-
-            <div className="flex w-full flex-col gap-2 pl-4 sm:gap-4">
-              <div className="text-[19px] font-bold sm:text-[29px]">
-                Термини на часови:
-              </div>
-              <ul className="mt-2">
-                {selectedGroup.schedule.map((slot, index) => (
-                  <li
-                    key={index}
-                    className="my-2 w-full border-[3px] border-sky p-2"
-                  >
-                    {slot.day}: {slot.startTime} - {slot.endTime} часот
-                  </li>
-                ))}
-              </ul>
-
-              <div className="text-[19px] font-bold sm:text-[29px]">
-                Линк за часовите:
-              </div>
-              <div className="flex w-full justify-between border-[3px] border-black p-2">
-                <div>Link....</div>
-                <Copy className="cursor-pointer text-sky" />
-              </div>
-              <Button
-                onClick={closeModal}
-                className="mt-4 rounded-full bg-sky  text-white hover:bg-sky"
-              >
-                Затвори
-              </Button>
-            </div>
-            {/* {MobxStore.user.role === "professor" && (
-              <div className="mt-4">
-                <strong>Ученици/Студенти:</strong>
-                <ul className="mt-2 list-disc pl-5">
-                  {selectedGroup.userNames.map((name, index) => (
-                    <li key={index}>{name}</li>
-                  ))}
-                </ul>
-              </div>
-            )} */}
-          </div>
-        </div>
+        <AcademyGroupModal selectedGroup={selectedGroup} onClose={closeModal} />
       )}
     </div>
   );

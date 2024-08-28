@@ -72,7 +72,7 @@ const Calendar = observer(({ schedule, professor, isAdmin = false }) => {
         <div
           key={i}
           className={`cursor-pointer border p-3 text-center ${
-            isAvailable ? "bg-blue-400" : "bg-white"
+            isAvailable ? "bg-sky" : "bg-white"
           } hover:bg-blue-100`}
           onClick={() => handleDateClick(dateString)}
         >
@@ -91,8 +91,7 @@ const Calendar = observer(({ schedule, professor, isAdmin = false }) => {
       (scheduleEntry) => scheduleEntry.date === selectedDate,
     );
 
-    if (!selectedSchedule)
-      return <div>No available time ranges for this date</div>;
+    if (!selectedSchedule) return <div>Нема слободни термини на тој датум</div>;
 
     const handleDeleteTimeRange = async (timeRange, isScheduled = false) => {
       if (isScheduled) {
@@ -115,11 +114,11 @@ const Calendar = observer(({ schedule, professor, isAdmin = false }) => {
           <ScheduleClassPopup
             selectedDate={selectedDate}
             timeRange={selectedTimeRange}
-            professorId={professor.id}
+            professor={professor}
             onClose={() => setIsPopupOpen(false)}
           />
         )}
-        <div className="rounded-20px absolute left-[-25px] top-[-45px] h-[50px] w-[50px] border bg-blue-400 p-3 text-center">
+        <div className="rounded-20px absolute left-[-25px] top-[-45px] h-[50px] w-[50px] border bg-sky p-3 text-center">
           {getDayFromDate(selectedDate)}
         </div>
         <h3 className="mb-2 mt-4 text-lg font-semibold">
@@ -139,7 +138,7 @@ const Calendar = observer(({ schedule, professor, isAdmin = false }) => {
                     className={`rounded px-3 py-1 text-white ${
                       range.isScheduled
                         ? "cursor-not-allowed bg-gray-400"
-                        : "bg-blue-500 hover:bg-blue-600"
+                        : "bg-sky hover:bg-sky"
                     }`}
                   >
                     {range.isScheduled ? "Полна" : "Закажи"}
@@ -170,8 +169,8 @@ const Calendar = observer(({ schedule, professor, isAdmin = false }) => {
   };
 
   return (
-    <div className="my-4 flex space-x-10">
-      <div className="w-2/3">
+    <div className="my-4 flex flex-col space-x-0 space-y-4 md:flex-row md:space-x-10 md:space-y-0">
+      <div className="w-full md:w-2/3">
         <div className="mb-5 flex items-center justify-between">
           <h3 className="text-xl font-semibold">
             {new Date(currentYear, currentMonth).toLocaleString("default", {
@@ -180,7 +179,6 @@ const Calendar = observer(({ schedule, professor, isAdmin = false }) => {
             })}
           </h3>
           <div className="flex gap-2">
-            {" "}
             <button
               onClick={handlePrevMonth}
               className="rounded bg-gray-500 px-4 py-2 text-white hover:bg-gray-600"
@@ -206,7 +204,7 @@ const Calendar = observer(({ schedule, professor, isAdmin = false }) => {
         </div>
         {renderCalendar()}
       </div>
-      <div className="w-1/3 rounded bg-white p-2 shadow">
+      <div className="w-full rounded bg-white p-2 shadow md:w-1/3">
         {renderTimeRanges()}
       </div>
     </div>
