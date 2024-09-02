@@ -1,9 +1,9 @@
 export const SUBJECTS = [
-  { id: "maths", label: "Mathematics" },
-  { id: "science", label: "Science" },
-  { id: "history", label: "History" },
-  { id: "art", label: "Art" },
-  { id: "pe", label: "Physical Education" },
+  { id: "maths", label: "Математика" },
+  { id: "science", label: "Наука" },
+  { id: "history", label: "Историја" },
+  { id: "art", label: "Уметност" },
+  { id: "pe", label: "Фузичко" },
 ];
 
 export const ODDELENIJA = [

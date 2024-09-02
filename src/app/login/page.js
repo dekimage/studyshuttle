@@ -127,9 +127,11 @@ export const LoginForm = observer(() => {
           Најави се
         </Button>
 
-        <div className="cursor-pointer text-blue-400">
-          Ја заборавивте лознката?
-        </div>
+        <Link href="/forgot-password">
+          <div className="cursor-pointer text-blue-400">
+            Ја заборавивте лознката?
+          </div>
+        </Link>
       </form>
     </Form>
   );

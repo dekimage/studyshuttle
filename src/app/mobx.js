@@ -1,4 +1,4 @@
-import { makeAutoObservable, runInAction } from "mobx";
+import { action, makeAutoObservable, runInAction } from "mobx";
 import { auth, db } from "./firebase";
 import {
   onAuthStateChanged,
@@ -36,7 +36,7 @@ class Store {
   nextAcademyGroups = [];
   professors = [];
   user = null;
-  userReady = null;
+  userReady = false;
   professors = [];
 
   // Static Data
@@ -46,6 +46,12 @@ class Store {
   loading = true;
 
   constructor() {
+    makeAutoObservable({
+      setUser: action, // Mark methods as actions
+      setLoading: action,
+      initializeAuth: action.bound, // Ensure actions are bound to the class instance
+    });
+
     makeAutoObservable(this);
     this.initializeAuth();
 
@@ -96,46 +102,61 @@ class Store {
     this.joinGroup = this.joinGroup.bind(this);
   }
 
-  initializeAuth() {
+  setUser(user) {
+    this.user = user;
+  }
+
+  setLoading(loading) {
+    this.loading = loading;
+  }
+
+  async initializeAuth() {
     const auth = getAuth();
-    this.userReady = new Promise((resolve) => {
-      onAuthStateChanged(auth, async (user) => {
-        if (user) {
-          const userDocRef = doc(db, "users", user.uid);
-          const userDoc = await getDoc(userDocRef);
 
-          runInAction(async () => {
-            if (userDoc.exists()) {
-              let userData = { uid: user.uid, ...userDoc.data() };
+    onAuthStateChanged(auth, async (user) => {
+      runInAction(() => {
+        this.setLoading(true); // Start with loading
+      });
 
-              if (userData.role === "professor") {
-                const professorQuery = query(
-                  collection(db, "professors"),
-                  where("userId", "==", user.uid),
-                );
-                const professorSnapshot = await getDocs(professorQuery);
+      if (user) {
+        const userDocRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userDocRef);
 
-                if (!professorSnapshot.empty) {
-                  const professorData = professorSnapshot.docs[0].data();
-                  userData = { ...userData, ...professorData }; // Merge professor data into user data
-                }
-              }
+        if (userDoc.exists()) {
+          let userData = { uid: user.uid, ...userDoc.data() };
 
-              this.user = userData;
-            } else {
-              this.user = null;
+          if (userData.role === "professor") {
+            const professorQuery = query(
+              collection(db, "professors"),
+              where("userId", "==", user.uid),
+            );
+            const professorSnapshot = await getDocs(professorQuery);
+
+            if (!professorSnapshot.empty) {
+              const professorData = professorSnapshot.docs[0].data();
+              userData = { ...userData, ...professorData };
             }
-            this.loading = false;
-            resolve(); // Signal that user is ready
+          }
+
+          runInAction(() => {
+            this.setUser(userData);
+            this.setLoading(false); // Finished loading
+            this.userReady = true; // User data is ready
           });
         } else {
           runInAction(() => {
-            this.user = null;
-            this.loading = false;
-            resolve(); // Signal that user is ready
+            this.setUser(null);
+            this.setLoading(false); // Finished loading
+            this.userReady = true; // User data is ready
           });
         }
-      });
+      } else {
+        runInAction(() => {
+          this.setUser(null);
+          this.setLoading(false); // Finished loading
+          this.userReady = true; // User data is ready
+        });
+      }
     });
   }
 

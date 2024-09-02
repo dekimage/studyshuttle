@@ -8,6 +8,7 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import logoImg from "../../assets/logo.png";
 import Image from "next/image";
 import { AcademyGroupModal } from "../pocetna/page";
+import withAuth from "@/src/Components/AuthHoc";
 
 const CalendarView = observer(() => {
   const [viewMode, setViewMode] = useState("week"); // "week" or "month"
@@ -193,61 +194,65 @@ const CalendarView = observer(() => {
             <ArrowRight />
           </Button>
         </div>
-        <div className="grid grid-cols-7 gap-4 text-center font-bold">
-          {dayNames.map((dayName, index) => (
-            <div key={index}>{dayName}</div>
-          ))}
-        </div>
-        <div className="grid grid-cols-7 gap-4">
-          {daysInMonth.map((day, index) => (
-            <div key={index} className="rounded border bg-white p-4">
-              <div className="font-bold">{day.getDate()}</div>
-              <div className="mt-2">
-                {/* Render events */}
-                {MobxStore.upcomingEvents
-                  .filter(
-                    (event) => event.date === day.toISOString().split("T")[0],
-                  )
-                  .map((event) => (
-                    <div
-                      key={event.id}
-                      className="mt-2 cursor-pointer rounded bg-blue-200 p-2"
-                      onClick={() => setSelectedEvent(event)}
-                    >
-                      <div>{event.subject}</div>
-                      <div>
-                        {event.timeRange.from} - {event.timeRange.to}
-                      </div>
-                    </div>
-                  ))}
-                {/* Render Academy Groups */}
-                {MobxStore.academyGroups
-                  .filter((group) =>
-                    group.schedule.some(
-                      (schedule) => schedule.day === dayNames[day.getDay()],
-                    ),
-                  )
-                  .map((group) =>
-                    group.schedule
-                      .filter(
-                        (schedule) => schedule.day === dayNames[day.getDay()],
-                      )
-                      .map((schedule, i) => (
-                        <div
-                          key={`${group.id}-${i}`}
-                          className="mt-2 cursor-pointer rounded bg-red-200 p-2"
-                          onClick={() => setSelectedEvent(group)}
-                        >
-                          <div>{group.name}</div>
-                          <div>
-                            {schedule.startTime} - {schedule.endTime}
-                          </div>
-                        </div>
-                      )),
-                  )}
+        <div className="overflow-x-auto">
+          <div className="grid min-w-[600px] grid-cols-7 gap-1 text-center font-bold lg:gap-4">
+            {dayNames.map((dayName, index) => (
+              <div key={index} className="hidden lg:block">
+                {dayName}
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
+          <div className="grid min-w-[600px] grid-cols-7 gap-1 lg:gap-4">
+            {daysInMonth.map((day, index) => (
+              <div key={index} className="rounded border bg-white p-4">
+                <div className="font-bold">{day.getDate()}</div>
+                <div className="mt-2">
+                  {/* Render events */}
+                  {MobxStore.upcomingEvents
+                    .filter(
+                      (event) => event.date === day.toISOString().split("T")[0],
+                    )
+                    .map((event) => (
+                      <div
+                        key={event.id}
+                        className="mt-2 cursor-pointer rounded bg-blue-200 p-2 text-xs md:text-base lg:text-sm"
+                        onClick={() => setSelectedEvent(event)}
+                      >
+                        <div>{event.subject}</div>
+                        <div>
+                          {event.timeRange.from} - {event.timeRange.to}
+                        </div>
+                      </div>
+                    ))}
+                  {/* Render Academy Groups */}
+                  {MobxStore.academyGroups
+                    .filter((group) =>
+                      group.schedule.some(
+                        (schedule) => schedule.day === dayNames[day.getDay()],
+                      ),
+                    )
+                    .map((group) =>
+                      group.schedule
+                        .filter(
+                          (schedule) => schedule.day === dayNames[day.getDay()],
+                        )
+                        .map((schedule, i) => (
+                          <div
+                            key={`${group.id}-${i}`}
+                            className="mt-2 cursor-pointer rounded bg-red-200 p-2 text-xs md:text-base lg:text-sm"
+                            onClick={() => setSelectedEvent(group)}
+                          >
+                            <div>{group.name}</div>
+                            <div>
+                              {schedule.startTime} - {schedule.endTime}
+                            </div>
+                          </div>
+                        )),
+                    )}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -265,7 +270,7 @@ const CalendarView = observer(() => {
         onClick={() => setSelectedEvent(null)}
       >
         <div
-          className="w-full max-w-lg rounded-lg bg-white p-2 shadow-lg sm:p-6"
+          className="w-full max-w-lg rounded-lg bg-white p-2 shadow-lg lg:p-6"
           onClick={(e) => e.stopPropagation()}
         >
           {!isEvent && (
@@ -296,7 +301,7 @@ const CalendarView = observer(() => {
   };
 
   return (
-    <div className="h-full min-h-screen bg-lightGrey p-2 sm:p-6">
+    <div className="h-full min-h-screen bg-lightGrey p-2 lg:p-6">
       <div className="flex w-full justify-between">
         <h2 className="mb-6 text-3xl font-bold"></h2>
         <Image src={logoImg} alt="logo" width={200} height={200} />
@@ -325,4 +330,4 @@ const CalendarView = observer(() => {
   );
 });
 
-export default CalendarView;
+export default withAuth(CalendarView);

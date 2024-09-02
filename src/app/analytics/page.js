@@ -7,6 +7,7 @@ import "react-svg-radar-chart/build/css/index.css";
 import { Button } from "@/components/ui/button";
 import Loader from "../_components/Loader";
 import { SUBJECTS, SubjectDropdown } from "@/src/constants";
+import withAuth from "@/src/Components/AuthHoc";
 
 const bgColorMap = {
   attention: "bg-sun",
@@ -256,4 +257,4 @@ const AnalyticsPage = observer(() => {
   );
 });
 
-export default AnalyticsPage;
+export default withAuth(AnalyticsPage);

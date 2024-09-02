@@ -7,9 +7,10 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Copy } from "lucide-react";
 import Loader from "../_components/Loader";
-import { filterOddByIds } from "@/src/constants";
+import { filterOddByIds, filterSubjectsByIds } from "@/src/constants";
 import { toJS } from "mobx";
 import Link from "next/link";
+import withAuth from "@/src/Components/AuthHoc";
 
 // utils function to sort and filter events for only future
 export function filterAndSortEvents(events) {
@@ -64,7 +65,7 @@ export const AcademyGroupModal = ({
           <div className="my-2">
             <div className="text-[19px] font-bold sm:text-[29px]">Предмет:</div>
             <div className="text-[15px] font-bold sm:text-[19px]">
-              {selectedGroup.subject}
+              {filterSubjectsByIds([selectedGroup.subject])[0]?.label}
             </div>
           </div>
           <div className="my-2">
@@ -219,9 +220,12 @@ const AcademyGroupsPage = observer(() => {
           <div className="min-w-[700px] space-y-2 rounded-bl-[15px] rounded-br-[15px] border border-[3px] border-t-0 border-sky bg-white p-4">
             {MobxStore.academyGroups.length > 0 ? (
               MobxStore.academyGroups.map((group) => (
-                <div key={group.id} className="grid grid-cols-5 gap-4 p-2">
+                <div
+                  key={group.id}
+                  className="grid grid-cols-5 gap-4 p-2 font-bold"
+                >
                   <div>{group.name}</div>
-                  <div>{group.subject}</div>
+                  <div>{filterSubjectsByIds([group.subject])[0]?.label}</div>
                   <div>{group.professorName}</div>
                   <div>
                     {group.activeUsers} / {group.maxUsers}
@@ -319,7 +323,7 @@ const OverviewPage = observer(() => {
                   className="grid grid-cols-4 gap-2 rounded p-2 font-bold"
                 >
                   <div>{event.date}</div>
-                  <div>{event.subject}</div>
+                  <div>{filterSubjectsByIds([event.subject])[0]?.label}</div>
                   <div>{event.classType}</div>
                   <div>
                     {user.role == "professor"
@@ -345,4 +349,4 @@ const OverviewPage = observer(() => {
   );
 });
 
-export default OverviewPage;
+export default withAuth(OverviewPage);

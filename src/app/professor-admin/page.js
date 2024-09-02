@@ -10,6 +10,8 @@ import { Separator } from "@/components/ui/separator";
 import Calendar from "../_components/Calendar";
 import { observer } from "mobx-react";
 import EventList from "../_components/EventList";
+import withAuth from "@/src/Components/AuthHoc";
+import withProfAuth from "@/src/Components/AuthProfHoc";
 
 // GPT GENERATED THJAT WORKS WITH MAILGUN
 const FeedbackForm = () => {
@@ -566,4 +568,4 @@ const ProfessorAdminPage = () => {
   );
 };
 
-export default ProfessorAdminPage;
+export default withProfAuth(ProfessorAdminPage);

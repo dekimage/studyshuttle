@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { Title } from "../_components/ReusableDivs";
+import withAuth from "@/src/Components/AuthHoc";
 
 const SupportPage = () => {
   const [subject, setSubject] = useState("");
@@ -13,7 +14,7 @@ const SupportPage = () => {
     // sendMessageApi(subject, message)
   };
   return (
-    <div className="bg-lightGrey flex h-screen items-center justify-center">
+    <div className="flex h-screen items-center justify-center bg-lightGrey">
       <div className=" flex w-full max-w-[480px] flex-col items-center justify-center gap-4 rounded-lg bg-white p-8">
         <div className="text-[35px] font-bold">Пријави проблем</div>
         <div className="w-full space-y-2">
@@ -36,7 +37,7 @@ const SupportPage = () => {
           />
         </div>
         <Button
-          className="bg-darkGrey hover:bg-darkGrey w-full"
+          className="w-full bg-darkGrey hover:bg-darkGrey"
           onClick={() => sendMessage()}
         >
           Испрати
@@ -46,4 +47,4 @@ const SupportPage = () => {
   );
 };
 
-export default SupportPage;
+export default withAuth(SupportPage);

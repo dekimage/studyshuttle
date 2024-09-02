@@ -14,6 +14,7 @@ import confetiImg from "../../assets/confeti.png";
 import { filterSubjectsByIds } from "@/src/constants";
 
 import Link from "next/link";
+import withAuth from "@/src/Components/AuthHoc";
 
 function isAvailableEventInNextXDays(schedule, days) {
   const now = new Date(); // Current date and time
@@ -558,4 +559,4 @@ const ProfPage = observer(() => {
   );
 });
 
-export default ProfPage;
+export default withAuth(ProfPage);
