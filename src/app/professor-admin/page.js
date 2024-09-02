@@ -5,13 +5,14 @@ import { Label } from "@/components/ui/label";
 import { useEffect, useState } from "react";
 import { Title } from "../_components/ReusableDivs";
 import MobxStore from "@/src/app/mobx";
-import { Trash } from "lucide-react";
+import { Plus, Trash, X } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import Calendar from "../_components/Calendar";
 import { observer } from "mobx-react";
 import EventList from "../_components/EventList";
 import withAuth from "@/src/Components/AuthHoc";
 import withProfAuth from "@/src/Components/AuthProfHoc";
+import { SubjectDropdown } from "@/src/constants";
 
 // GPT GENERATED THJAT WORKS WITH MAILGUN
 const FeedbackForm = () => {
@@ -90,7 +91,7 @@ const FeedbackForm = () => {
 function AcademyGroupsList({ academyGroups, onEdit, onDelete }) {
   return (
     <div>
-      <h2 className="p-2 text-2xl">Academy Groups</h2>
+      <h2 className="p-2 text-2xl">Академски Групи</h2>
       <div>
         {academyGroups.map((group, i) => (
           <div
@@ -101,13 +102,13 @@ function AcademyGroupsList({ academyGroups, onEdit, onDelete }) {
               <span className="mr-2 text-2xl">{i + 1}.</span>
               <strong>{group.name}</strong> - {group.subject}
             </div>
-            <Button onClick={() => onEdit(group)}>Edit</Button>
-            <Button
+            <Button onClick={() => onEdit(group)}>Промени</Button>
+            {/* <Button
               className="ml-2 bg-red-400"
               onClick={() => onDelete(group.id)}
             >
               Delete
-            </Button>
+            </Button> */}
           </div>
         ))}
       </div>
@@ -116,6 +117,7 @@ function AcademyGroupsList({ academyGroups, onEdit, onDelete }) {
 }
 
 function EditAcademyGroup({ group, onSave, onCancel }) {
+  const [error, setError] = useState("");
   const [name, setName] = useState(group.name);
   const [subject, setSubject] = useState(group.subject);
   const [studentType, setStudentType] = useState(group.studentType);
@@ -142,9 +144,50 @@ function EditAcademyGroup({ group, onSave, onCancel }) {
     setSchedule(schedule.filter((_, i) => i !== index));
   };
 
+  const handleSaveUpdates = () => {
+    if (!name) {
+      setError("Името е задолжително.");
+      return;
+    }
+
+    // Validation for subject
+    if (!subject) {
+      setError("Предметот е задолжителен.");
+      return;
+    }
+
+    // Validation for studentType
+    if (studentType.length === 0) {
+      setError("Потребно е да изберете барем еден тип на корисник.");
+      return;
+    }
+
+    // Validation for schedule: Check if all slots are valid
+    const allValidTimeSlots = schedule.every(
+      (slot) => slot.day !== "" && slot.startTime !== "" && slot.endTime !== "",
+    );
+
+    if (!allValidTimeSlots) {
+      setError("Сите термини мора да бидат валидни и пополнети.");
+      return;
+    }
+
+    // Clear errors if validation passes
+    setError("");
+
+    // Call onSave with the updated group data
+    onSave({
+      ...group,
+      name,
+      subject,
+      studentType,
+      schedule,
+    });
+  };
+
   return (
     <div>
-      <h2>Edit Academy Group</h2>
+      <h2 className="mb-5 text-2xl font-bold">Промени за Академска Група</h2>
 
       <div className="m-2 border p-2">
         <label>Name:</label>
@@ -156,73 +199,142 @@ function EditAcademyGroup({ group, onSave, onCancel }) {
         />
       </div>
       <div className="m-2 border p-2">
-        <label>Subject:</label>
-        <Input
-          className="m-2 border p-2"
-          type="text"
-          value={subject}
+        <label>Предмет</label>
+        <SubjectDropdown
           onChange={(e) => setSubject(e.target.value)}
+          selectedSubject={subject}
         />
       </div>
-      <div>
-        <label>Student Type:</label>
-        <Input
-          type="text"
-          value={studentType}
-          onChange={(e) => setStudentType(e.target.value)}
-        />
+      <div className="m-2 border p-2">
+        <label>Тип на корисник</label>
+        <div className="flex flex-wrap gap-2">
+          <label className="flex cursor-pointer gap-2 p-2 text-lg">
+            <input
+              type="checkbox"
+              value="osnovno"
+              checked={studentType.includes("osnovno")}
+              onChange={(e) => {
+                const { checked, value } = e.target;
+                setStudentType((prev) =>
+                  checked
+                    ? [...prev, value]
+                    : prev.filter((type) => type !== value),
+                );
+              }}
+            />
+            Основно
+          </label>
+          <label className="flex cursor-pointer gap-2 p-2 text-lg">
+            <input
+              type="checkbox"
+              value="sredno"
+              checked={studentType.includes("sredno")}
+              onChange={(e) => {
+                const { checked, value } = e.target;
+                setStudentType((prev) =>
+                  checked
+                    ? [...prev, value]
+                    : prev.filter((type) => type !== value),
+                );
+              }}
+            />
+            Средно
+          </label>
+          <label className="flex cursor-pointer gap-2 p-2 text-lg">
+            <input
+              type="checkbox"
+              value="visoko"
+              checked={studentType.includes("visoko")}
+              onChange={(e) => {
+                const { checked, value } = e.target;
+                setStudentType((prev) =>
+                  checked
+                    ? [...prev, value]
+                    : prev.filter((type) => type !== value),
+                );
+              }}
+            />
+            Високо
+          </label>
+        </div>
       </div>
 
       {schedule.map((slot, index) => (
         <div key={index} className="m-2 border p-2">
-          <label>Day:</label>
-          <select
-            value={slot.day}
-            onChange={(e) => handleScheduleChange(index, "day", e.target.value)}
-          >
-            {/* Populate day options */}
-            <option value="monday">Monday</option>
-            <option value="tuesday">Tuesday</option>
-            <option value="wednesday">Wednesday</option>
-            <option value="thursday">Thursday</option>
-            <option value="friday">Friday</option>
-            <option value="saturday">Saturday</option>
-            <option value="sunday">Sunday</option>
-          </select>
-          <label>Start Time:</label>
-          <Input
-            type="time"
-            value={slot.startTime}
-            onChange={(e) =>
-              handleScheduleChange(index, "startTime", e.target.value)
-            }
-          />
-          <label>End Time:</label>
-          <Input
-            type="time"
-            value={slot.endTime}
-            onChange={(e) =>
-              handleScheduleChange(index, "endTime", e.target.value)
-            }
-          />
-          <Button onClick={() => handleRemoveTimeSlot(index)}>Remove</Button>
+          <div className="p-4">
+            <label>Day:</label>
+            <select
+              className="ml-2 cursor-pointer border p-2"
+              value={slot.day}
+              onChange={(e) =>
+                handleScheduleChange(index, "day", e.target.value)
+              }
+            >
+              {/* Populate day options */}
+              <option value="">Select a day</option>
+              <option value="monday">Monday</option>
+              <option value="tuesday">Tuesday</option>
+              <option value="wednesday">Wednesday</option>
+              <option value="thursday">Thursday</option>
+              <option value="friday">Friday</option>
+              <option value="saturday">Saturday</option>
+              <option value="sunday">Sunday</option>
+            </select>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            <div className="flex items-center gap-2 p-4">
+              <label>Start Time:</label>
+              <Input
+                type="time"
+                className="w-fit"
+                value={slot.startTime}
+                onChange={(e) =>
+                  handleScheduleChange(index, "startTime", e.target.value)
+                }
+              />
+            </div>
+
+            <div className="flex items-center gap-2 p-4">
+              <label>End Time:</label>
+              <Input
+                className="w-fit"
+                type="time"
+                value={slot.endTime}
+                onChange={(e) =>
+                  handleScheduleChange(index, "endTime", e.target.value)
+                }
+              />
+            </div>
+          </div>
+
+          <Button onClick={() => handleRemoveTimeSlot(index)}>
+            Избриши Термин <Trash />
+          </Button>
         </div>
       ))}
-      <Button onClick={() => handleAddTimeSlot()}>Add Time Slot</Button>
+
       <Button
-        onClick={() =>
-          onSave({
-            ...group,
-            name,
-            subject,
-            studentType,
-            schedule,
-          })
-        }
+        variant="outline"
+        className="m-4"
+        onClick={() => handleAddTimeSlot()}
       >
-        Save Changes
+        Додади Нов Термин <Plus />
       </Button>
-      <Button onClick={onCancel}>Cancel</Button>
+      <div className="mt-10"></div>
+      <Button
+        className="w-[250px]"
+        onClick={() => {
+          handleSaveUpdates();
+        }}
+      >
+        Зачувај
+      </Button>
+      <Button variant="outline" className="ml-2" onClick={onCancel}>
+        Откажи
+      </Button>
+
+      {error && <p className="mb-4 text-red-500">{error}</p>}
     </div>
   );
 }
@@ -230,10 +342,12 @@ function EditAcademyGroup({ group, onSave, onCancel }) {
 function AddAcademyGroup({ onAdd, setAddingGroup }) {
   const [name, setName] = useState("");
   const [subject, setSubject] = useState("");
-  const [studentType, setStudentType] = useState("");
+  const [studentType, setStudentType] = useState([]);
   const [schedule, setSchedule] = useState([
     { day: "", startTime: "", endTime: "" },
   ]);
+
+  const [error, setError] = useState(""); // State to track validation errors
 
   const handleScheduleChange = (index, key, value) => {
     const newSchedule = [...schedule];
@@ -249,14 +363,48 @@ function AddAcademyGroup({ onAdd, setAddingGroup }) {
     setSchedule(schedule.filter((_, i) => i !== index));
   };
 
+  const handleSave = () => {
+    // Validation Logic
+    if (!name) {
+      setError("Името е задолжително.");
+      return;
+    }
+    if (!subject) {
+      setError("Предметот е задолжителен.");
+      return;
+    }
+    if (studentType.length === 0) {
+      setError("Потребно е да изберете барем еден тип на корисник.");
+      return;
+    }
+
+    if (schedule.length === 0) {
+      setError("Потребно е да додадете барем еден термин.");
+      return;
+    }
+
+    const allValidTimeSlots = schedule.every(
+      (slot) => slot.day !== "" && slot.startTime !== "" && slot.endTime !== "",
+    );
+
+    if (!allValidTimeSlots) {
+      setError("Сите термини мора да бидат валидни и пополнети.");
+      return;
+    }
+
+    setError("");
+
+    onAdd({ name, subject, studentType, schedule });
+  };
+
   return (
     <div className="px-8">
-      <h2>Add Academy Group</h2>
+      <h2 className="mb-5 text-2xl font-bold">Нова Академска Група</h2>
       <div className="max-w-[600px]">
-        <div className="text-2xl">Basic Info:</div>
+        <div className="text-2xl">Основни Информации:</div>
         <div className="m-2 flex flex-col gap-4 border p-2">
           <div className="">
-            <label>Name:</label>
+            <label>Име</label>
             <Input
               type="text"
               value={name}
@@ -264,24 +412,68 @@ function AddAcademyGroup({ onAdd, setAddingGroup }) {
             />
           </div>
           <div className="">
-            <label>Subject:</label>
-            <Input
-              type="text"
-              value={subject}
+            <label>Предмет</label>
+            <SubjectDropdown
               onChange={(e) => setSubject(e.target.value)}
+              selectedSubject={subject}
             />
           </div>
           <div className="">
-            <label>Student Type:</label>
-            <Input
-              type="text"
-              value={studentType}
-              onChange={(e) => setStudentType(e.target.value)}
-            />
+            <label>Тип на корисник</label>
+            <div className="flex flex-wrap gap-2">
+              <label className="flex cursor-pointer gap-2 p-2 text-lg">
+                <input
+                  type="checkbox"
+                  value="osnovno"
+                  checked={studentType.includes("osnovno")}
+                  onChange={(e) => {
+                    const { checked, value } = e.target;
+                    setStudentType((prev) =>
+                      checked
+                        ? [...prev, value]
+                        : prev.filter((type) => type !== value),
+                    );
+                  }}
+                />
+                Основно
+              </label>
+              <label className="flex cursor-pointer gap-2 p-2 text-lg">
+                <input
+                  type="checkbox"
+                  value="sredno"
+                  checked={studentType.includes("sredno")}
+                  onChange={(e) => {
+                    const { checked, value } = e.target;
+                    setStudentType((prev) =>
+                      checked
+                        ? [...prev, value]
+                        : prev.filter((type) => type !== value),
+                    );
+                  }}
+                />
+                Средно
+              </label>
+              <label className="flex cursor-pointer gap-2 p-2 text-lg">
+                <input
+                  type="checkbox"
+                  value="visoko"
+                  checked={studentType.includes("visoko")}
+                  onChange={(e) => {
+                    const { checked, value } = e.target;
+                    setStudentType((prev) =>
+                      checked
+                        ? [...prev, value]
+                        : prev.filter((type) => type !== value),
+                    );
+                  }}
+                />
+                Високо
+              </label>
+            </div>
           </div>
         </div>
 
-        <div className="text-2xl">Time Slots:</div>
+        <div className="mt-8 text-2xl">Термини за академска група</div>
         {schedule.map((slot, index) => (
           <div
             key={index}
@@ -297,6 +489,7 @@ function AddAcademyGroup({ onAdd, setAddingGroup }) {
                   handleScheduleChange(index, "day", e.target.value)
                 }
               >
+                <option value="">Select a day</option>
                 <option value="monday">Monday</option>
                 <option value="tuesday">Tuesday</option>
                 <option value="wednesday">Wednesday</option>
@@ -343,14 +536,22 @@ function AddAcademyGroup({ onAdd, setAddingGroup }) {
           className="ml-1 mt-4"
           onClick={handleAddTimeSlot}
         >
-          + Add Time Slot
+          + Додади термин
         </Button>
         <Separator className="my-8" />
-        <Button onClick={() => onAdd({ name, subject, studentType, schedule })}>
-          Save Changes
+
+        {/* Display validation error message */}
+        {error && <p className="text-red-500">{error}</p>}
+
+        <Button className=" w-[250px]" onClick={handleSave}>
+          Зачувај
         </Button>
-        <Button variant="outline" onClick={() => setAddingGroup(false)}>
-          Cancel
+        <Button
+          className="ml-2"
+          variant="outline"
+          onClick={() => setAddingGroup(false)}
+        >
+          Откажи
         </Button>
       </div>
     </div>
@@ -413,7 +614,9 @@ function AcademyGroupManager() {
       newGroup.schedule,
     );
     if (result.success) {
-      // Reload or add the new group to the list
+      if (typeof window !== "undefined") {
+        window.location.reload();
+      }
       setAddingGroup(false);
     }
   };
@@ -442,7 +645,7 @@ function AcademyGroupManager() {
             className="m-2 border  p-2"
             onClick={() => setAddingGroup(true)}
           >
-            + New Group
+            + Нова Академска Група
           </Button>
         </div>
       )}
@@ -453,17 +656,7 @@ function AcademyGroupManager() {
 const Termini = observer(() => {
   const [date, setDate] = useState("");
   const [timeRanges, setTimeRanges] = useState([{ from: "", to: "" }]);
-
-  // const [schedule, setSchedule] = useState([]);
-
-  // useEffect(() => {
-  //   const fetchSchedule = async () => {
-  //     await MobxStore.userReady;
-  //     setSchedule(MobxStore.user?.schedule || []);
-  //   };
-
-  //   fetchSchedule();
-  // }, [MobxStore.user?.schedule]);
+  const [error, setError] = useState(""); // State for error handling
 
   const handleAddTimeRange = () => {
     setTimeRanges([...timeRanges, { from: "", to: "" }]);
@@ -480,10 +673,24 @@ const Termini = observer(() => {
   };
 
   const handleAddScheduleEntry = async () => {
+    // Validation for date
     if (!date) {
-      console.error("Please select a date.");
+      setError("Ве молиме одберете датум.");
       return;
     }
+
+    // Validation for time ranges
+    const hasValidTimeRange = timeRanges.some(
+      (range) => range.from !== "" && range.to !== "",
+    );
+
+    if (!hasValidTimeRange) {
+      setError("Ве молиме додадете барем еден валиден термин.");
+      return;
+    }
+
+    // Clear errors if validation passes
+    setError("");
 
     const dateObject = new Date(date); // Ensure the date is a Date object
     const result = await MobxStore.addScheduleEntry(dateObject, timeRanges);
@@ -498,9 +705,9 @@ const Termini = observer(() => {
 
   return (
     <div className="p-5">
-      <h2 className="mb-5 text-2xl font-bold">Manage Schedule</h2>
-      <div className="mb-4">
-        <label className="mb-2 block font-semibold">Select Date:</label>
+      <h2 className="mb-5 text-2xl font-bold">Нов Термин</h2>
+      <div className="mb-4 flex w-fit flex-col">
+        <label className="mb-2 text-lg font-semibold">Одберете Датум</label>
         <input
           type="date"
           value={date}
@@ -509,9 +716,12 @@ const Termini = observer(() => {
         />
       </div>
       <div className="mb-4">
-        <h4 className="mb-2 text-lg font-semibold">Time Ranges:</h4>
+        <h2 className="mb-2 text-lg font-semibold">Термини</h2>
         {timeRanges.map((range, index) => (
-          <div key={index} className="mb-2 flex items-center space-x-2">
+          <div
+            key={index}
+            className="mb-2 flex flex-wrap items-center space-x-2"
+          >
             <input
               type="time"
               value={range.from}
@@ -520,7 +730,7 @@ const Termini = observer(() => {
               }
               className="rounded border px-3 py-2"
             />
-            <span>to</span>
+            <span>до</span>
             <input
               type="time"
               value={range.to}
@@ -533,37 +743,87 @@ const Termini = observer(() => {
               onClick={() => handleRemoveTimeRange(index)}
               className="rounded bg-red-500 px-3 py-1 text-white hover:bg-red-600"
             >
-              Remove
+              Избриши
             </button>
           </div>
         ))}
         <Button onClick={handleAddTimeRange} variant="outline">
-          + Add Time Range
+          + Додади термин
         </Button>
       </div>
+      {error && <p className="mb-4 text-red-500">{error}</p>}
       <button
         onClick={() => handleAddScheduleEntry()}
         className="rounded bg-green-500 px-4 py-2 text-white hover:bg-green-600"
       >
-        Add Schedule Entry
+        Зачувај ги сите термини
       </button>
-      <div className="mt-10">
-        <Calendar
-          schedule={MobxStore.user?.schedule}
-          professor={MobxStore.user}
-          isAdmin
-        />
-      </div>
+      <h2 className="mb-5 mt-16 text-2xl font-bold">Tермини</h2>
+
+      <Calendar
+        schedule={MobxStore.user?.schedule}
+        professor={MobxStore.user}
+        isAdmin
+      />
     </div>
   );
 });
 
 const ProfessorAdminPage = () => {
+  const [activeTab, setActiveTab] = useState("academyGroup"); // State to track the active tab
+
+  // Function to render the active component based on the selected tab
+  const renderActiveComponent = () => {
+    switch (activeTab) {
+      case "academyGroup":
+        return <AcademyGroupManager />;
+      case "termini":
+        return <Termini />;
+      case "events":
+        return <EventList />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="flex flex-col">
-      <AcademyGroupManager />
-      <Termini />
-      <EventList />
+      {/* Tab Navigation */}
+      <div className="flex border-b border-gray-300">
+        <button
+          className={`px-4 py-2 text-sm font-medium ${
+            !(activeTab === "academyGroup")
+              ? "border-b-2 border-transparent text-blue-600"
+              : "border-b-2 border-gray-300 text-gray-600"
+          }`}
+          onClick={() => setActiveTab("academyGroup")}
+        >
+          Академии
+        </button>
+        <button
+          className={`px-4 py-2 text-sm font-medium ${
+            !(activeTab === "termini")
+              ? "border-b-2 border-transparent text-blue-600"
+              : "border-b-2 border-gray-300 text-gray-600"
+          }`}
+          onClick={() => setActiveTab("termini")}
+        >
+          Термини
+        </button>
+        <button
+          className={`px-4 py-2 text-sm font-medium ${
+            !(activeTab === "events")
+              ? "border-b-2 border-transparent text-blue-600"
+              : "border-b-2 border-gray-300 text-gray-600"
+          }`}
+          onClick={() => setActiveTab("events")}
+        >
+          Настани
+        </button>
+      </div>
+
+      {/* Render the active component */}
+      <div className="p-2 sm:p-8">{renderActiveComponent()}</div>
     </div>
   );
 };

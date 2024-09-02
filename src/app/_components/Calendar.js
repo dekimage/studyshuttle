@@ -162,7 +162,7 @@ const Calendar = observer(({ schedule, professor, isAdmin = false }) => {
                 <span>
                   {range.from} - {range.to}
                 </span>
-                <div className="flex space-x-2">
+                <div className="flex items-center space-x-2">
                   {MobxStore.user?.role === "student" && (
                     <button
                       onClick={() => handleScheduleClick(range)}
@@ -195,7 +195,7 @@ const Calendar = observer(({ schedule, professor, isAdmin = false }) => {
                           : "bg-red-500 hover:bg-red-600"
                       }`}
                     >
-                      Delete Event
+                      Избриши настан
                     </button>
                   )}
                 </div>

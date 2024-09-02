@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 import MobxStore from "../mobx";
-import { FileWarning } from "lucide-react";
+import { ChevronDown, ChevronUp, FileWarning } from "lucide-react";
 import Loader from "./Loader";
 import { toJS } from "mobx";
 import { filterAndSortEvents } from "../pocetna/page";
@@ -58,25 +58,25 @@ const Event = observer(({ event, showGraded, ignored = false }) => {
 
   return (
     <div className="mb-4 flex flex-col rounded-lg border p-4 shadow-lg">
-      <div className="flex items-center justify-between">
+      <div
+        onClick={toggleOpen}
+        className="flex cursor-pointer items-center justify-between"
+      >
         <div>
           <div className="text-xl font-bold text-blue-700">{event.subject}</div>
           <div className="text-sm text-gray-500">{event.classType}</div>
-          <div className="text-sm text-gray-700">User ID: {event.userId}</div>
+          <div className="break-all text-sm text-gray-700">
+            User ID: {event.userId}
+          </div>
         </div>
         <div className="flex items-center">
           {isNotGraded && (
-            <div className="flex items-center text-red-600">
+            <div className="mr-4 flex items-center text-red-600">
               <FileWarning className="mr-1 h-5 w-5" />
-              <span>Not Graded</span>
+              <span>Нема Оценка</span>
             </div>
           )}
-          <button
-            onClick={toggleOpen}
-            className="ml-3 rounded bg-blue-500 px-3 py-1 text-white hover:bg-blue-600"
-          >
-            {isOpen ? "CLOSE" : "OPEN"}
-          </button>
+          {isOpen ? <ChevronUp /> : <ChevronDown />}
         </div>
       </div>
       {isOpen && (
@@ -154,13 +154,13 @@ const Event = observer(({ event, showGraded, ignored = false }) => {
                 onClick={handleCancel}
                 className="rounded bg-gray-500 px-4 py-2 text-white hover:bg-gray-600"
               >
-                Cancel
+                Откажи
               </button>
               <button
                 onClick={handleSave}
                 className="rounded bg-green-500 px-4 py-2 text-white hover:bg-green-600"
               >
-                Save
+                Зачувај
               </button>
             </div>
           </div>
@@ -199,7 +199,7 @@ const EventList = observer(() => {
   }
 
   return (
-    <div className="p-5">
+    <div className="">
       <h2 className="mb-5 text-2xl font-bold">Закажани Следни Настани</h2>
       <div>
         {filterAndSortEvents(toJS(MobxStore.events)).length > 0 ? (
