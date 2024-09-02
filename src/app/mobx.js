@@ -21,6 +21,7 @@ import {
   where,
 } from "firebase/firestore";
 import { classReservationTemplate } from "../util/emailTemplates";
+import { filterSubjectsByIds } from "../constants";
 
 const DEFAULT_USER = {
   yellowTokens: 0,
@@ -1175,15 +1176,18 @@ class Store {
       });
 
       try {
-        // Event creation logic...
-
         // Fetch user and professor details
         const student = this.user;
-        const professor = { name: "Predo", lastname: "Dedo" };
+        const professor = professorSnapshot.data();
+        const professorUserData = await this.fetchUserProfileById(
+          professor.userId,
+        );
 
         if (!student || !professor) {
           throw new Error("Invalid student or professor ID");
         }
+
+        const subjectLabel = filterSubjectsByIds([subject])[0]?.label
 
         // Prepare email templates
         const { studentEmail, professorEmail } = classReservationTemplate(
@@ -1191,46 +1195,33 @@ class Store {
           `${professor.name} ${professor.lastname}`,
           date,
           `${timeRange.from} - ${timeRange.to}`,
-          subject,
+          subjectLabel,
           classType,
           notes,
+          professor.link,
         );
 
-        const response = await fetch("/api/sendEmail", {
+        // Send email to student
+        await fetch("/api/sendEmail", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             to: student.email,
             subject: studentEmail.subject,
             text: studentEmail.text,
           }),
         });
-        const data = await response.json();
-        console.log(data);
 
-        // // Send email to student
-        // await fetch("/api/sendEmail", {
-        //   method: "POST",
-        //   headers: { "Content-Type": "application/json" },
-        //   body: JSON.stringify({
-        //     to: student.email,
-        //     subject: studentEmail.subject,
-        //     text: studentEmail.text,
-        //   }),
-        // });
-
-        // // Send email to professor
-        // await fetch("/api/sendEmail", {
-        //   method: "POST",
-        //   headers: { "Content-Type": "application/json" },
-        //   body: JSON.stringify({
-        //     to: professor.email,
-        //     subject: professorEmail.subject,
-        //     text: professorEmail.text,
-        //   }),
-        // });
+        // Send email to professor
+        await fetch("/api/sendEmail", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            to: professorUserData.data.email,
+            subject: professorEmail.subject,
+            text: professorEmail.text,
+          }),
+        });
 
         return { success: true };
       } catch (error) {

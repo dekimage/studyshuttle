@@ -13,15 +13,16 @@ export const classReservationTemplate = (
   subject,
   classType,
   notes,
+  link,
 ) => {
   return {
     studentEmail: {
       subject: `Class Reservation Confirmation`,
-      text: `Hi ${studentName},\n\nYou have successfully reserved a one-on-one class with Professor ${professorName} on ${date} during ${timeRange} for ${subject} (${classType}).\n\nNotes: ${notes}`,
+      text: `Hi ${studentName},\n\nYou have successfully reserved a one-on-one class with Professor ${professorName} on ${date} during ${timeRange} for ${subject} (${classType}).\n\nNotes: ${notes} \n\nLink: ${link}`,
     },
     professorEmail: {
       subject: `New Class Reservation`,
-      text: `Dear Professor ${professorName},\n\nA new student, ${studentName}, has reserved a one-on-one class with you on ${date} during ${timeRange} for ${subject} (${classType}).\n\nNotes: ${notes}`,
+      text: `Dear Professor ${professorName},\n\nA new student, ${studentName}, has reserved a one-on-one class with you on ${date} during ${timeRange} for ${subject} (${classType}).\n\nNotes: ${notes} \n\nLink: ${link}`,
     },
   };
 };
