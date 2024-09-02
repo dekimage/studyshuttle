@@ -141,7 +141,9 @@ const Event = observer(({ event, showGraded, ignored = false }) => {
               </div>
             </div>
             <div className="mt-4">
-              <label className="font-semibold">Comment (0/140):</label>
+              <label className="font-semibold">
+                Comment ({comment.length}/140):
+              </label>
               <textarea
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}

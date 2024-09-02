@@ -168,10 +168,10 @@ const AnalyticsPage = observer(() => {
             type="text"
             value={inputUserId}
             onChange={(e) => setInputUserId(e.target.value)}
-            placeholder="Enter User ID"
+            placeholder="Внесете UserID"
             className="rounded border px-2 py-1"
           />
-          <Button onClick={handleLoadProfile}>Load Profile</Button>
+          <Button onClick={handleLoadProfile}>Вчитајте Профил</Button>
 
           {fetchedUserProfile && (
             <>

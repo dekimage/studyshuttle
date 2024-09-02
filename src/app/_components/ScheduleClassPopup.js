@@ -40,9 +40,9 @@ const ScheduleClassPopup = ({
     if (result.success) {
       console.log("Class scheduled successfully");
       onClose(); // Close the popup after successful scheduling
-      if (typeof window !== "undefined") {
-        window.location.reload();
-      }
+      // if (typeof window !== "undefined") {
+      //   window.location.reload();
+      // }
     } else {
       console.log(result.error);
     }

@@ -20,6 +20,7 @@ import {
   getDocs,
   where,
 } from "firebase/firestore";
+import { classReservationTemplate } from "../util/emailTemplates";
 
 const DEFAULT_USER = {
   yellowTokens: 0,
@@ -948,6 +949,52 @@ class Store {
     }
   }
 
+  // async fetchAcademyGroupsForCurrentProfessor() {
+  //   if (!this.user || this.user.role !== "professor") {
+  //     console.log(
+  //       "Access denied: Only professors can view their academy groups.",
+  //     );
+  //     return { error: "Access denied" };
+  //   }
+
+  //   try {
+  //     const professorQuery = query(
+  //       collection(db, "professors"),
+  //       where("userId", "==", this.user.uid),
+  //     );
+  //     const professorSnapshot = await getDocs(professorQuery);
+
+  //     if (professorSnapshot.empty) {
+  //       console.log("Professor not found.");
+  //       return { error: "Professor not found" };
+  //     }
+
+  //     const professorDoc = professorSnapshot.docs[0];
+  //     const professorId = professorDoc.id;
+
+  //     const academyGroupsQuery = query(
+  //       collection(db, "academyGroups"),
+  //       where("professorId", "==", professorId),
+  //     );
+
+  //     const academyGroupsSnapshot = await getDocs(academyGroupsQuery);
+  //     const academyGroups = [];
+
+  //     academyGroupsSnapshot.forEach((doc) => {
+  //       academyGroups.push({ id: doc.id, ...doc.data() });
+  //     });
+
+  //     runInAction(() => {
+  //       this.academyGroups = academyGroups;
+  //     });
+
+  //     return { success: true };
+  //   } catch (error) {
+  //     console.log("Error fetching academy groups:", error);
+  //     return { error: "Error fetching academy groups" };
+  //   }
+  // }
+
   async fetchAcademyGroupsForCurrentProfessor() {
     if (!this.user || this.user.role !== "professor") {
       console.log(
@@ -957,6 +1004,7 @@ class Store {
     }
 
     try {
+      // Step 1: Fetch the professor's details using their user ID
       const professorQuery = query(
         collection(db, "professors"),
         where("userId", "==", this.user.uid),
@@ -971,6 +1019,7 @@ class Store {
       const professorDoc = professorSnapshot.docs[0];
       const professorId = professorDoc.id;
 
+      // Step 2: Fetch all academy groups for the professor
       const academyGroupsQuery = query(
         collection(db, "academyGroups"),
         where("professorId", "==", professorId),
@@ -983,6 +1032,37 @@ class Store {
         academyGroups.push({ id: doc.id, ...doc.data() });
       });
 
+      // Step 3: Extract unique user IDs from all academy groups
+      const uniqueUserIds = new Set();
+      academyGroups.forEach((group) => {
+        if (group.users) {
+          group.users.forEach((userId) => uniqueUserIds.add(userId));
+        }
+      });
+
+      // Step 4: Fetch user details for each unique user ID
+      const nameDetails = {};
+      for (const userId of uniqueUserIds) {
+        const userDoc = await getDoc(doc(db, "users", userId));
+        if (userDoc.exists()) {
+          nameDetails[userId] = `${userDoc.data().name} ${
+            userDoc.data().lastname
+          }`;
+        } else {
+          nameDetails[userId] = "Unknown User";
+        }
+      }
+
+      // Step 5: Map user names back to each academy group
+      academyGroups.forEach((group) => {
+        if (group.users) {
+          group.participantNames = group.users.map(
+            (userId) => nameDetails[userId] || "Unknown User",
+          );
+        }
+      });
+
+      // Step 6: Update the state with the fetched academy groups
       runInAction(() => {
         this.academyGroups = academyGroups;
       });
@@ -1093,6 +1173,70 @@ class Store {
       runInAction(() => {
         console.log("Event created successfully:", event);
       });
+
+      try {
+        // Event creation logic...
+
+        // Fetch user and professor details
+        const student = this.user;
+        const professor = { name: "Predo", lastname: "Dedo" };
+
+        if (!student || !professor) {
+          throw new Error("Invalid student or professor ID");
+        }
+
+        // Prepare email templates
+        const { studentEmail, professorEmail } = classReservationTemplate(
+          `${student.name} ${student.lastname}`,
+          `${professor.name} ${professor.lastname}`,
+          date,
+          `${timeRange.from} - ${timeRange.to}`,
+          subject,
+          classType,
+          notes,
+        );
+
+        const response = await fetch("/api/sendEmail", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            to: student.email,
+            subject: studentEmail.subject,
+            text: studentEmail.text,
+          }),
+        });
+        const data = await response.json();
+        console.log(data);
+
+        // // Send email to student
+        // await fetch("/api/sendEmail", {
+        //   method: "POST",
+        //   headers: { "Content-Type": "application/json" },
+        //   body: JSON.stringify({
+        //     to: student.email,
+        //     subject: studentEmail.subject,
+        //     text: studentEmail.text,
+        //   }),
+        // });
+
+        // // Send email to professor
+        // await fetch("/api/sendEmail", {
+        //   method: "POST",
+        //   headers: { "Content-Type": "application/json" },
+        //   body: JSON.stringify({
+        //     to: professor.email,
+        //     subject: professorEmail.subject,
+        //     text: professorEmail.text,
+        //   }),
+        // });
+
+        return { success: true };
+      } catch (error) {
+        console.error("Error creating event or sending email:", error);
+        return { error: "Failed to create event or send email" };
+      }
 
       return { success: true };
     } catch (error) {

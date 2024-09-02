@@ -12,7 +12,12 @@ import { observer } from "mobx-react";
 import EventList from "../_components/EventList";
 import withAuth from "@/src/Components/AuthHoc";
 import withProfAuth from "@/src/Components/AuthProfHoc";
-import { SubjectDropdown } from "@/src/constants";
+import {
+  SUBJECTS,
+  SubjectDropdown,
+  filterSubjectsByIds,
+} from "@/src/constants";
+import { toJS } from "mobx";
 
 // GPT GENERATED THJAT WORKS WITH MAILGUN
 const FeedbackForm = () => {
@@ -88,7 +93,13 @@ const FeedbackForm = () => {
   );
 };
 
-function AcademyGroupsList({ academyGroups, onEdit, onDelete }) {
+function AcademyGroupsList({
+  academyGroups,
+  onEdit,
+  onDelete,
+  setSelectedGroupDetails,
+}) {
+  console.log({ academyGroups: toJS(academyGroups) });
   return (
     <div>
       <h2 className="p-2 text-2xl">Академски Групи</h2>
@@ -103,6 +114,12 @@ function AcademyGroupsList({ academyGroups, onEdit, onDelete }) {
               <strong>{group.name}</strong> - {group.subject}
             </div>
             <Button onClick={() => onEdit(group)}>Промени</Button>
+            <Button
+              className="ml-2 bg-blue-400"
+              onClick={() => setSelectedGroupDetails(group)} // Set the selected group details
+            >
+              Детали
+            </Button>
             {/* <Button
               className="ml-2 bg-red-400"
               onClick={() => onDelete(group.id)}
@@ -341,7 +358,7 @@ function EditAcademyGroup({ group, onSave, onCancel }) {
 
 function AddAcademyGroup({ onAdd, setAddingGroup }) {
   const [name, setName] = useState("");
-  const [subject, setSubject] = useState("");
+  const [subject, setSubject] = useState(SUBJECTS[0].id);
   const [studentType, setStudentType] = useState([]);
   const [schedule, setSchedule] = useState([
     { day: "", startTime: "", endTime: "" },
@@ -558,8 +575,62 @@ function AddAcademyGroup({ onAdd, setAddingGroup }) {
   );
 }
 
+const GroupDetails = ({ group, setSelectedGroupDetails }) => {
+  return (
+    <div>
+      {group && (
+        <div className="mt-4 rounded border p-4 shadow-lg">
+          <h2 className="mb-4 text-xl font-bold">
+            Детали за академска група: {group.name}
+          </h2>
+          <p>
+            <strong>Предмет:</strong>{" "}
+            {filterSubjectsByIds([group.subject])[0]?.label}
+          </p>
+          <p>
+            <strong>Максимум ученици:</strong> {group.maxUsers}
+          </p>
+          <p>
+            <strong>Вклучени ученици:</strong> {group.activeUsers}
+          </p>
+          <p>
+            <strong>Линк:</strong>{" "}
+            <a href={group.link} target="_blank" className="text-blue-500">
+              {group.link}
+            </a>
+          </p>
+          <p>
+            <strong>Тип на студент:</strong> {group.studentType.join(", ")}
+          </p>
+
+          <p>
+            <strong>Ученици:</strong> {group.participantNames.join(", ")}
+          </p>
+          <div>
+            <strong>Термини:</strong>
+            <ul>
+              {group.schedule.map((slot, index) => (
+                <li key={index}>
+                  {slot.day}: {slot.startTime} - {slot.endTime}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <Button
+            className="mt-4 bg-red-400"
+            onClick={() => setSelectedGroupDetails(null)} // Reset the details view
+          >
+            Назад
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+};
+
 function AcademyGroupManager() {
   const [academyGroups, setAcademyGroups] = useState([]);
+  const [selectedGroupDetails, setSelectedGroupDetails] = useState(null);
   const [editingGroup, setEditingGroup] = useState(null);
   const [addingGroup, setAddingGroup] = useState(false);
 
@@ -606,7 +677,6 @@ function AcademyGroupManager() {
   };
 
   const handleAddGroup = async (newGroup) => {
-    console.log(newGroup);
     const result = await MobxStore.createAcademyGroup(
       newGroup.name,
       newGroup.subject,
@@ -634,11 +704,17 @@ function AcademyGroupManager() {
           onSave={handleSaveGroup}
           onCancel={() => setEditingGroup(null)}
         />
+      ) : selectedGroupDetails ? (
+        <GroupDetails
+          group={selectedGroupDetails}
+          setSelectedGroupDetails={setSelectedGroupDetails}
+        />
       ) : (
         <div>
           <AcademyGroupsList
             academyGroups={academyGroups}
             onEdit={handleEditGroup}
+            setSelectedGroupDetails={setSelectedGroupDetails}
             onDelete={handleDeleteGroup}
           />
           <Button
