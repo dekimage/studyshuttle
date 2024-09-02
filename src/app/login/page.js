@@ -51,7 +51,7 @@ export const LoginForm = observer(() => {
 
     if (isAuthenticated) {
       setIsLoading(false);
-      router.push("/dashboard");
+      router.push("/pocetna");
       return;
     }
 
@@ -60,7 +60,7 @@ export const LoginForm = observer(() => {
       password,
     });
     setIsLoading(false);
-    router.push("/dashboard");
+    router.push("/pocetna");
   }
 
   return (
@@ -117,15 +117,16 @@ export const LoginForm = observer(() => {
           {showPassword ? "Сокриј лозинка" : "Покажи лозинка"}
         </div>
 
-        <Button
-          className="w-full bg-sun font-bold text-black hover:bg-sun"
-          type="submit"
-          disabled={isLoading}
-        >
-          {isLoading && <CgSpinner className="mr-2 h-4 w-4 animate-spin" />}
-          Најави се
-        </Button>
-
+        <Link href="/login">
+          <Button
+            className="w-full bg-sun font-bold text-black hover:bg-sun"
+            type="submit"
+            disabled={isLoading}
+          >
+            {isLoading && <CgSpinner className="mr-2 h-4 w-4 animate-spin" />}
+            Најави се
+          </Button>
+        </Link>
         <div className="cursor-pointer text-blue-400">
           Ја заборавивте лознката?
         </div>
@@ -136,11 +137,13 @@ export const LoginForm = observer(() => {
 
 const LoginPage = () => {
   return (
-    <div className="mt-8 flex items-center justify-center px-4 sm:px-8">
+    <div className="mb-32 mt-8 flex items-center justify-center px-4 sm:px-8">
       <div className="w-full max-w-[850px]">
-        <div className="mb-8 text-center text-[32px] font-bold text-sun sm:text-[65px]">
-          Најави се
-        </div>
+        <Link href="/login">
+          <div className="mb-8 text-center text-[32px] font-bold text-sun sm:text-[65px]">
+            Најави се
+          </div>
+        </Link>
         <LoginForm />
         <div className="mt-4 text-center">
           Немате профил?

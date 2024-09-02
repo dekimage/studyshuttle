@@ -1,14 +1,12 @@
+"use client";
 import { Inter as FontSans, Montserrat } from "next/font/google";
-import { cookies } from "next/headers";
 import "./globals.css";
-
-import { ClerkProvider } from "@clerk/nextjs";
-import { themes } from "../util/config";
 import { cn } from "@/lib/utils";
 import ReusableLayout from "./_components/ReusableLayout";
 import { ThemeProvider } from "@/theme-provider";
 import { Header } from "../Components/Header";
 import { Footer } from "../Components/Footer";
+import { usePathname } from "next/navigation";
 
 export const fontSans = Montserrat({
   subsets: ["latin"],
@@ -17,8 +15,28 @@ export const fontSans = Montserrat({
 });
 
 export default function RootLayout({ children }) {
+  const pathname = usePathname();
+
+  // Define your route-specific conditions here
+  const showReusableLayout = ![
+    "/login",
+    "/signup",
+    "/profesori",
+    "/skolarina",
+    "/osnovno",
+    "/sredno",
+    "/univerzitet",
+  ].includes(pathname); // Example: Hide layout on login and register routes
+  const showHeaderFooter = ![
+    "/pocetna",
+    "/professor-admin",
+    "/professors",
+    "/analytics",
+    "/profile",
+    "/schedule",
+  ].includes(pathname); // Example: Hide header and footer on specific routes
+
   return (
-    // <ClerkProvider>
     <html lang="en">
       <body
         className={cn(
@@ -27,14 +45,21 @@ export default function RootLayout({ children }) {
         )}
       >
         <ThemeProvider attribute="class" defaultTheme="system">
-          <ReusableLayout>
-            {/* <Header /> */}
-            {children}
-            {/* <Footer /> */}
-          </ReusableLayout>
+          {showReusableLayout ? (
+            <ReusableLayout>
+              {showHeaderFooter && <Header />}
+              {children}
+              {showHeaderFooter && <Footer />}
+            </ReusableLayout>
+          ) : (
+            <>
+              {showHeaderFooter && <Header />}
+              {children}
+              {showHeaderFooter && <Footer />}
+            </>
+          )}
         </ThemeProvider>
       </body>
     </html>
-    // </ClerkProvider>
   );
 }

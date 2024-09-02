@@ -32,7 +32,7 @@ const DEFAULT_USER = {
   yellowTokens: 0,
   blueTokens: 0,
   redTokens: 0,
-  role: "user",
+  role: "student",
 };
 
 class Store {
@@ -196,7 +196,10 @@ class Store {
       const newUserList = [...(groupData.users || []), this.user.uid];
 
       // Update the group with the new user list
-      await updateDoc(groupDocRef, { users: newUserList });
+      await updateDoc(groupDocRef, {
+        users: newUserList,
+        activeUsers: newUserList.length,
+      });
 
       // Update user's tokens (this would involve another Firestore call)
       await updateDoc(doc(db, "users", this.user.uid), {
@@ -696,44 +699,46 @@ class Store {
     existingReviewStars = null,
     reviewId = null,
   ) {
+    // Check if user is logged in
     if (!this.user) {
       console.log("No user logged in.");
       return { error: "No user logged in" };
     }
 
+    // Validate star rating
     if (stars < 1 || stars > 5) {
       console.log("Stars must be between 1 and 5.");
       return { error: "Invalid star rating" };
     }
 
-    const reviewDocRef = doc(db, "reviews", reviewId);
-    const latestReviewDoc = await getDoc(reviewDocRef);
+    // Check if reviewId is provided
+    if (reviewId) {
+      // Handle updating an existing review
+      try {
+        const reviewDocRef = doc(db, "reviews", reviewId);
+        const latestReviewDoc = await getDoc(reviewDocRef);
 
-    if (!latestReviewDoc.exists()) {
-      console.log("Review not found.");
-      return { error: "Review not found." };
-    }
+        if (!latestReviewDoc.exists()) {
+          console.log("Review not found.");
+          return { error: "Review not found." };
+        }
 
-    const latestReviewData = latestReviewDoc.data();
-    const currentStars = latestReviewData.stars;
+        const latestReviewData = latestReviewDoc.data();
+        const currentStars = latestReviewData.stars;
 
-    if (currentStars === stars) {
-      console.log(
-        "New rating is the same as the current rating. No update needed.",
-      );
-      return {
-        error:
-          "New rating is the same as the current rating. No update needed.",
-      };
-    }
+        if (currentStars === stars) {
+          console.log(
+            "New rating is the same as the current rating. No update needed.",
+          );
+          return {
+            error:
+              "New rating is the same as the current rating. No update needed.",
+          };
+        }
 
-    try {
-      if (reviewId) {
         // Update the existing review
-        const reviewDocRef = doc(db, "reviews", reviewId); // Use the provided review ID
         await updateDoc(reviewDocRef, {
           stars,
-
           date: new Date(),
         });
 
@@ -745,13 +750,17 @@ class Store {
         );
 
         return { success: true, updated: true };
-      } else {
-        // Create a new review
+      } catch (error) {
+        console.log("Error updating review:", error);
+        return { error: "Error updating review" };
+      }
+    } else {
+      // Handle creating a new review
+      try {
         const newReview = {
           userId: this.user.uid,
           professorId,
           stars,
-
           date: new Date(),
         };
 
@@ -761,10 +770,10 @@ class Store {
         await this.updateProfessorAverageRating(professorId, stars);
 
         return { success: true, updated: false };
+      } catch (error) {
+        console.log("Error creating review:", error);
+        return { error: "Error creating review" };
       }
-    } catch (error) {
-      console.log("Error submitting review:", error);
-      return { error: "Error submitting review" };
     }
   }
   async updateProfessorAverageRating(professorId, newRating, oldRating = null) {

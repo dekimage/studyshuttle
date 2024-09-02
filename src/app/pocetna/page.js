@@ -8,6 +8,40 @@ import { Button } from "@/components/ui/button";
 import { Copy } from "lucide-react";
 import Loader from "../_components/Loader";
 import { filterOddByIds } from "@/src/constants";
+import { toJS } from "mobx";
+import Link from "next/link";
+
+// utils function to sort and filter events for only future
+export function filterAndSortEvents(events) {
+  const now = new Date(); // Current date and time
+  const twoHoursAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000); // Two hours before now
+
+  // Convert date and timeRange to actual Date objects for comparison
+  const filteredEvents = events.filter((event) => {
+    const [fromHours, fromMinutes] = event.timeRange.from.split(":");
+    const eventFromTime = new Date(event.date);
+    eventFromTime.setHours(fromHours, fromMinutes, 0, 0); // Set hours and minutes
+
+    // Only include events that start from two hours ago to the future
+    return eventFromTime >= twoHoursAgo;
+  });
+
+  // Sort the events by their 'from' time (most upcoming first)
+  const sortedEvents = filteredEvents.sort((a, b) => {
+    const [aHours, aMinutes] = a.timeRange.from.split(":");
+    const [bHours, bMinutes] = b.timeRange.from.split(":");
+
+    const aDate = new Date(a.date);
+    aDate.setHours(aHours, aMinutes, 0, 0); // Set hours and minutes for event A
+
+    const bDate = new Date(b.date);
+    bDate.setHours(bHours, bMinutes, 0, 0); // Set hours and minutes for event B
+
+    return aDate - bDate; // Sort ascending by time
+  });
+
+  return sortedEvents;
+}
 
 export const AcademyGroupModal = ({
   selectedGroup,
@@ -182,7 +216,7 @@ const AcademyGroupsPage = observer(() => {
             <div>Статус</div>
             <div>Детали</div>
           </div>
-          <div className="min-w-[700px] space-y-2 rounded-bl-[15px] rounded-br-[15px] border border-[3px] border-t-0 border-sky bg-white p-4 font-bold">
+          <div className="min-w-[700px] space-y-2 rounded-bl-[15px] rounded-br-[15px] border border-[3px] border-t-0 border-sky bg-white p-4">
             {MobxStore.academyGroups.length > 0 ? (
               MobxStore.academyGroups.map((group) => (
                 <div key={group.id} className="grid grid-cols-5 gap-4 p-2">
@@ -203,7 +237,12 @@ const AcademyGroupsPage = observer(() => {
                 </div>
               ))
             ) : (
-              <div>No academy groups found.</div>
+              <div>
+                Не учествувате во академска група.{" "}
+                <Link className="text-blue-400 underline" href="/professors">
+                  Побарајте група.
+                </Link>
+              </div>
             )}
           </div>
         </div>
@@ -272,8 +311,8 @@ const OverviewPage = observer(() => {
             <div>{user.role == "professor" ? "Студент" : "Професор"}</div>
           </div>
           <div className="min-w-[600px] space-y-2 rounded-bl-[15px] rounded-br-[15px] border border-[3px] border-t-0 border-chili bg-white p-4">
-            {MobxStore.upcomingEvents.length > 0 ? (
-              MobxStore.upcomingEvents.map((event) => (
+            {filterAndSortEvents(MobxStore.upcomingEvents).length > 0 ? (
+              filterAndSortEvents(MobxStore.upcomingEvents).map((event) => (
                 <div
                   key={event.id}
                   className="grid grid-cols-4 gap-2 rounded p-2 font-bold"
@@ -289,7 +328,12 @@ const OverviewPage = observer(() => {
                 </div>
               ))
             ) : (
-              <div>No upcoming events.</div>
+              <div>
+                Нема следни настани.{" "}
+                <Link className="text-blue-400 underline" href="/professors">
+                  Побарајте термин.
+                </Link>
+              </div>
             )}
           </div>
         </div>

@@ -5,6 +5,7 @@ import { proffesorsData } from "@/src/data";
 import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 const filtersData = [
   { title: "основно образование", color: "chili", filter: "основно" },
@@ -239,13 +240,12 @@ const ProffesorsPage = () => {
         <div className="text-center text-[35px] font-semibold text-chili">
           Сеуште немаш профил?
         </div>
-        <CtaDialog
-          cta={
-            <Button className="w-fit rounded-full bg-sky text-white">
-              Регистрирај се
-            </Button>
-          }
-        />
+
+        <Link href="/signup">
+          <Button className="w-fit rounded-full bg-sky text-white">
+            Регистрирај се
+          </Button>
+        </Link>
       </div>
     </div>
   );

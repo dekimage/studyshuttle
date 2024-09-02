@@ -3,8 +3,10 @@ import { observer } from "mobx-react-lite";
 import MobxStore from "../mobx";
 import { FileWarning } from "lucide-react";
 import Loader from "./Loader";
+import { toJS } from "mobx";
+import { filterAndSortEvents } from "../pocetna/page";
 
-const Event = observer(({ event }) => {
+const Event = observer(({ event, showGraded, ignored = false }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [scores, setScores] = useState({
     attention: event.scores?.attention || 0,
@@ -50,6 +52,8 @@ const Event = observer(({ event }) => {
   };
 
   const isNotGraded = Object.values(scores).some((score) => score === 0);
+
+  if (showGraded && !isNotGraded && !ignored) return null;
 
   return (
     <div className="mb-4 flex flex-col rounded-lg border p-4 shadow-lg">
@@ -167,6 +171,7 @@ const Event = observer(({ event }) => {
 
 const EventList = observer(() => {
   const [loading, setLoading] = useState(true); // Add loading state
+  const [showGraded, setShowGraded] = useState(true);
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -189,16 +194,29 @@ const EventList = observer(() => {
   }, []);
 
   if (loading) {
-    return <Loader />; 
+    return <Loader />;
   }
 
   return (
     <div className="p-5">
-      <h2 className="mb-5 text-2xl font-bold">Scheduled Events</h2>
+      <div onClick={() => setShowGraded(!showGraded)}>
+        {showGraded ? "Само неоценети" : "Сите"}
+      </div>
+      <h2 className="mb-5 text-2xl font-bold">Закажани Следни Настани</h2>
+      <div>
+        {filterAndSortEvents(toJS(MobxStore.events)).length > 0 ? (
+          filterAndSortEvents(toJS(MobxStore.events)).map((event) => (
+            <Event key={event.id} event={event} ignored />
+          ))
+        ) : (
+          <div>No events scheduled.</div>
+        )}
+      </div>
+      <h2 className="mb-5 mt-8 text-2xl font-bold">Сите Настани</h2>
       <div>
         {MobxStore.events?.length > 0 ? (
           MobxStore.events.map((event) => (
-            <Event key={event.id} event={event} />
+            <Event key={event.id} event={event} showGraded={showGraded} />
           ))
         ) : (
           <div>No events scheduled.</div>

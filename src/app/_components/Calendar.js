@@ -155,7 +155,11 @@ const Calendar = observer(({ schedule, professor, isAdmin = false }) => {
                     onClick={() =>
                       handleDeleteTimeRange(range, range.isScheduled)
                     }
-                    className="rounded bg-red-500 px-3 py-1 text-white hover:bg-red-600"
+                    className={`rounded  px-3 py-1 text-white  ${
+                      range.isScheduled
+                        ? "bg-gray-400 hover:bg-gray-400"
+                        : "bg-red-500 hover:bg-red-600"
+                    }`}
                   >
                     Delete Event
                   </button>

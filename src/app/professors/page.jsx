@@ -13,6 +13,8 @@ import { ChevronLeft } from "lucide-react";
 import confetiImg from "../../assets/confeti.png";
 import { filterSubjectsByIds } from "@/src/constants";
 
+import Link from "next/link";
+
 function isAvailableEventInNextXDays(schedule, days) {
   const now = new Date(); // Current date and time
   const futureDate = new Date();
@@ -221,7 +223,7 @@ const AcademyGroups = ({ professor }) => {
                 <Modal onClose={() => setJoinGroupId(null)}>
                   <div className="flex h-[300px] w-[300px] flex-col items-center justify-center">
                     {user.blueTokens < 1 ? (
-                      <div>
+                      <div className="flex flex-col items-center justify-center">
                         Имате 0{" "}
                         <Image
                           src={blueTokenImg}
@@ -230,7 +232,7 @@ const AcademyGroups = ({ professor }) => {
                           alt="blue token"
                         />
                         сини токени на сметка.
-                        <Link className="/profile">
+                        <Link href="/profile" className="mt-4">
                           <Button className="bg-sky hover:bg-sky">
                             Надополнете тука
                           </Button>
@@ -399,7 +401,10 @@ const ProffesorCard = ({
             </div>
 
             <div className="mt-2">
-              <Button onClick={handleReviewSubmit}>
+              <Button
+                disabled={rating == existingReview?.stars || rating == 0}
+                onClick={handleReviewSubmit}
+              >
                 {existingReview ? "Промени оценка" : "Поднеси оценка"}
               </Button>
             </div>
@@ -435,7 +440,7 @@ const ProffesorCard = ({
               <Calendar schedule={professor.schedule} professor={professor} />
             ) : (
               <div className="text-gray-400">
-                Нема слободни настани во средните 4 недели
+                Нема слободни термини во следните 4 недели
               </div>
             )}
           </div>
@@ -479,6 +484,7 @@ const ProfPage = observer(() => {
     // Check if we have an existing review
     if (existingReview && existingReview.id) {
       // Update existing review
+      console.log("Updating review...");
       const result = await submitReview(
         profDetails.professor.id, // Use the professor ID from profDetails
         rating,
@@ -493,6 +499,7 @@ const ProfPage = observer(() => {
       }
     } else {
       // Submit a new review
+      console.log("Submitting new review...");
       const result = await submitReview(
         profDetails.professor.id, // Use the professor ID from profDetails
         rating,

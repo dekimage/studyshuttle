@@ -6,15 +6,7 @@ import RadarChart from "react-svg-radar-chart";
 import "react-svg-radar-chart/build/css/index.css";
 import { Button } from "@/components/ui/button";
 import Loader from "../_components/Loader";
-import { SubjectDropdown } from "@/src/constants";
-
-const subjects = [
-  { label: "Mathematics", id: "123" },
-  { label: "Science", id: "science" },
-  { label: "History", id: "history" },
-  { label: "Art", id: "art" },
-  { label: "Physical Education", id: "pe" },
-];
+import { SUBJECTS, SubjectDropdown } from "@/src/constants";
 
 const bgColorMap = {
   attention: "bg-sun",
@@ -51,7 +43,7 @@ const convertToOriginalRating = (normalizedValue) => {
 };
 
 const AnalyticsPage = observer(() => {
-  const [selectedSubject, setSelectedSubject] = useState(subjects[0].id);
+  const [selectedSubject, setSelectedSubject] = useState(SUBJECTS[0].id);
   const [chartData, setChartData] = useState([]);
   const [fetchedUserProfile, setFetchedUserProfile] = useState(null); // For professor view
   const [fetchedUserGrades, setFetchedUserGrades] = useState(null); // For professor view
@@ -130,9 +122,7 @@ const AnalyticsPage = observer(() => {
       ]);
     }
   };
-
   useEffect(() => {
-    // Recalculate chart data when the subject changes
     if (MobxStore.user?.role === "student") {
       calculateChartData(selectedSubject);
     } else if (fetchedUserGrades) {
@@ -164,7 +154,7 @@ const AnalyticsPage = observer(() => {
   };
 
   const { user } = MobxStore;
-
+  console.log(chartData);
   if (!user) return <Loader />;
 
   return (
@@ -217,17 +207,6 @@ const AnalyticsPage = observer(() => {
                     onChange={(e) => setSelectedSubject(e.target.value)}
                     selectedSubject={selectedSubject}
                   />
-                  {/* <select
-                    value={selectedSubject}
-                    onChange={(e) => setSelectedSubject(e.target.value)}
-                    className="rounded border px-2 py-1"
-                  >
-                    {subjects.map((subject) => (
-                      <option key={subject.id} value={subject.id}>
-                        {subject.label}
-                      </option>
-                    ))}
-                  </select> */}
                 </div>
               </div>
             </>

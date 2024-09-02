@@ -93,17 +93,15 @@ export const Hero = ({ heroData }) => {
           {subheadline}
         </div>
 
-        <CtaDialog
-          cta={
-            <Button
-              style={{ border: `2px solid ${color}`, color: color }}
-              variant="outline"
-              className="animate-heartbeat rounded-full"
-            >
-              Регистрирај се
-            </Button>
-          }
-        />
+        <Link href="/signup">
+          <Button
+            style={{ border: `2px solid ${color}`, color: color }}
+            variant="outline"
+            className="animate-heartbeat rounded-full"
+          >
+            Регистрирај се
+          </Button>
+        </Link>
       </div>
 
       <div className="relative mt-8 flex h-full w-full items-center justify-center">
@@ -252,23 +250,22 @@ export const RocketCta = ({ isRed, active, isProf }) => {
         >
           Сеуште немаш профил?
         </div>
-        <CtaDialog
-          cta={
-            isProf ? (
-              <Button className="w-fit rounded-full border bg-sky text-white">
-                Регистрирај се
-              </Button>
-            ) : (
-              <Button
-                variant="outline"
-                className="b-sky w-fit rounded-full border text-sky"
-              >
-                Регистрирај се
-              </Button>
-            )
-          }
-        />
-
+        {isProf ? (
+          <Link href="/signup">
+            <Button className="w-fit rounded-full border bg-sky text-white">
+              Регистрирај се
+            </Button>
+          </Link>
+        ) : (
+          <Link href="/signup">
+            <Button
+              variant="outline"
+              className="b-sky w-fit rounded-full border text-sky"
+            >
+              Регистрирај се
+            </Button>
+          </Link>
+        )}
         {isRed && (
           <div className="my-6 flex gap-2 text-black lg:text-white">
             <div className="text-[19px]">Види ги чекорите</div> <ChevronDown />
@@ -352,16 +349,15 @@ const FlagHero = ({ data, active, setActive, setIsOnceClicked }) => {
               <div className="mt-32 text-[35px] font-semibold">
                 Сеуште немаш профил?
               </div>
-              <CtaDialog
-                cta={
-                  <Button
-                    variant="outline"
-                    className="b-sky w-fit rounded-full border text-sky"
-                  >
-                    Регистрирај се
-                  </Button>
-                }
-              />
+
+              <Link href="/signup">
+                <Button
+                  variant="outline"
+                  className="b-sky w-fit rounded-full border text-sky"
+                >
+                  Регистрирај се
+                </Button>
+              </Link>
 
               <div className="flex gap-2">
                 <div className="text-[19px] font-semibold">
@@ -579,13 +575,11 @@ const LandingPage = () => {
       </div>
 
       <div className="flex items-center justify-center py-16">
-        <CtaDialog
-          cta={
-            <Button className="rounded-full bg-sky py-8 lg:bg-chili lg:px-8 lg:text-[24px]">
-              Регистрирај се
-            </Button>
-          }
-        />
+        <Link href="/signup">
+          <Button className="rounded-full bg-sky py-8 lg:bg-chili lg:px-8 lg:text-[24px]">
+            Регистрирај се
+          </Button>
+        </Link>
       </div>
 
       <Stats />

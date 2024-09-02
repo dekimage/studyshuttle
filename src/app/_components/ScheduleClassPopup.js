@@ -16,6 +16,8 @@ const ScheduleClassPopup = ({
   const [classType, setClassType] = useState("");
   const [notes, setNotes] = useState("");
 
+  const user = MobxStore.user;
+
   const handleSubmit = async () => {
     if (!subject || !classType) {
       console.error("Please fill in all required fields.");
@@ -67,6 +69,7 @@ const ScheduleClassPopup = ({
             Селектирај ја годината на образование
           </label>
           <OddDropdown
+            academicLevel={user.academicLevel}
             onChange={(e) => setClassType(e.target.value)}
             selectedSubject={classType}
           />

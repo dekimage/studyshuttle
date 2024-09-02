@@ -114,7 +114,7 @@ export const Header = () => {
               Професори
             </div>
           </Link>
-          <Link href="/najava" className="w-full cursor-pointer text-end">
+          <Link href="/login" className="w-full cursor-pointer text-end">
             <div className="relative z-[100000] w-full cursor-pointer p-3 pr-8 text-end text-[20px] font-bold text-sky">
               Најави Се
             </div>
@@ -202,9 +202,10 @@ export const Header = () => {
             Професори
           </div>
         </Link>
-        <CtaDialog
-          cta={<Button className="rounded-full bg-chili">Најави се</Button>}
-        />
+
+        <Link href="/signup">
+          <Button className="rounded-full bg-chili">Најави се</Button>
+        </Link>
       </div>
     </div>
   );

@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import { Star as StarOutline, StarHalf } from "lucide-react";
 
 const StarRating = ({ rating, setRating, editable = false }) => {
   const MAX_STARS = 5;
+  const [hoverIndex, setHoverIndex] = useState(null);
 
   const handleStarClick = (index) => {
     if (editable && setRating) {
@@ -10,10 +11,24 @@ const StarRating = ({ rating, setRating, editable = false }) => {
     }
   };
 
+  const handleMouseEnter = (index) => {
+    if (editable) {
+      setHoverIndex(index);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (editable) {
+      setHoverIndex(null);
+    }
+  };
+
   const getStarType = (index) => {
-    if (index < Math.floor(rating)) {
+    const currentRating = hoverIndex !== null ? hoverIndex + 1 : rating;
+
+    if (index < Math.floor(currentRating)) {
       return "full";
-    } else if (index < rating) {
+    } else if (index < currentRating) {
       return "half";
     } else {
       return "empty";
@@ -30,6 +45,8 @@ const StarRating = ({ rating, setRating, editable = false }) => {
             key={index}
             className="relative inline-block cursor-pointer"
             onClick={() => handleStarClick(index)}
+            onMouseEnter={() => handleMouseEnter(index)}
+            onMouseLeave={handleMouseLeave}
           >
             {starType === "full" && (
               <StarOutline

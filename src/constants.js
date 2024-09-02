@@ -54,7 +54,20 @@ export const SubjectDropdown = ({
   );
 };
 
-export const OddDropdown = ({ onChange, selectedSubject }) => {
+export const OddDropdown = ({ onChange, selectedSubject, academicLevel }) => {
+  // Filter the options based on the academic level
+  const filteredOptions =
+    academicLevel === "osnovno"
+      ? ODDELENIJA.filter(
+          (subject) => parseInt(subject.id) >= 1 && parseInt(subject.id) <= 9,
+        )
+      : academicLevel === "sredno"
+        ? ODDELENIJA.filter(
+            (subject) =>
+              parseInt(subject.id) >= 10 && parseInt(subject.id) <= 13,
+          )
+        : []; // Empty array if academic level does not match
+
   return (
     <div className="">
       <select
@@ -62,7 +75,7 @@ export const OddDropdown = ({ onChange, selectedSubject }) => {
         onChange={onChange}
         value={selectedSubject}
       >
-        {ODDELENIJA.map((subject) => (
+        {filteredOptions.map((subject) => (
           <option key={subject.id} value={subject.id}>
             {subject.label}
           </option>

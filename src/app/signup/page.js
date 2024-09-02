@@ -25,31 +25,31 @@ import MobxStore from "../mobx";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
 // Validation schema
-const formSchema = z.object({
-  name: z.string().min(3, {
-    message: "Името мора да содржи најмалку 3 карактери.",
-  }),
-  lastname: z.string().min(3, {
-    message: "Презимето мора да содржи најмалку 3 карактери.",
-  }),
-  password: z.string().min(6, {
-    message: "Лозинката мора да содржи најмалку 6 карактери.",
-  }),
-  confirmPassword: z
-    .string()
-    .min(6, {
-      message: "Потврдата на лозинката мора да содржи најмалку 6 карактери.",
-    })
-    .refine((value, ctx) => value === ctx?.options?.parent?.password, {
-      message: "Лозинките мора да се совпаѓаат.",
+const formSchema = z
+  .object({
+    name: z.string().min(3, {
+      message: "Името мора да содржи најмалку 3 карактери.",
     }),
-  email: z.string().email({
-    message: "Ве молиме внесете валидна емаил адреса.",
-  }),
-  academicLevel: z.enum(["osnovno", "sredno", "visoko"], {
-    required_error: "Ве молиме одберете академско ниво.",
-  }),
-});
+    lastname: z.string().min(3, {
+      message: "Презимето мора да содржи најмалку 3 карактери.",
+    }),
+    password: z.string().min(6, {
+      message: "Лозинката мора да содржи најмалку 6 карактери.",
+    }),
+    confirmPassword: z.string().min(6, {
+      message: "Потврдата на лозинката мора да содржи најмалку 6 карактери.",
+    }),
+    email: z.string().email({
+      message: "Ве молиме внесете валидна емаил адреса.",
+    }),
+    academicLevel: z.enum(["osnovno", "sredno", "visoko"], {
+      required_error: "Ве молиме одберете академско ниво.",
+    }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Лозинките мора да се совпаѓаат.",
+    path: ["confirmPassword"], // Optional: Indicates where to show the error
+  });
 
 export const SignupForm = observer(() => {
   const { signupWithEmail } = MobxStore;
@@ -80,7 +80,7 @@ export const SignupForm = observer(() => {
       await signupWithEmail(email, password, name, lastname, academicLevel);
 
       setIsLoading(false);
-      router.push("/dashboard"); // Redirect after successful operation
+      router.push("/pocetna"); // Redirect after successful operation
     } catch (error) {
       // Handle errors
       setIsLoading(false);
@@ -279,12 +279,13 @@ export const SignupForm = observer(() => {
 
 const Signup = () => {
   return (
-    <div className="mt-8 flex items-center justify-center px-4 sm:px-8">
+    <div className="mb-32 mt-8 flex items-center justify-center px-4 sm:px-8">
       <div className="w-full max-w-[850px]">
         <div className="mb-8 text-center text-[32px] font-bold sm:text-[65px]">
           Регистрирај се на <br />
           <span className="text-sun">Study Shuttle!</span>
         </div>
+
         <SignupForm />
         <div className="mt-4 text-center">
           Веќе имате профил?{" "}
