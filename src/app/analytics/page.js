@@ -154,7 +154,7 @@ const AnalyticsPage = observer(() => {
   };
 
   const { user } = MobxStore;
-  console.log(chartData);
+
   if (!user) return <Loader />;
 
   return (

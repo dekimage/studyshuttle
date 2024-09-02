@@ -15,9 +15,15 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 
 const DialogLogout = ({ setDialogOpen, link }) => {
   const { logout } = MobxStore;
+  const route = useRouter();
+  const signout = () => {
+    logout();
+    route.push("/");
+  };
   const ref = useRef();
   return (
     <Dialog>
@@ -63,7 +69,7 @@ const DialogLogout = ({ setDialogOpen, link }) => {
           >
             Врати се назад
           </Button>
-          <Button onClick={logout} className="bg-sky hover:bg-sky">
+          <Button onClick={signout} className="bg-sky hover:bg-sky">
             Одјави се
           </Button>
         </DialogFooter>

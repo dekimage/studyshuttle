@@ -60,6 +60,7 @@ export const LoginForm = observer(() => {
       password,
     });
     setIsLoading(false);
+    console.log(1241241);
     router.push("/pocetna");
   }
 
@@ -117,16 +118,15 @@ export const LoginForm = observer(() => {
           {showPassword ? "Сокриј лозинка" : "Покажи лозинка"}
         </div>
 
-        <Link href="/login">
-          <Button
-            className="w-full bg-sun font-bold text-black hover:bg-sun"
-            type="submit"
-            disabled={isLoading}
-          >
-            {isLoading && <CgSpinner className="mr-2 h-4 w-4 animate-spin" />}
-            Најави се
-          </Button>
-        </Link>
+        <Button
+          className="w-full bg-sun font-bold text-black hover:bg-sun"
+          type="submit"
+          disabled={isLoading}
+        >
+          {isLoading && <CgSpinner className="mr-2 h-4 w-4 animate-spin" />}
+          Најави се
+        </Button>
+
         <div className="cursor-pointer text-blue-400">
           Ја заборавивте лознката?
         </div>
@@ -139,11 +139,10 @@ const LoginPage = () => {
   return (
     <div className="mb-32 mt-8 flex items-center justify-center px-4 sm:px-8">
       <div className="w-full max-w-[850px]">
-        <Link href="/login">
-          <div className="mb-8 text-center text-[32px] font-bold text-sun sm:text-[65px]">
-            Најави се
-          </div>
-        </Link>
+        <div className="mb-8 text-center text-[32px] font-bold text-sun sm:text-[65px]">
+          Најави се
+        </div>
+
         <LoginForm />
         <div className="mt-4 text-center">
           Немате профил?

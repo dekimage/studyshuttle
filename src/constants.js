@@ -67,7 +67,6 @@ export const OddDropdown = ({ onChange, selectedSubject, academicLevel }) => {
               parseInt(subject.id) >= 10 && parseInt(subject.id) <= 13,
           )
         : []; // Empty array if academic level does not match
-
   return (
     <div className="">
       <select
@@ -75,6 +74,10 @@ export const OddDropdown = ({ onChange, selectedSubject, academicLevel }) => {
         onChange={onChange}
         value={selectedSubject}
       >
+        {/* Default placeholder option */}
+        <option value="" disabled selected={!selectedSubject}>
+          Изберете едно
+        </option>
         {filteredOptions.map((subject) => (
           <option key={subject.id} value={subject.id}>
             {subject.label}

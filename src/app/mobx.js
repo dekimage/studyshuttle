@@ -2,13 +2,9 @@ import { makeAutoObservable, runInAction } from "mobx";
 import { auth, db } from "./firebase";
 import {
   onAuthStateChanged,
-  signInAnonymously,
   getAuth,
-  EmailAuthProvider,
-  linkWithCredential,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  signInWithPopup,
   signOut,
   sendPasswordResetEmail,
 } from "firebase/auth";
@@ -20,12 +16,9 @@ import {
   addDoc,
   deleteDoc,
   query,
-  onSnapshot,
   updateDoc,
   getDocs,
   where,
-  orderBy,
-  limit,
 } from "firebase/firestore";
 
 const DEFAULT_USER = {
@@ -336,10 +329,22 @@ class Store {
       }
 
       const today = new Date().toISOString().split("T")[0]; // Get today's date in YYYY-MM-DD format
-      const eventsQuery = query(
-        collection(db, "events"),
-        where("userId", "==", this.user.uid),
-      );
+      let eventsQuery;
+
+      // Modify the query based on the user's role
+      if (this.user.role === "professor") {
+        // Fetch events where professorId matches the professor's ID
+        eventsQuery = query(
+          collection(db, "events"),
+          where("professorId", "==", this.user.professorId), // Correct field for professor
+        );
+      } else {
+        // Fetch events where userId matches the student's ID
+        eventsQuery = query(
+          collection(db, "events"),
+          where("userId", "==", this.user.uid), // Correct field for student
+        );
+      }
       const eventsSnapshot = await getDocs(eventsQuery);
 
       const events = eventsSnapshot.docs.map((doc) => ({
@@ -362,7 +367,6 @@ class Store {
             nameDetails[userId] = `${userDoc.data().name} ${
               userDoc.data().lastname
             }`;
-            console.log(userDoc.data().name);
           } else {
             nameDetails[userId] = "Unknown User";
           }
@@ -382,7 +386,9 @@ class Store {
         for (const professorId of uniqueProfessorIds) {
           const professorDoc = await getDoc(doc(db, "professors", professorId));
           if (professorDoc.exists()) {
-            nameDetails[professorId] = professorDoc.data().name;
+            nameDetails[professorId] = `${professorDoc.data().name} ${
+              professorDoc.data().lastname
+            }`;
             link = professorDoc.data().link;
           } else {
             nameDetails[professorId] = "Unknown Professor";
@@ -987,6 +993,14 @@ class Store {
       classType,
       notes,
     });
+    if (!this.user || this.user.role !== "student") {
+      console.log("Access denied: Only students can create events.");
+      return { error: "Access denied" };
+    }
+    if (this.user.yellowTokens <= 0) {
+      console.log("Not enough yellow tokens.");
+      return { error: "Not enough yellow tokens" };
+    }
     try {
       const professorDocRef = doc(db, "professors", professorId);
       const professorSnapshot = await getDoc(professorDocRef);

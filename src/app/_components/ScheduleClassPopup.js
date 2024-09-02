@@ -2,9 +2,12 @@ import React, { useState } from "react";
 import MobxStore from "../mobx";
 import {
   OddDropdown,
+  SUBJECTS,
   SubjectDropdown,
   filterSubjectsByIds,
 } from "@/src/constants";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 const ScheduleClassPopup = ({
   selectedDate,
@@ -12,7 +15,7 @@ const ScheduleClassPopup = ({
   professor,
   onClose,
 }) => {
-  const [subject, setSubject] = useState("");
+  const [subject, setSubject] = useState(SUBJECTS[0].id);
   const [classType, setClassType] = useState("");
   const [notes, setNotes] = useState("");
 
@@ -91,6 +94,16 @@ const ScheduleClassPopup = ({
             </div>
           </div>
         </div>
+        {user.yellowTokens <= 0 && (
+          <div className="mb-4">
+            <div className="mb-2 text-sm text-red-500">
+              Немате доволно жолти жетони за да го закажете часот.
+            </div>
+            <Link href="/profile">
+              <div className="text-blue-500 underline">Надополнете токени</div>
+            </Link>
+          </div>
+        )}
         <div className="flex justify-end space-x-4">
           <button
             onClick={onClose}
@@ -98,12 +111,18 @@ const ScheduleClassPopup = ({
           >
             Откажи ги промените
           </button>
-          <button
-            onClick={handleSubmit}
+          <Button
+            disabled={!subject || !classType || user.yellowTokens <= 0}
+            onClick={() => {
+              if (user.yellowTokens <= 0) {
+                return;
+              }
+              handleSubmit();
+            }}
             className="rounded bg-sky px-4 py-2 text-white hover:bg-sky"
           >
             Зачувај и закажи
-          </button>
+          </Button>
         </div>
       </div>
     </div>

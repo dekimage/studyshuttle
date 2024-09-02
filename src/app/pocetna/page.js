@@ -255,9 +255,12 @@ const AcademyGroupsPage = observer(() => {
 });
 
 const OverviewPage = observer(() => {
+  // const [loading, setLoading] = useState(true);
+  const { user } = MobxStore;
   useEffect(() => {
     const fetchData = async () => {
       await MobxStore.userReady; // Wait for user to be loaded
+
       const result = await MobxStore.fetchUpcomingEventsForUser();
       if (!result.success) {
         console.log(result.error);
@@ -266,8 +269,6 @@ const OverviewPage = observer(() => {
 
     fetchData();
   }, []);
-
-  const { user } = MobxStore;
 
   if (!user) return <Loader />;
 

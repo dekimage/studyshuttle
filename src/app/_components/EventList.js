@@ -5,6 +5,7 @@ import { FileWarning } from "lucide-react";
 import Loader from "./Loader";
 import { toJS } from "mobx";
 import { filterAndSortEvents } from "../pocetna/page";
+import { Button } from "@/components/ui/button";
 
 const Event = observer(({ event, showGraded, ignored = false }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -199,9 +200,6 @@ const EventList = observer(() => {
 
   return (
     <div className="p-5">
-      <div onClick={() => setShowGraded(!showGraded)}>
-        {showGraded ? "Само неоценети" : "Сите"}
-      </div>
       <h2 className="mb-5 text-2xl font-bold">Закажани Следни Настани</h2>
       <div>
         {filterAndSortEvents(toJS(MobxStore.events)).length > 0 ? (
@@ -212,7 +210,14 @@ const EventList = observer(() => {
           <div>No events scheduled.</div>
         )}
       </div>
-      <h2 className="mb-5 mt-8 text-2xl font-bold">Сите Настани</h2>
+      <div className="mt-4 flex items-center justify-between">
+        {" "}
+        <h2 className="mb-5 mt-8 text-2xl font-bold">Сите Настани</h2>
+        <Button variant="outline" onClick={() => setShowGraded(!showGraded)}>
+          {showGraded ? "Покажи ги сите" : "Покажи само неоценети"}
+        </Button>
+      </div>
+
       <div>
         {MobxStore.events?.length > 0 ? (
           MobxStore.events.map((event) => (

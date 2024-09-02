@@ -53,26 +53,39 @@ const Calendar = observer(({ schedule, professor, isAdmin = false }) => {
   const renderCalendar = () => {
     const daysInMonth = getDaysInMonth(currentMonth, currentYear);
     const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
+    const today = new Date(); // Current date and time
+    const currentDateString = today.toISOString().split("T")[0]; // Get current date in YYYY-MM-DD format
 
     const days = [];
+
+    // Render empty slots for days before the first day of the current month
     for (let i = 0; i < firstDayOfMonth; i++) {
       days.push(<div key={`empty-${i}`} className="p-3 text-center"></div>);
     }
 
+    // Render each day of the month
     for (let i = 1; i <= daysInMonth; i++) {
       const dateString = `${currentYear}-${String(currentMonth + 1).padStart(
         2,
         "0",
       )}-${String(i).padStart(2, "0")}`;
+
       const isAvailable = schedule?.some((scheduleEntry) => {
         return scheduleEntry.date === dateString;
       });
+
+      // Check if the date is in the past
+      const isPast = new Date(dateString) < today;
 
       days.push(
         <div
           key={i}
           className={`cursor-pointer border p-3 text-center ${
-            isAvailable ? "bg-sky" : "bg-white"
+            isPast && isAvailable
+              ? "bg-gray-200"
+              : isAvailable
+                ? "bg-sky"
+                : "bg-white"
           } hover:bg-blue-100`}
           onClick={() => handleDateClick(dateString)}
         >
@@ -125,48 +138,70 @@ const Calendar = observer(({ schedule, professor, isAdmin = false }) => {
           Слободни термини за {selectedDate}
         </h3>
         <ul className="list-disc">
-          {selectedSchedule.timeRanges?.map((range, index) => (
-            <li key={index} className="my-2 flex items-center justify-between">
-              <span>
-                {range.from} - {range.to}
-              </span>
-              <div className="flex space-x-2">
-                {MobxStore.user?.role == "student" && (
-                  <button
-                    onClick={() => handleScheduleClick(range)}
-                    disabled={range.isScheduled}
-                    className={`rounded px-3 py-1 text-white ${
-                      range.isScheduled
-                        ? "cursor-not-allowed bg-gray-400"
-                        : "bg-sky hover:bg-sky"
-                    }`}
-                  >
-                    {range.isScheduled ? "Полна" : "Закажи"}
-                  </button>
-                )}
+          {selectedSchedule.timeRanges?.map((range, index) => {
+            // Check if the time range is in the past
+            const currentDateTime = new Date();
+            const rangeEndDateTime = new Date(`${selectedDate}T${range.to}`);
 
-                {MobxStore.user?.role == "professor" && (
-                  <div>{range.isScheduled ? "Закажано" : "Слободно"}</div>
-                )}
+            const isPast = rangeEndDateTime < currentDateTime;
 
-                {isAdmin && (
-                  <button
-                    disabled={range.isScheduled}
-                    onClick={() =>
-                      handleDeleteTimeRange(range, range.isScheduled)
-                    }
-                    className={`rounded  px-3 py-1 text-white  ${
-                      range.isScheduled
-                        ? "bg-gray-400 hover:bg-gray-400"
-                        : "bg-red-500 hover:bg-red-600"
-                    }`}
-                  >
-                    Delete Event
-                  </button>
-                )}
-              </div>
-            </li>
-          ))}
+            let buttonText;
+            if (isPast) {
+              buttonText = range.isScheduled
+                ? "Полна завршена"
+                : "Слободна завршена";
+            } else {
+              buttonText = range.isScheduled ? "Полна" : "Закажи";
+            }
+
+            return (
+              <li
+                key={index}
+                className="my-2 flex items-center justify-between"
+              >
+                <span>
+                  {range.from} - {range.to}
+                </span>
+                <div className="flex space-x-2">
+                  {MobxStore.user?.role === "student" && (
+                    <button
+                      onClick={() => handleScheduleClick(range)}
+                      disabled={range.isScheduled || isPast}
+                      className={`rounded px-3 py-1 text-white ${
+                        isPast
+                          ? "cursor-not-allowed bg-gray-300"
+                          : range.isScheduled
+                            ? "cursor-not-allowed bg-gray-400"
+                            : "bg-sky hover:bg-sky"
+                      }`}
+                    >
+                      {buttonText}
+                    </button>
+                  )}
+
+                  {MobxStore.user?.role === "professor" && (
+                    <div>{range.isScheduled ? "Закажано" : "Слободно"}</div>
+                  )}
+
+                  {isAdmin && (
+                    <button
+                      disabled={range.isScheduled}
+                      onClick={() =>
+                        handleDeleteTimeRange(range, range.isScheduled)
+                      }
+                      className={`rounded  px-3 py-1 text-white  ${
+                        range.isScheduled
+                          ? "bg-gray-400 hover:bg-gray-400"
+                          : "bg-red-500 hover:bg-red-600"
+                      }`}
+                    >
+                      Delete Event
+                    </button>
+                  )}
+                </div>
+              </li>
+            );
+          })}
         </ul>
       </div>
     );
