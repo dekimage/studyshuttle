@@ -20,7 +20,10 @@ import {
   getDocs,
   where,
 } from "firebase/firestore";
-import { classReservationTemplate } from "../util/emailTemplates";
+import {
+  classReservationTemplate,
+  groupJoinTemplate,
+} from "../util/emailTemplates";
 import { filterSubjectsByIds } from "../constants";
 
 const DEFAULT_USER = {
@@ -222,9 +225,68 @@ class Store {
         blueTokens: this.user.blueTokens - 1,
       });
 
-      return { success: true }; // Return success without modifying MobX state
+      // send email
+      const professorDocRef = doc(db, "professors", groupData.professorId);
+      const professorSnapshot = await getDoc(professorDocRef);
+
+      if (!professorSnapshot.exists()) {
+        console.log("Professor not found.");
+        return { error: "Professor not found" };
+      }
+      console.log(professorSnapshot.data());
+
+      try {
+        // Fetch user and professor details
+        const student = this.user;
+        const professor = professorSnapshot.data();
+        const professorUserData = await this.fetchUserProfileById(
+          professor.userId,
+        );
+
+        if (!student || !professor) {
+          throw new Error("Invalid student or professor ID");
+        }
+
+        // Prepare email templates
+        const { studentEmail, professorEmail } = groupJoinTemplate(
+          `${student.name} ${student.lastname}`,
+          groupData.name,
+          `${professor.name} ${professor.lastname}`,
+          groupData.schedule,
+          professor.link, // groupData.link??
+        );
+
+        // Send email to student
+        await fetch("/api/sendEmail", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            to: student.email,
+            subject: studentEmail.subject,
+            text: studentEmail.text,
+          }),
+        });
+
+        // Send email to professor
+        await fetch("/api/sendEmail", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            to: professorUserData.data.email,
+            subject: professorEmail.subject,
+            text: professorEmail.text,
+          }),
+        });
+
+        return { success: true };
+      } catch (error) {
+        console.log("Error creating event or sending email:", error);
+        return { error: "Failed to create event or send email" };
+      }
+
+      return { success: true };
     } catch (error) {
-      console.error("Error joining group:", error);
+      console.log("Error joining group:", error);
       return { success: false, error: "Error joining group." };
     }
   }
@@ -1187,7 +1249,7 @@ class Store {
           throw new Error("Invalid student or professor ID");
         }
 
-        const subjectLabel = filterSubjectsByIds([subject])[0]?.label
+        const subjectLabel = filterSubjectsByIds([subject])[0]?.label;
 
         // Prepare email templates
         const { studentEmail, professorEmail } = classReservationTemplate(
@@ -1228,8 +1290,6 @@ class Store {
         console.error("Error creating event or sending email:", error);
         return { error: "Failed to create event or send email" };
       }
-
-      return { success: true };
     } catch (error) {
       console.log("Error creating event:", error);
       return { error: "Error creating event" };

@@ -32,6 +32,7 @@ export const groupJoinTemplate = (
   groupName,
   professorName,
   schedule,
+  link,
 ) => {
   const scheduleDetails = schedule
     .map((slot) => `${slot.day}: ${slot.startTime} - ${slot.endTime}`)
@@ -40,11 +41,11 @@ export const groupJoinTemplate = (
   return {
     studentEmail: {
       subject: `Academy Group Join Confirmation`,
-      text: `Hi ${studentName},\n\nYou have successfully joined the academy group ${groupName} under Professor ${professorName}.\n\nThe group meets on the following schedule:\n${scheduleDetails}`,
+      text: `Hi ${studentName},\n\nYou have successfully joined the academy group ${groupName} under Professor ${professorName}.\n\nThe group meets on the following schedule:\n${scheduleDetails}. \n\nLink: ${link}`,
     },
     professorEmail: {
       subject: `New Student Joined Your Group`,
-      text: `Dear Professor ${professorName},\n\nA new student, ${studentName}, has joined your academy group ${groupName}.\n\nGroup Schedule:\n${scheduleDetails}`,
+      text: `Dear Professor ${professorName},\n\nA new student, ${studentName}, has joined your academy group ${groupName}.\n\nGroup Schedule:\n${scheduleDetails}. \n\nLink: ${link}`,
     },
   };
 };
