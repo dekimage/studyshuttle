@@ -6,6 +6,7 @@ import Loader from "./Loader";
 import { toJS } from "mobx";
 import { filterAndSortEvents } from "../pocetna/page";
 import { Button } from "@/components/ui/button";
+import { filterOddByIds, filterSubjectsByIds } from "@/src/constants";
 
 const Event = observer(({ event, showGraded, ignored = false }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -94,26 +95,30 @@ const Event = observer(({ event, showGraded, ignored = false }) => {
             </div>
           </div>
           <div className="border-t pt-4">
-            <h3 className="text-lg font-semibold">User Submitted:</h3>
+            <h3 className="mb-4 text-lg font-semibold">Од ученикот:</h3>
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col">
-                <label className="font-semibold">Subject:</label>
-                <div className="rounded bg-gray-100 p-2">{event.subject}</div>
+                <label className="font-semibold">Предмет:</label>
+                <div className="rounded bg-gray-100 p-2">
+                  {filterSubjectsByIds([event.subject])[0]?.label}
+                </div>
               </div>
               <div className="flex flex-col">
-                <label className="font-semibold">Class Type:</label>
-                <div className="rounded bg-gray-100 p-2">{event.classType}</div>
+                <label className="font-semibold">Ниво:</label>
+                <div className="rounded bg-gray-100 p-2">
+                  {filterOddByIds(event.classType).label}
+                </div>
               </div>
             </div>
             <div className="mt-4">
-              <label className="font-semibold">Notes:</label>
+              <label className="font-semibold">Забелешки:</label>
               <div className="rounded bg-gray-100 p-2">
                 {event.notes || "No notes provided"}
               </div>
             </div>
           </div>
           <div className="border-t pt-4">
-            <h3 className="text-lg font-semibold">Grading:</h3>
+            <h3 className="mb-4 text-lg font-semibold">Оценување:</h3>
             <div className="grid grid-cols-4 gap-4">
               {["attention", "memory", "skill", "interest"].map((stat) => (
                 <div key={stat} className="flex flex-col">
@@ -131,7 +136,7 @@ const Event = observer(({ event, showGraded, ignored = false }) => {
                 </div>
               ))}
               <div className="flex flex-col">
-                <label className="font-semibold">Average:</label>
+                <label className="font-semibold">Просек:</label>
                 <input
                   type="number"
                   value={calculateAverage()}
@@ -142,7 +147,7 @@ const Event = observer(({ event, showGraded, ignored = false }) => {
             </div>
             <div className="mt-4">
               <label className="font-semibold">
-                Comment ({comment.length}/140):
+                Коментар ({comment.length}/140):
               </label>
               <textarea
                 value={comment}

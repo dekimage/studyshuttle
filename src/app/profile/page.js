@@ -8,6 +8,8 @@ import MobxStore from "../mobx";
 import { observer } from "mobx-react";
 import { useState } from "react";
 import Loader from "../_components/Loader";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import crypto from "crypto";
 
 const CheckmarkIcon = ({ isBlack = false }) => {
   return isBlack ? (
@@ -65,6 +67,156 @@ const BalanceBox = ({ amount, label, color, isBluecoin }) => {
   );
 };
 
+function generateHash({
+  clientid,
+  oid,
+  amount,
+  okUrl,
+  failUrl,
+  trantype,
+  rnd,
+  storeKey,
+}) {
+  // Construct the plaintext string
+  const plaintext = `${clientid}${oid}${amount}${okUrl}${failUrl}${trantype}${rnd}${storeKey}`;
+
+  // Create the SHA1 hash and encode it in Base64
+  const hash = crypto
+    .createHash("sha1")
+    .update(plaintext, "utf8")
+    .digest("base64");
+
+  return hash;
+}
+
+function generateRandomString(length) {
+  const characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "";
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  return result;
+}
+
+function generateUUID() {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (char) => {
+    const random = (Math.random() * 16) | 0;
+    const value = char === "x" ? random : (random & 0x3) | 0x8;
+    return value.toString(16);
+  });
+}
+
+const PaymentDialog = ({}) => {
+  const [formValues, setFormValues] = useState({
+    pan: "",
+    expYear: "",
+    expMonth: "",
+    cv2: "",
+  });
+
+  const handleInputChange = (e) => {
+    setFormValues({ ...formValues, [e.target.name]: e.target.value });
+  };
+
+  const clientId = "180000166";
+  // const oid = generateUUID();
+  const oid = "1291899411421";
+  const amount = "3000.00";
+  const okUrl = "http://localhost/api/payment-success";
+  const failUrl = "http://localhost/api/payment-fail";
+  const trantype = "Auth";
+  // const rnd = generateRandomString(10);
+  const rnd = "asdf";
+  const storeKey = "TEST1777";
+  // const storeKey = "TEST1787";
+
+  const handleSubmit = () => {
+    // Generate hash for form submission
+    // return "ZTMwMjE2MmQzNjI5MDRlODU2YjhmMTk2ZmI3NzU5YjI0MWFiYzMzZg==";
+    return generateHash({
+      clientId,
+      oid,
+      amount,
+      okUrl,
+      failUrl,
+      trantype,
+      rnd,
+      storeKey,
+    });
+  };
+
+  return (
+    <Dialog>
+      <DialogTrigger>
+        <Button className="bg-sky hover:bg-sky">Избери план</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <form
+          method="POST"
+          action="https://torus-stage-halkbankmacedonia.asseco-see.com.tr/fim/est3Dgate"
+        >
+          <input type="hidden" name="clientid" value={clientId} />
+          <input type="hidden" name="storetype" value="3d_pay_hosting" />
+          <input type="hidden" name="hash" value={handleSubmit()} />
+          <input type="hidden" name="trantype" value={trantype} />
+          <input type="hidden" name="amount" value={amount} />
+          <input type="hidden" name="currency" value="807" />
+          <input type="hidden" name="oid" value={oid} />
+          <input type="hidden" name="encoding" value="utf-8" />
+          <input
+            type="hidden"
+            name="okUrl"
+            value="http://localhost/api/payment-success"
+          />
+          <input
+            type="hidden"
+            name="failUrl"
+            value="http://localhost/api/payment-fail"
+          />
+          <input type="hidden" name="lang" value="en" />
+          <input type="hidden" name="rnd" value={rnd} />
+
+          {/* Payment form fields */}
+          {/* <input
+            type="text"
+            name="pan"
+            placeholder="Card Number"
+            value={formValues.pan}
+            onChange={handleInputChange}
+            required
+          />
+          <input
+            type="text"
+            name="expYear"
+            placeholder="Expiry Year"
+            value={formValues.expYear}
+            onChange={handleInputChange}
+            required
+          />
+          <input
+            type="text"
+            name="expMonth"
+            placeholder="Expiry Month"
+            value={formValues.expMonth}
+            onChange={handleInputChange}
+            required
+          />
+          <input
+            type="text"
+            name="cv2"
+            placeholder="CVV"
+            value={formValues.cv2}
+            onChange={handleInputChange}
+            required
+          /> */}
+          <button type="submit">Pay Now</button>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 const InitPaymentForm = ({ setSelectedPlan }) => {
   return (
     <div>
@@ -86,7 +238,8 @@ const InitPaymentForm = ({ setSelectedPlan }) => {
         >
           Врати се назад
         </Button>
-        <Button className="bg-sky hover:bg-sky">Избери план</Button>
+        {/* <Button className="bg-sky hover:bg-sky">Избери план</Button> */}
+        <PaymentDialog />
       </div>
     </div>
   );
