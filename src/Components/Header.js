@@ -203,7 +203,7 @@ export const Header = () => {
           </div>
         </Link>
 
-        <Link href="/signup">
+        <Link href="/login">
           <Button className="rounded-full bg-chili">Најави се</Button>
         </Link>
       </div>

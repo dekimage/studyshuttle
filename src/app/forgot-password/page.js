@@ -1,18 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getAuth, sendPasswordResetEmail } from "firebase/auth";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { CgSpinner } from "react-icons/cg";
+import MobxStore from "../mobx";
+import { useRouter } from "next/navigation";
 
 const ForgotPasswordForm = () => {
+  const { user, userReady } = MobxStore;
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [requestCount, setRequestCount] = useState(0); // Track number of requests
   const [cooldown, setCooldown] = useState(false); // Track cooldown state
+  const router = useRouter();
+
+  useEffect(() => {
+    if (user && userReady) {
+      router.push("/pocetna");
+    }
+  }, [user, userReady, router]);
 
   const handleForgotPassword = async () => {
     if (cooldown) {

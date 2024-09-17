@@ -99,7 +99,7 @@ function AcademyGroupsList({
   onDelete,
   setSelectedGroupDetails,
 }) {
-  console.log({ academyGroups: toJS(academyGroups) });
+  // console.log({ academyGroups: toJS(academyGroups) });
   return (
     <div>
       <h2 className="p-2 text-2xl">Академски Групи</h2>
@@ -730,6 +730,16 @@ function AcademyGroupManager() {
 }
 
 const Termini = observer(() => {
+  const { user } = MobxStore;
+  return (
+    <div>
+      <TerminiComponent />
+      <Calendar schedule={user?.schedule} professor={user} isAdmin />
+    </div>
+  );
+});
+
+const TerminiComponent = observer(() => {
   const [date, setDate] = useState("");
   const [timeRanges, setTimeRanges] = useState([{ from: "", to: "" }]);
   const [error, setError] = useState(""); // State for error handling
@@ -835,12 +845,6 @@ const Termini = observer(() => {
         Зачувај ги сите термини
       </button>
       <h2 className="mb-5 mt-16 text-2xl font-bold">Tермини</h2>
-
-      <Calendar
-        schedule={MobxStore.user?.schedule}
-        professor={MobxStore.user}
-        isAdmin
-      />
     </div>
   );
 });

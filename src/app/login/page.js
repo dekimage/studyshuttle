@@ -15,7 +15,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { observer } from "mobx-react";
 import MobxStore from "../mobx";
@@ -32,11 +32,12 @@ const formSchema = z.object({
 
 export const LoginForm = observer(() => {
   const router = useRouter();
-  const { user, loginWithEmail } = MobxStore;
+  const { user, userReady, loginWithEmail } = MobxStore;
   const isAuthenticated = !!user;
 
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false); // State to manage password visibility
+  const [errorMessage, setErrorMessage] = useState("");
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -45,9 +46,16 @@ export const LoginForm = observer(() => {
     },
   });
 
+  useEffect(() => {
+    if (user && userReady) {
+      router.push("/pocetna");
+    }
+  }, [user, userReady, router]);
+
   async function onSubmit(values) {
     const { email, password } = values;
     setIsLoading(true);
+    setErrorMessage(""); // Clear any previous error message
 
     if (isAuthenticated) {
       setIsLoading(false);
@@ -55,13 +63,17 @@ export const LoginForm = observer(() => {
       return;
     }
 
-    await loginWithEmail({
-      email,
-      password,
-    });
-    setIsLoading(false);
-    console.log(1241241);
-    router.push("/pocetna");
+    try {
+      await loginWithEmail({ email, password });
+      router.push("/pocetna");
+    } catch (error) {
+      console.log(error);
+
+      setErrorMessage(
+        "Погрешна емаил адреса или лозинка. Ве молиме проверете ги вашите податоци.",
+      );
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -117,6 +129,10 @@ export const LoginForm = observer(() => {
         >
           {showPassword ? "Сокриј лозинка" : "Покажи лозинка"}
         </div>
+
+        {errorMessage && ( // Display error message if it exists
+          <div className="text-sm text-red-500">{errorMessage}</div>
+        )}
 
         <Button
           className="w-full bg-sun font-bold text-black hover:bg-sun"

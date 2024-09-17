@@ -26,6 +26,7 @@ export default function RootLayout({ children }) {
     "/osnovno",
     "/sredno",
     "/univerzitet",
+    "/forgot-password",
     "/",
   ].includes(pathname); // Example: Hide layout on login and register routes
   const showHeaderFooter = ![

@@ -72,7 +72,7 @@ class Store {
     this.fetchProfessors = this.fetchProfessors.bind(this);
     this.fetchAcademyGroupsByProfessorId =
       this.fetchAcademyGroupsByProfessorId.bind(this);
-    this.reserveUserInAcademyGroup = this.reserveUserInAcademyGroup.bind(this);
+
     this.createAcademyGroup = this.createAcademyGroup.bind(this);
     this.editAcademyGroup = this.editAcademyGroup.bind(this);
     this.deleteAcademyGroup = this.deleteAcademyGroup.bind(this);
@@ -165,7 +165,191 @@ class Store {
     });
   }
 
-  // MAIN PAGES
+  // async joinGroup(groupId) {
+  //   if (!this.user || this.user.role !== "student") {
+  //     return { success: false, error: "Only students can join groups." };
+  //   }
+
+  //   if (this.user.blueTokens < 1) {
+  //     return { success: false, error: "Not enough blue tokens." };
+  //   }
+
+  //   try {
+  //     // Fetch the group document
+  //     const groupDocRef = doc(db, "academyGroups", groupId);
+  //     const groupDoc = await getDoc(groupDocRef);
+
+  //     if (!groupDoc.exists()) {
+  //       return { success: false, error: "Group not found." };
+  //     }
+
+  //     const groupData = groupDoc.data();
+
+  //     // Check if the user is already in the group
+  //     if (groupData.users && groupData.users.includes(this.user.uid)) {
+  //       return { success: false, error: "User is already in the group." };
+  //     }
+
+  //     const newUserList = [...(groupData.users || []), this.user.uid];
+
+  //     // Update the group with the new user list
+  //     await updateDoc(groupDocRef, {
+  //       users: newUserList,
+  //       activeUsers: newUserList.length,
+  //     });
+
+  //     // Update user's tokens (this would involve another Firestore call)
+  //     await updateDoc(doc(db, "users", this.user.uid), {
+  //       blueTokens: this.user.blueTokens - 1,
+  //     });
+
+  //     // send email
+  //     const professorDocRef = doc(db, "professors", groupData.professorId);
+  //     const professorSnapshot = await getDoc(professorDocRef);
+
+  //     if (!professorSnapshot.exists()) {
+  //       console.log("Professor not found.");
+  //       return { error: "Professor not found" };
+  //     }
+  //     console.log(professorSnapshot.data());
+
+  //     try {
+  //       // Fetch user and professor details
+  //       const student = this.user;
+  //       const professor = professorSnapshot.data();
+  //       const professorUserData = await this.fetchUserProfileById(
+  //         professor.userId,
+  //       );
+
+  //       if (!student || !professor) {
+  //         throw new Error("Invalid student or professor ID");
+  //       }
+
+  //       // Prepare email templates
+  //       const { studentEmail, professorEmail } = groupJoinTemplate(
+  //         `${student.name} ${student.lastname}`,
+  //         groupData.name,
+  //         `${professor.name} ${professor.lastname}`,
+  //         groupData.schedule,
+  //         professor.link, // groupData.link??
+  //       );
+
+  //       // Send email to student
+  //       await fetch("/api/sendEmail", {
+  //         method: "POST",
+  //         headers: { "Content-Type": "application/json" },
+  //         body: JSON.stringify({
+  //           to: student.email,
+  //           subject: studentEmail.subject,
+  //           text: studentEmail.text,
+  //         }),
+  //       });
+
+  //       // Send email to professor
+  //       await fetch("/api/sendEmail", {
+  //         method: "POST",
+  //         headers: { "Content-Type": "application/json" },
+  //         body: JSON.stringify({
+  //           to: professorUserData.data.email,
+  //           subject: professorEmail.subject,
+  //           text: professorEmail.text,
+  //         }),
+  //       });
+
+  //       return { success: true };
+  //     } catch (error) {
+  //       console.log("Error creating event or sending email:", error);
+  //       return { error: "Failed to create event or send email" };
+  //     }
+  //   } catch (error) {
+  //     console.log("Error joining group:", error);
+  //     return { success: false, error: "Error joining group." };
+  //   }
+  // }
+
+  async joinGroup(groupId) {
+    try {
+      const auth = getAuth();
+      const user = auth.currentUser;
+      const token = await user.getIdToken();
+
+      const response = await fetch("/api/joinGroup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ groupId }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to join group");
+      }
+
+      // Handle success
+      console.log("Successfully joined group");
+    } catch (error) {
+      console.log("Error:", error.message);
+    }
+  }
+
+  async handlePaymentCallback(paymentDetails) {
+    const { paymentId, status, packagePurchased, tokensPurchased, couponUsed } =
+      paymentDetails;
+
+    if (!this.user) {
+      console.log("No user logged in.");
+      return { error: "No user logged in" };
+    }
+
+    const newOrder = {
+      userId: this.user.uid,
+      date: new Date(),
+      paymentId,
+      status,
+      packagePurchased,
+      tokensPurchased,
+      couponUsed: couponUsed || null, // Only add coupon if it was used
+    };
+
+    try {
+      // Create the order in Firestore
+      const orderDocRef = await addDoc(collection(db, "orders"), newOrder);
+
+      // Determine which token type to increase
+      let updatedTokens = {};
+
+      switch (packagePurchased) {
+        case "blueTokenPackage":
+          updatedTokens.blueTokens =
+            (this.user.blueTokens || 0) + tokensPurchased;
+          break;
+        case "yellowTokenPackage":
+          updatedTokens.yellowTokens =
+            (this.user.yellowTokens || 0) + tokensPurchased;
+          break;
+        // Add cases for other token types if needed
+        default:
+          console.log("Unknown package purchased.");
+          return { error: "Unknown package purchased" };
+      }
+
+      // Update the user's token count in Firestore
+      await updateDoc(doc(db, "users", this.user.uid), updatedTokens);
+
+      // Update the user's token count in MobX store
+      runInAction(() => {
+        this.user = { ...this.user, ...updatedTokens };
+      });
+
+      return { success: true, orderId: orderDocRef.id };
+    } catch (error) {
+      console.log("Error creating order or updating tokens:", error);
+      return { error: "Error creating order or updating tokens" };
+    }
+  }
 
   async fetchAcademyGroupsByProfessor(professorId) {
     try {
@@ -184,110 +368,6 @@ class Store {
     } catch (error) {
       console.error("Error fetching academy groups:", error);
       return { success: false, error: "Error fetching academy groups" };
-    }
-  }
-
-  async joinGroup(groupId) {
-    if (!this.user || this.user.role !== "student") {
-      return { success: false, error: "Only students can join groups." };
-    }
-
-    if (this.user.blueTokens < 1) {
-      return { success: false, error: "Not enough blue tokens." };
-    }
-
-    try {
-      // Fetch the group document
-      const groupDocRef = doc(db, "academyGroups", groupId);
-      const groupDoc = await getDoc(groupDocRef);
-
-      if (!groupDoc.exists()) {
-        return { success: false, error: "Group not found." };
-      }
-
-      const groupData = groupDoc.data();
-
-      // Check if the user is already in the group
-      if (groupData.users && groupData.users.includes(this.user.uid)) {
-        return { success: false, error: "User is already in the group." };
-      }
-
-      const newUserList = [...(groupData.users || []), this.user.uid];
-
-      // Update the group with the new user list
-      await updateDoc(groupDocRef, {
-        users: newUserList,
-        activeUsers: newUserList.length,
-      });
-
-      // Update user's tokens (this would involve another Firestore call)
-      await updateDoc(doc(db, "users", this.user.uid), {
-        blueTokens: this.user.blueTokens - 1,
-      });
-
-      // send email
-      const professorDocRef = doc(db, "professors", groupData.professorId);
-      const professorSnapshot = await getDoc(professorDocRef);
-
-      if (!professorSnapshot.exists()) {
-        console.log("Professor not found.");
-        return { error: "Professor not found" };
-      }
-      console.log(professorSnapshot.data());
-
-      try {
-        // Fetch user and professor details
-        const student = this.user;
-        const professor = professorSnapshot.data();
-        const professorUserData = await this.fetchUserProfileById(
-          professor.userId,
-        );
-
-        if (!student || !professor) {
-          throw new Error("Invalid student or professor ID");
-        }
-
-        // Prepare email templates
-        const { studentEmail, professorEmail } = groupJoinTemplate(
-          `${student.name} ${student.lastname}`,
-          groupData.name,
-          `${professor.name} ${professor.lastname}`,
-          groupData.schedule,
-          professor.link, // groupData.link??
-        );
-
-        // Send email to student
-        await fetch("/api/sendEmail", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            to: student.email,
-            subject: studentEmail.subject,
-            text: studentEmail.text,
-          }),
-        });
-
-        // Send email to professor
-        await fetch("/api/sendEmail", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            to: professorUserData.data.email,
-            subject: professorEmail.subject,
-            text: professorEmail.text,
-          }),
-        });
-
-        return { success: true };
-      } catch (error) {
-        console.log("Error creating event or sending email:", error);
-        return { error: "Failed to create event or send email" };
-      }
-
-      return { success: true };
-    } catch (error) {
-      console.log("Error joining group:", error);
-      return { success: false, error: "Error joining group." };
     }
   }
 
@@ -564,13 +644,6 @@ class Store {
     }
   }
 
-  // GLOBAL MOBX STATE
-  setIsMobileOpen(isMobileOpen) {
-    runInAction(() => {
-      this.isMobileOpen = isMobileOpen;
-    });
-  }
-
   async fetchAcademyGroups() {
     if (!this.user) return;
 
@@ -632,133 +705,6 @@ class Store {
     }
   }
 
-  async reserveUserInAcademyGroup(academyGroupId) {
-    if (!this.user) {
-      console.log("No user logged in.");
-      return;
-    }
-
-    if (this.user.blueTokens < 1) {
-      console.log("Not enough tokens.");
-      return { error: "Not enough tokens" };
-    }
-
-    // Reduce the user's blue tokens by 1
-    const updatedTokens = {
-      blueTokens: this.user.blueTokens - 1,
-    };
-
-    // Update the user in Firestore
-    await updateDoc(doc(db, "users", this.user.uid), updatedTokens);
-
-    // Update the user in MobX store
-    runInAction(() => {
-      this.user = { ...this.user, ...updatedTokens };
-    });
-
-    try {
-      const academyGroupRef = doc(db, "academyGroups", academyGroupId);
-      const academyGroupDoc = await getDoc(academyGroupRef);
-
-      if (!academyGroupDoc.exists()) {
-        console.log("Academy group not found.");
-        return;
-      }
-
-      const academyGroupData = academyGroupDoc.data();
-
-      // Check if the group has reached its maximum capacity
-      if (academyGroupData.activeUsers >= academyGroupData.maxUsers) {
-        console.log("Student limit reached.");
-        return { error: "Student limit reached" };
-      }
-
-      // Update the users array and activeUsers count
-      const updatedUsersArray = [...academyGroupData.users, this.user.uid];
-      const updatedActiveUsers = academyGroupData.activeUsers + 1;
-
-      await updateDoc(academyGroupRef, {
-        users: updatedUsersArray,
-        activeUsers: updatedActiveUsers,
-      });
-
-      // Optionally, update the local MobX state with the new academyGroup data
-      runInAction(() => {
-        const updatedAcademyGroup = {
-          ...academyGroupData,
-          users: updatedUsersArray,
-          activeUsers: updatedActiveUsers,
-        };
-        const index = this.academyGroups.findIndex(
-          (group) => group.id === academyGroupId,
-        );
-        if (index !== -1) {
-          this.academyGroups[index] = updatedAcademyGroup;
-        }
-      });
-
-      return { success: true };
-    } catch (error) {
-      console.log("Error reserving user in academy group:", error);
-      return { error: "Error reserving user in academy group" };
-    }
-  }
-
-  async handlePaymentCallback(paymentDetails) {
-    const { paymentId, status, packagePurchased, tokensPurchased, couponUsed } =
-      paymentDetails;
-
-    if (!this.user) {
-      console.log("No user logged in.");
-      return { error: "No user logged in" };
-    }
-
-    const newOrder = {
-      userId: this.user.uid,
-      date: new Date(),
-      paymentId,
-      status,
-      packagePurchased,
-      tokensPurchased,
-      couponUsed: couponUsed || null, // Only add coupon if it was used
-    };
-
-    try {
-      // Create the order in Firestore
-      const orderDocRef = await addDoc(collection(db, "orders"), newOrder);
-
-      // Determine which token type to increase
-      let updatedTokens = {};
-
-      switch (packagePurchased) {
-        case "blueTokenPackage":
-          updatedTokens.blueTokens =
-            (this.user.blueTokens || 0) + tokensPurchased;
-          break;
-        case "yellowTokenPackage":
-          updatedTokens.yellowTokens =
-            (this.user.yellowTokens || 0) + tokensPurchased;
-          break;
-        // Add cases for other token types if needed
-        default:
-          console.log("Unknown package purchased.");
-          return { error: "Unknown package purchased" };
-      }
-
-      // Update the user's token count in Firestore
-      await updateDoc(doc(db, "users", this.user.uid), updatedTokens);
-
-      // Update the user's token count in MobX store
-      runInAction(() => {
-        this.user = { ...this.user, ...updatedTokens };
-      });
-
-      return { success: true, orderId: orderDocRef.id };
-    } catch (error) {
-      console.log("Error creating order or updating tokens:", error);
-      return { error: "Error creating order or updating tokens" };
-    }
-  }
   async checkUserReview(professorId) {
     try {
       const reviewQuery = query(
@@ -784,6 +730,7 @@ class Store {
       return { success: false, error: "Error fetching review" };
     }
   }
+
   async submitReview(
     professorId,
     stars,
@@ -867,6 +814,7 @@ class Store {
       }
     }
   }
+
   async updateProfessorAverageRating(professorId, newRating, oldRating = null) {
     console.log({ newRating, oldRating });
     try {
@@ -1011,52 +959,6 @@ class Store {
       return { error: "Error deleting academy group" };
     }
   }
-
-  // async fetchAcademyGroupsForCurrentProfessor() {
-  //   if (!this.user || this.user.role !== "professor") {
-  //     console.log(
-  //       "Access denied: Only professors can view their academy groups.",
-  //     );
-  //     return { error: "Access denied" };
-  //   }
-
-  //   try {
-  //     const professorQuery = query(
-  //       collection(db, "professors"),
-  //       where("userId", "==", this.user.uid),
-  //     );
-  //     const professorSnapshot = await getDocs(professorQuery);
-
-  //     if (professorSnapshot.empty) {
-  //       console.log("Professor not found.");
-  //       return { error: "Professor not found" };
-  //     }
-
-  //     const professorDoc = professorSnapshot.docs[0];
-  //     const professorId = professorDoc.id;
-
-  //     const academyGroupsQuery = query(
-  //       collection(db, "academyGroups"),
-  //       where("professorId", "==", professorId),
-  //     );
-
-  //     const academyGroupsSnapshot = await getDocs(academyGroupsQuery);
-  //     const academyGroups = [];
-
-  //     academyGroupsSnapshot.forEach((doc) => {
-  //       academyGroups.push({ id: doc.id, ...doc.data() });
-  //     });
-
-  //     runInAction(() => {
-  //       this.academyGroups = academyGroups;
-  //     });
-
-  //     return { success: true };
-  //   } catch (error) {
-  //     console.log("Error fetching academy groups:", error);
-  //     return { error: "Error fetching academy groups" };
-  //   }
-  // }
 
   async fetchAcademyGroupsForCurrentProfessor() {
     if (!this.user || this.user.role !== "professor") {
@@ -1548,8 +1450,7 @@ class Store {
     }
   }
 
-  // NEW FUNCTIONS ABOVE
-
+  // AUTH
   async loginWithEmail({ email, password }) {
     try {
       this.loading = true;
@@ -1627,6 +1528,12 @@ class Store {
       console.log("Error sending password reset email:", error);
       // Handle errors, such as invalid email, etc.
     }
+  }
+
+  setIsMobileOpen(isMobileOpen) {
+    runInAction(() => {
+      this.isMobileOpen = isMobileOpen;
+    });
   }
 }
 

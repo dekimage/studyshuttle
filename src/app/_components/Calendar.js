@@ -3,6 +3,9 @@ import { observer } from "mobx-react-lite";
 import MobxStore from "../mobx";
 import ScheduleClassPopup from "./ScheduleClassPopup";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import { DialogContent } from "@radix-ui/react-dialog";
+import { TerminiComponent } from "../professor-admin/page";
 
 function getDayFromDate(dateString) {
   // Split the date string by hyphens and return the last element
@@ -105,6 +108,26 @@ const Calendar = observer(({ schedule, professor, isAdmin = false }) => {
     );
 
     if (!selectedSchedule) return <div>Нема слободни термини на тој датум</div>;
+    // if (!selectedSchedule) {
+    //   if (
+    //     MobxStore.user?.role === "professor" &&
+    //     MobxStore.user?.uid === professor?.uid
+    //   ) {
+    //     return (
+    //       <Dialog>
+    //         <DialogTrigger>
+    //           <button className="rounded bg-sky px-3 py-1 text-white">
+    //             Додади слободен термин
+    //           </button>
+    //         </DialogTrigger>
+    //         <DialogContent>
+    //           <TerminiComponent />
+    //         </DialogContent>
+    //       </Dialog>
+    //     );
+    //   }
+    //   return <div>Нема слободни термини на тој датум</div>;
+    // }
 
     const handleDeleteTimeRange = async (timeRange, isScheduled = false) => {
       if (isScheduled) {

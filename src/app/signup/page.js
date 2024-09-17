@@ -17,7 +17,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { observer } from "mobx-react";
@@ -52,12 +52,18 @@ const formSchema = z
   });
 
 export const SignupForm = observer(() => {
-  const { signupWithEmail } = MobxStore;
+  const { signupWithEmail, user, userReady } = MobxStore;
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [academicLevel, setAcademicLevel] = useState("osnovno");
   const router = useRouter();
+
+  useEffect(() => {
+    if (user && userReady) {
+      router.push("/pocetna");
+    }
+  }, [user, userReady, router]);
 
   const form = useForm({
     resolver: zodResolver(formSchema),

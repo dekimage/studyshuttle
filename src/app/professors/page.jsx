@@ -131,7 +131,7 @@ const AcademyGroups = ({ professor }) => {
   }
 
   return (
-    <div className="flex w-full flex-col gap-2">
+    <div className="flex w-full flex-col gap-2 ">
       {academyGroups.length > 0 &&
         academyGroups.map((group) => {
           const isUserInGroup = group.users.includes(user.uid); // Check if the user is already in the group
@@ -431,7 +431,7 @@ const ProffesorCard = ({
       </div>
 
       {isDetails && (
-        <div className="flex h-[900px] w-full flex-col justify-between rounded-[16px] bg-sun p-4">
+        <div className="flex h-[900px] w-full flex-col justify-between overflow-x-auto rounded-[16px] bg-sun p-4">
           <div className="h-full pt-4 md:h-[450px]">
             <div className="text-[25px] font-bold">
               Слободни термини за часови:
