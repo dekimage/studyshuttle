@@ -1,5 +1,24 @@
 import { NextResponse } from "next/server";
 import { db, auth, admin } from "../../firebaseAdmin";
+import { groupJoinTemplate } from "@/src/util/emailTemplates";
+
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+
+export const fetchUserProfileById = async (userId) => {
+  try {
+    const userDocRef = db.collection("users").doc(userId);
+    const userDoc = await userDocRef.get();
+
+    if (userDoc.exists) {
+      return { success: true, data: userDoc.data() };
+    } else {
+      return { success: false, error: "User not found" };
+    }
+  } catch (error) {
+    console.error("Error fetching user profile:", error);
+    return { success: false, error: "Error fetching user profile" };
+  }
+};
 
 export async function POST(req) {
   try {
@@ -94,6 +113,42 @@ export async function POST(req) {
         { status: 404 },
       );
     }
+
+    const professorData = professorDoc.data();
+
+    // professor as user data -->
+    const professorUserData = await fetchUserProfileById(professorData.userId);
+
+    // Prepare email templates
+    const { studentEmail, professorEmail } = groupJoinTemplate(
+      `${userData.name} ${userData.lastname}`,
+      groupData.name,
+      `${professorData.name} ${professorData.lastname}`,
+      groupData.schedule,
+      professorData.link, // groupData.link??
+    );
+
+    // Send email to student
+    await fetch(`${baseUrl}/api/sendEmail`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        to: userData.email,
+        subject: studentEmail.subject,
+        text: studentEmail.text,
+      }),
+    });
+
+    // Send email to professor
+    await fetch(`${baseUrl}/api/sendEmail`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        to: professorUserData.data.email,
+        subject: professorEmail.subject,
+        text: professorEmail.text,
+      }),
+    });
 
     // Skip email sending part for now
 

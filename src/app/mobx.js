@@ -14,24 +14,11 @@ import {
   setDoc,
   collection,
   addDoc,
-  deleteDoc,
   query,
   updateDoc,
   getDocs,
   where,
 } from "firebase/firestore";
-import {
-  classReservationTemplate,
-  groupJoinTemplate,
-} from "../util/emailTemplates";
-import { filterSubjectsByIds } from "../constants";
-
-const DEFAULT_USER = {
-  yellowTokens: 0,
-  blueTokens: 0,
-  redTokens: 0,
-  role: "student",
-};
 
 class Store {
   // App Data
@@ -59,52 +46,55 @@ class Store {
 
     makeAutoObservable(this);
     this.initializeAuth();
-
+    this.getIdToken = this.getIdToken.bind(this);
     this.setIsMobileOpen = this.setIsMobileOpen.bind(this);
 
     this.loginWithEmail = this.loginWithEmail.bind(this);
     this.signupWithEmail = this.signupWithEmail.bind(this);
-
     this.logout = this.logout.bind(this);
     this.sendPasswordReset = this.sendPasswordReset.bind(this);
 
-    this.fetchAcademyGroups = this.fetchAcademyGroups.bind(this);
-    this.fetchProfessors = this.fetchProfessors.bind(this);
-    this.fetchAcademyGroupsByProfessorId =
-      this.fetchAcademyGroupsByProfessorId.bind(this);
+    // DONE NEXT SERVER
+    this.joinGroup = this.joinGroup.bind(this);
+    this.submitReview = this.submitReview.bind(this);
 
     this.createAcademyGroup = this.createAcademyGroup.bind(this);
     this.editAcademyGroup = this.editAcademyGroup.bind(this);
     this.deleteAcademyGroup = this.deleteAcademyGroup.bind(this);
-    this.handlePaymentCallback = this.handlePaymentCallback.bind(this);
-    this.submitReview = this.submitReview.bind(this);
-    this.updateProfessorAverageRating =
-      this.updateProfessorAverageRating.bind(this);
-    this.fetchAcademyGroupsForCurrentProfessor =
-      this.fetchAcademyGroupsForCurrentProfessor.bind(this);
     this.addScheduleEntry = this.addScheduleEntry.bind(this);
     this.deleteScheduleEntry = this.deleteScheduleEntry.bind(this);
-    this.deleteTimeRange = this.deleteTimeRange.bind(this);
-    this.fetchEventsForProfessor = this.fetchEventsForProfessor.bind(this);
+
     this.createEvent = this.createEvent.bind(this);
+    //updateEvent in routes
     this.updateEventAndSubjectScores =
       this.updateEventAndSubjectScores.bind(this);
+    this.sendSupportMessage = this.sendSupportMessage.bind(this);
+
+    // TO DO
+
+    this.handlePaymentCallback = this.handlePaymentCallback.bind(this);
+
+    // FETCH NO SERVER
+    this.fetchAcademyGroups = this.fetchAcademyGroups.bind(this);
+    this.fetchProfessors = this.fetchProfessors.bind(this);
+    this.fetchAcademyGroupsByProfessorId =
+      this.fetchAcademyGroupsByProfessorId.bind(this);
+    this.fetchAcademyGroupsForCurrentProfessor =
+      this.fetchAcademyGroupsForCurrentProfessor.bind(this);
+    this.fetchEventsForProfessor = this.fetchEventsForProfessor.bind(this);
     this.fetchUpcomingEventsForUser =
       this.fetchUpcomingEventsForUser.bind(this);
     this.fetchAcademyGroupsForUser = this.fetchAcademyGroupsForUser.bind(this);
     this.fetchUserGrades = this.fetchUserGrades.bind(this);
     this.fetchUserProfileWithGrades =
       this.fetchUserProfileWithGrades.bind(this);
-
     this.fetchUserProfileById = this.fetchUserProfileById.bind(this);
     this.fetchUserGradesById = this.fetchUserGradesById.bind(this);
     this.fetchAllProfessors = this.fetchAllProfessors.bind(this);
-
     this.checkUserReview = this.checkUserReview.bind(this);
 
     this.fetchAcademyGroupsByProfessor =
       this.fetchAcademyGroupsByProfessor.bind(this);
-    this.joinGroup = this.joinGroup.bind(this);
   }
 
   setUser(user) {
@@ -165,107 +155,33 @@ class Store {
     });
   }
 
-  // async joinGroup(groupId) {
-  //   if (!this.user || this.user.role !== "student") {
-  //     return { success: false, error: "Only students can join groups." };
-  //   }
+  async sendSupportMessage(subject, message) {
+    try {
+      const auth = getAuth();
+      const user = auth.currentUser;
+      const token = await user.getIdToken();
 
-  //   if (this.user.blueTokens < 1) {
-  //     return { success: false, error: "Not enough blue tokens." };
-  //   }
+      const response = await fetch("/api/sendSupportMessage", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ subject, message }),
+      });
 
-  //   try {
-  //     // Fetch the group document
-  //     const groupDocRef = doc(db, "academyGroups", groupId);
-  //     const groupDoc = await getDoc(groupDocRef);
+      const data = await response.json();
 
-  //     if (!groupDoc.exists()) {
-  //       return { success: false, error: "Group not found." };
-  //     }
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to send support message");
+      }
 
-  //     const groupData = groupDoc.data();
-
-  //     // Check if the user is already in the group
-  //     if (groupData.users && groupData.users.includes(this.user.uid)) {
-  //       return { success: false, error: "User is already in the group." };
-  //     }
-
-  //     const newUserList = [...(groupData.users || []), this.user.uid];
-
-  //     // Update the group with the new user list
-  //     await updateDoc(groupDocRef, {
-  //       users: newUserList,
-  //       activeUsers: newUserList.length,
-  //     });
-
-  //     // Update user's tokens (this would involve another Firestore call)
-  //     await updateDoc(doc(db, "users", this.user.uid), {
-  //       blueTokens: this.user.blueTokens - 1,
-  //     });
-
-  //     // send email
-  //     const professorDocRef = doc(db, "professors", groupData.professorId);
-  //     const professorSnapshot = await getDoc(professorDocRef);
-
-  //     if (!professorSnapshot.exists()) {
-  //       console.log("Professor not found.");
-  //       return { error: "Professor not found" };
-  //     }
-  //     console.log(professorSnapshot.data());
-
-  //     try {
-  //       // Fetch user and professor details
-  //       const student = this.user;
-  //       const professor = professorSnapshot.data();
-  //       const professorUserData = await this.fetchUserProfileById(
-  //         professor.userId,
-  //       );
-
-  //       if (!student || !professor) {
-  //         throw new Error("Invalid student or professor ID");
-  //       }
-
-  //       // Prepare email templates
-  //       const { studentEmail, professorEmail } = groupJoinTemplate(
-  //         `${student.name} ${student.lastname}`,
-  //         groupData.name,
-  //         `${professor.name} ${professor.lastname}`,
-  //         groupData.schedule,
-  //         professor.link, // groupData.link??
-  //       );
-
-  //       // Send email to student
-  //       await fetch("/api/sendEmail", {
-  //         method: "POST",
-  //         headers: { "Content-Type": "application/json" },
-  //         body: JSON.stringify({
-  //           to: student.email,
-  //           subject: studentEmail.subject,
-  //           text: studentEmail.text,
-  //         }),
-  //       });
-
-  //       // Send email to professor
-  //       await fetch("/api/sendEmail", {
-  //         method: "POST",
-  //         headers: { "Content-Type": "application/json" },
-  //         body: JSON.stringify({
-  //           to: professorUserData.data.email,
-  //           subject: professorEmail.subject,
-  //           text: professorEmail.text,
-  //         }),
-  //       });
-
-  //       return { success: true };
-  //     } catch (error) {
-  //       console.log("Error creating event or sending email:", error);
-  //       return { error: "Failed to create event or send email" };
-  //     }
-  //   } catch (error) {
-  //     console.log("Error joining group:", error);
-  //     return { success: false, error: "Error joining group." };
-  //   }
-  // }
+      return { success: true };
+    } catch (error) {
+      console.error("Error sending support message:", error);
+      return { success: false, error: error.message };
+    }
+  }
 
   async joinGroup(groupId) {
     try {
@@ -289,9 +205,12 @@ class Store {
       }
 
       // Handle success
+
       console.log("Successfully joined group");
+      return { success: true };
     } catch (error) {
       console.log("Error:", error.message);
+      return { error };
     }
   }
 
@@ -581,10 +500,21 @@ class Store {
     try {
       if (!this.user) throw new Error("User not logged in");
 
-      const groupsQuery = query(
-        collection(db, "academyGroups"),
-        where("users", "array-contains", this.user.uid),
-      );
+      let groupsQuery;
+
+      // Determine the query based on the user's role
+      if (this.user.role === "professor") {
+        groupsQuery = query(
+          collection(db, "academyGroups"),
+          where("professorId", "==", this.user.professorId), // Use professor ID to get relevant groups
+        );
+      } else {
+        groupsQuery = query(
+          collection(db, "academyGroups"),
+          where("users", "array-contains", this.user.uid), // Use user ID for students
+        );
+      }
+
       const groupsSnapshot = await getDocs(groupsQuery);
 
       const groups = groupsSnapshot.docs.map((doc) => ({
@@ -592,8 +522,8 @@ class Store {
         ...doc.data(),
       }));
 
+      // Fetch user details for each group if the user is a professor
       if (this.user.role === "professor") {
-        // If the user is a professor, fetch user details for each user ID in the academy groups
         for (let group of groups) {
           const userNames = await Promise.all(
             group.users.map(async (userId) => {
@@ -634,7 +564,7 @@ class Store {
       }));
 
       runInAction(() => {
-        this.academyGroups = groupsWithDetails;
+        this.nextAcademyGroups = groupsWithDetails;
       });
 
       return { success: true };
@@ -731,188 +661,111 @@ class Store {
     }
   }
 
+  async getIdToken() {
+    if (!this.user) {
+      console.error("No user is logged in");
+      return null;
+    }
+
+    try {
+      const auth = getAuth();
+      const user = auth.currentUser;
+      const token = await user.getIdToken();
+      return token;
+    } catch (error) {
+      console.error("Error getting ID token:", error);
+      return null;
+    }
+  }
+
   async submitReview(
     professorId,
     stars,
     existingReviewStars = null,
     reviewId = null,
   ) {
-    // Check if user is logged in
-    if (!this.user) {
-      console.log("No user logged in.");
-      return { error: "No user logged in" };
-    }
+    try {
+      if (!this.user) {
+        console.log("No user logged in.");
+        return { error: "No user logged in" };
+      }
 
-    // Validate star rating
-    if (stars < 1 || stars > 5) {
-      console.log("Stars must be between 1 and 5.");
-      return { error: "Invalid star rating" };
-    }
+      const token = await this.getIdToken();
 
-    // Check if reviewId is provided
-    if (reviewId) {
-      // Handle updating an existing review
-      try {
-        const reviewDocRef = doc(db, "reviews", reviewId);
-        const latestReviewDoc = await getDoc(reviewDocRef);
-
-        if (!latestReviewDoc.exists()) {
-          console.log("Review not found.");
-          return { error: "Review not found." };
-        }
-
-        const latestReviewData = latestReviewDoc.data();
-        const currentStars = latestReviewData.stars;
-
-        if (currentStars === stars) {
-          console.log(
-            "New rating is the same as the current rating. No update needed.",
-          );
-          return {
-            error:
-              "New rating is the same as the current rating. No update needed.",
-          };
-        }
-
-        // Update the existing review
-        await updateDoc(reviewDocRef, {
-          stars,
-          date: new Date(),
-        });
-
-        // Update the professor's average rating with the new rating
-        await this.updateProfessorAverageRating(
+      const response = await fetch("/api/submitReview", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
           professorId,
           stars,
           existingReviewStars,
-        );
-
-        return { success: true, updated: true };
-      } catch (error) {
-        console.log("Error updating review:", error);
-        return { error: "Error updating review" };
-      }
-    } else {
-      // Handle creating a new review
-      try {
-        const newReview = {
-          userId: this.user.uid,
-          professorId,
-          stars,
-          date: new Date(),
-        };
-
-        await addDoc(collection(db, "reviews"), newReview);
-
-        // Update the professor's average rating with the new rating
-        await this.updateProfessorAverageRating(professorId, stars);
-
-        return { success: true, updated: false };
-      } catch (error) {
-        console.log("Error creating review:", error);
-        return { error: "Error creating review" };
-      }
-    }
-  }
-
-  async updateProfessorAverageRating(professorId, newRating, oldRating = null) {
-    console.log({ newRating, oldRating });
-    try {
-      const professorDocRef = doc(db, "professors", professorId);
-      const professorDoc = await getDoc(professorDocRef);
-
-      if (!professorDoc.exists()) {
-        console.log("Professor not found.");
-        return { error: "Professor not found" };
-      }
-
-      const professorData = professorDoc.data();
-      const { averageRating = 0, reviewCount = 0 } = professorData;
-
-      let newAverageRating, newReviewCount;
-      if (oldRating !== null) {
-        // Adjust the average rating calculation if updating an existing review
-        newAverageRating =
-          (averageRating * reviewCount - oldRating + newRating) / reviewCount;
-      } else {
-        // Calculate the new average rating for a new review
-        newReviewCount = reviewCount + 1;
-        newAverageRating =
-          (averageRating * reviewCount + newRating) / newReviewCount;
-      }
-
-      // Update the professor's document with the new average rating and review count
-      await updateDoc(professorDocRef, {
-        averageRating: newAverageRating,
-        reviewCount: oldRating !== null ? reviewCount : newReviewCount,
+          reviewId,
+        }),
       });
 
-      return { success: true };
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to submit review");
+      }
+
+      return { success: true, updated: data.updated };
     } catch (error) {
-      console.log("Error updating professor's average rating:", error);
-      return { error: "Error updating professor's average rating" };
+      console.log("Error submitting review:", error.message);
+      return { error: error.message };
     }
   }
 
   async createAcademyGroup(name, subject, studentType, schedule) {
-    if (!this.user || this.user.role !== "professor") {
-      console.log(
-        "Access denied: Only professors can create an academy group.",
-      );
-      return { error: "Access denied" };
-    }
-
     try {
-      // Find the professor's ID based on the logged-in user's ID
-      const professorQuery = query(
-        collection(db, "professors"),
-        where("userId", "==", this.user.uid),
-      );
-      const professorSnapshot = await getDocs(professorQuery);
+      const token = await this.getIdToken(); // Use the method to get the user's ID token
 
-      if (professorSnapshot.empty) {
-        console.log("Professor not found.");
-        return { error: "Professor not found" };
+      const response = await fetch("/api/academyGroup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ name, subject, studentType, schedule }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to create academy group");
       }
 
-      const professorDoc = professorSnapshot.docs[0];
-      const professorId = professorDoc.id;
-
-      // Create the new academy group
-      const newAcademyGroup = {
-        name,
-        subject,
-        studentType,
-        professorId,
-        schedule,
-        users: [], // Initially empty
-        activeUsers: 0,
-        maxUsers: 10, // Default max users, can be customized
-        createdAt: new Date(),
-      };
-
-      await addDoc(collection(db, "academyGroups"), newAcademyGroup);
-
+      // Handle success
       return { success: true };
     } catch (error) {
-      console.log("Error creating academy group:", error);
-      return { error: "Error creating academy group" };
+      console.error("Error creating academy group:", error);
+      return { error: error.message };
     }
   }
 
   async editAcademyGroup(academyGroupId, updatedData) {
-    if (!this.user || this.user.role !== "professor") {
-      console.log("Access denied: Only professors can edit an academy group.");
-      return { error: "Access denied" };
-    }
-
     try {
-      const academyGroupRef = doc(db, "academyGroups", academyGroupId);
+      const token = await this.getIdToken(); // Use the method to get the user's ID token
 
-      // Update the academy group with the new data
-      await updateDoc(academyGroupRef, updatedData);
+      const response = await fetch("/api/academyGroup", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ academyGroupId, updatedData }),
+      });
 
-      // Optionally, update the local MobX state if needed
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to edit academy group");
+      }
+
+      // Handle success
       runInAction(() => {
         const index = this.academyGroups.findIndex(
           (group) => group.id === academyGroupId,
@@ -927,26 +780,31 @@ class Store {
 
       return { success: true };
     } catch (error) {
-      console.log("Error editing academy group:", error);
-      return { error: "Error editing academy group" };
+      console.error("Error editing academy group:", error);
+      return { error: error.message };
     }
   }
 
   async deleteAcademyGroup(academyGroupId) {
-    if (!this.user || this.user.role !== "professor") {
-      console.log(
-        "Access denied: Only professors can delete an academy group.",
-      );
-      return { error: "Access denied" };
-    }
-
     try {
-      const academyGroupRef = doc(db, "academyGroups", academyGroupId);
+      const token = await this.getIdToken(); // Use the method to get the user's ID token
 
-      // Delete the academy group document
-      await deleteDoc(academyGroupRef);
+      const response = await fetch("/api/academyGroup", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ academyGroupId }),
+      });
 
-      // Optionally, remove the academy group from the local MobX state
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to delete academy group");
+      }
+
+      // Handle success
       runInAction(() => {
         this.academyGroups = this.academyGroups.filter(
           (group) => group.id !== academyGroupId,
@@ -955,8 +813,8 @@ class Store {
 
       return { success: true };
     } catch (error) {
-      console.log("Error deleting academy group:", error);
-      return { error: "Error deleting academy group" };
+      console.error("Error deleting academy group:", error);
+      return { error: error.message };
     }
   }
 
@@ -1040,7 +898,6 @@ class Store {
   }
 
   // EVENTS
-
   async createEvent({
     date,
     timeRange,
@@ -1050,300 +907,135 @@ class Store {
     classType,
     notes,
   }) {
-    console.log({
-      date,
-      timeRange,
-      userId,
-      professorId,
-      subject,
-      classType,
-      notes,
-    });
-    if (!this.user || this.user.role !== "student") {
-      console.log("Access denied: Only students can create events.");
-      return { error: "Access denied" };
-    }
-    if (this.user.yellowTokens <= 0) {
-      console.log("Not enough yellow tokens.");
-      return { error: "Not enough yellow tokens" };
-    }
     try {
-      const professorDocRef = doc(db, "professors", professorId);
-      const professorSnapshot = await getDoc(professorDocRef);
+      const token = await this.getIdToken(); // Use the method to get the user's ID token
 
-      if (!professorSnapshot.exists()) {
-        console.log("Professor not found.");
-        return { error: "Professor not found" };
-      }
-      console.log(professorSnapshot.data());
-
-      const currentSchedule = professorSnapshot.data().schedule || [];
-
-      // Find the date entry in the professor's schedule
-      const existingEntryIndex = currentSchedule.findIndex(
-        (entry) => entry.date === date,
-      );
-      if (existingEntryIndex > -1) {
-        const timeRangeIndex = currentSchedule[
-          existingEntryIndex
-        ].timeRanges.findIndex(
-          (range) => range.from === timeRange.from && range.to === timeRange.to,
-        );
-
-        if (
-          timeRangeIndex > -1 &&
-          currentSchedule[existingEntryIndex].timeRanges[timeRangeIndex]
-            .isScheduled
-        ) {
-          return { error: "This time range is already scheduled." };
-        }
-
-        // Mark the time range as scheduled
-        currentSchedule[existingEntryIndex].timeRanges[
-          timeRangeIndex
-        ].isScheduled = true;
-      } else {
-        return {
-          error:
-            "This time range is not available in the professor's schedule.",
-        };
-      }
-
-      // Update the professor's schedule in Firestore
-      await updateDoc(professorDocRef, { schedule: currentSchedule });
-
-      // Subtract 1 red token from the user's balance
-      const updatedUserTokens = this.user.yellowTokens - 1;
-      await updateDoc(doc(db, "users", this.user.uid), {
-        yellowTokens: updatedUserTokens,
-      });
-
-      runInAction(() => {
-        this.user.yellowTokens = updatedUserTokens;
-      });
-
-      const event = {
-        date,
-        timeRange,
-        userId,
-        professorId,
-        subject,
-        classType,
-        notes,
-        createdAt: new Date(),
-      };
-
-      await addDoc(collection(db, "events"), event);
-
-      runInAction(() => {
-        console.log("Event created successfully:", event);
-      });
-
-      try {
-        // Fetch user and professor details
-        const student = this.user;
-        const professor = professorSnapshot.data();
-        const professorUserData = await this.fetchUserProfileById(
-          professor.userId,
-        );
-
-        if (!student || !professor) {
-          throw new Error("Invalid student or professor ID");
-        }
-
-        const subjectLabel = filterSubjectsByIds([subject])[0]?.label;
-
-        // Prepare email templates
-        const { studentEmail, professorEmail } = classReservationTemplate(
-          `${student.name} ${student.lastname}`,
-          `${professor.name} ${professor.lastname}`,
+      const response = await fetch("/api/createEvent", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
           date,
-          `${timeRange.from} - ${timeRange.to}`,
-          subjectLabel,
+          timeRange,
+          userId,
+          professorId,
+          subject,
           classType,
           notes,
-          professor.link,
-        );
+        }),
+      });
 
-        // Send email to student
-        await fetch("/api/sendEmail", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            to: student.email,
-            subject: studentEmail.subject,
-            text: studentEmail.text,
-          }),
-        });
+      const data = await response.json();
 
-        // Send email to professor
-        await fetch("/api/sendEmail", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            to: professorUserData.data.email,
-            subject: professorEmail.subject,
-            text: professorEmail.text,
-          }),
-        });
-
-        return { success: true };
-      } catch (error) {
-        console.error("Error creating event or sending email:", error);
-        return { error: "Failed to create event or send email" };
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to create event");
       }
+
+      // Handle success
+      runInAction(() => {
+        // Update local state, e.g., tokens or events
+        this.user.yellowTokens -= 1;
+        console.log("Event created successfully");
+      });
+
+      return { success: true };
     } catch (error) {
-      console.log("Error creating event:", error);
-      return { error: "Error creating event" };
+      console.error("Error creating event:", error);
+      return { error: error.message };
     }
   }
 
   // PROFESOR TERMINI PRAVI
 
   async addScheduleEntry(date, timeRanges) {
-    if (!this.user || this.user.role !== "professor") {
-      console.log("Access denied: Only professors can manage schedules.");
-      return { error: "Access denied" };
-    }
-
     try {
-      const professorQuery = query(
-        collection(db, "professors"),
-        where("userId", "==", this.user.uid),
-      );
-      const professorSnapshot = await getDocs(professorQuery);
+      const token = await this.getIdToken(); // Use the method to get the user's ID token
 
-      if (professorSnapshot.empty) {
-        console.log("Professor not found.");
-        return { error: "Professor not found" };
-      }
-
-      const professorDoc = professorSnapshot.docs[0];
-      const currentSchedule = professorDoc.data().schedule || [];
-
-      // Convert the date to a string in the format "YYYY-MM-DD"
-      const dateString = date.toISOString().split("T")[0];
-
-      // Check if the date already exists in the schedule
-      const existingEntryIndex = currentSchedule.findIndex(
-        (entry) => entry.date === dateString,
-      );
-
-      if (existingEntryIndex > -1) {
-        // If the date exists, merge the new time ranges with the existing time ranges
-        currentSchedule[existingEntryIndex].timeRanges.push(...timeRanges);
-      } else {
-        // If the date doesn't exist, add a new entry
-        const newEntry = { date: dateString, timeRanges };
-        currentSchedule.push(newEntry);
-      }
-
-      // Use professorDoc.ref to get the document reference
-      await updateDoc(professorDoc.ref, { schedule: currentSchedule });
-
-      runInAction(() => {
-        this.user.schedule = currentSchedule;
+      const response = await fetch("/api/schedule", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ date, timeRanges }),
       });
 
-      return { success: true };
-    } catch (error) {
-      console.log("Error adding schedule entry:", error);
-      return { error: "Error adding schedule entry" };
-    }
-  }
+      const data = await response.json();
 
-  async deleteScheduleEntry(date) {
-    if (!this.user || this.user.role !== "professor") {
-      console.log("Access denied: Only professors can manage schedules.");
-      return { error: "Access denied" };
-    }
-
-    try {
-      const professorDocRef = doc(db, "professors", this.user.professorId);
-      const professorDoc = await getDoc(professorDocRef);
-
-      if (!professorDoc.exists()) {
-        console.log("Professor document not found.");
-        return { error: "Professor document not found" };
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to add schedule entry");
       }
 
-      const currentSchedule = professorDoc.data().schedule || [];
-      const updatedSchedule = currentSchedule.filter(
-        (entry) => entry.date !== date,
-      );
-
-      await updateDoc(professorDocRef, { schedule: updatedSchedule });
-
+      // Handle success
       runInAction(() => {
-        this.user.schedule = updatedSchedule;
-      });
+        // Update local state if necessary
+        if (!this.user.schedule) this.user.schedule = [];
+        const dateString = new Date(date).toISOString().split("T")[0];
 
-      return { success: true };
-    } catch (error) {
-      console.log("Error deleting schedule entry:", error);
-      return { error: "Error deleting schedule entry" };
-    }
-  }
-
-  async deleteTimeRange(date, timeRangeToDelete) {
-    if (!this.user || this.user.role !== "professor") {
-      console.log("Access denied: Only professors can manage schedules.");
-      return { error: "Access denied" };
-    }
-
-    try {
-      const professorQuery = query(
-        collection(db, "professors"),
-        where("userId", "==", this.user.uid),
-      );
-      const professorSnapshot = await getDocs(professorQuery);
-
-      if (professorSnapshot.empty) {
-        console.log("Professor not found.");
-        return { error: "Professor not found" };
-      }
-
-      const professorDoc = professorSnapshot.docs[0];
-      let currentSchedule = professorDoc.data().schedule || [];
-
-      // Find the date entry
-      const existingEntryIndex = currentSchedule.findIndex(
-        (entry) => entry.date === date,
-      );
-
-      if (existingEntryIndex > -1) {
-        // Filter out the time range to delete
-        const updatedTimeRanges = currentSchedule[
-          existingEntryIndex
-        ].timeRanges.filter(
-          (range) =>
-            range.from !== timeRangeToDelete.from ||
-            range.to !== timeRangeToDelete.to,
+        const existingEntryIndex = this.user.schedule.findIndex(
+          (entry) => entry.date === dateString,
         );
 
-        // If no time ranges are left, remove the entire date entry
-        if (updatedTimeRanges.length === 0) {
-          currentSchedule = currentSchedule.filter(
-            (_, index) => index !== existingEntryIndex,
-          );
+        if (existingEntryIndex > -1) {
+          this.user.schedule[existingEntryIndex].timeRanges.push(...timeRanges);
         } else {
-          currentSchedule[existingEntryIndex].timeRanges = updatedTimeRanges;
+          this.user.schedule.push({ date: dateString, timeRanges });
         }
+      });
 
-        await updateDoc(professorDoc.ref, { schedule: currentSchedule });
-
-        runInAction(() => {
-          this.user.schedule = currentSchedule;
-        });
-
-        return { success: true };
-      } else {
-        console.log("Date not found in schedule.");
-        return { error: "Date not found in schedule." };
-      }
+      return { success: true };
     } catch (error) {
-      console.log("Error deleting time range:", error);
-      return { error: "Error deleting time range" };
+      console.error("Error adding schedule entry:", error);
+      return { error: error.message };
+    }
+  }
+
+  async deleteScheduleEntry(date, timeRangeToDelete) {
+    try {
+      const token = await this.getIdToken(); // Use the method to get the user's ID token
+
+      const response = await fetch("/api/schedule", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ date, timeRangeToDelete }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to delete time range");
+      }
+
+      // Handle success
+      runInAction(() => {
+        const existingEntryIndex = this.user.schedule.findIndex(
+          (entry) => entry.date === date,
+        );
+
+        if (existingEntryIndex > -1) {
+          this.user.schedule[existingEntryIndex].timeRanges =
+            this.user.schedule[existingEntryIndex].timeRanges.filter(
+              (range) =>
+                range.from !== timeRangeToDelete.from ||
+                range.to !== timeRangeToDelete.to,
+            );
+
+          // If no time ranges are left, remove the entire date entry
+          if (this.user.schedule[existingEntryIndex].timeRanges.length === 0) {
+            this.user.schedule.splice(existingEntryIndex, 1);
+          }
+        }
+      });
+
+      return { success: true };
+    } catch (error) {
+      console.error("Error deleting time range:", error);
+      return { error: error.message };
     }
   }
 
@@ -1373,69 +1065,26 @@ class Store {
 
   async updateEventAndSubjectScores(event) {
     try {
-      const eventRef = doc(db, "events", event.id);
-      const eventDoc = await getDoc(eventRef);
-      const previousEvent = eventDoc.data();
+      const token = await this.getIdToken(); // Use the method to get the user's ID token
 
-      const isEventGraded = previousEvent.isEventGraded;
-
-      // Update the event document in Firestore
-      await updateDoc(eventRef, {
-        scores: event.scores,
-        comment: event.comment,
-        isEventGraded: true,
+      const response = await fetch("/api/updateEvent", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ event }),
       });
 
-      // Update the user's subject scores in the subcollection
-      const subjectRef = doc(
-        db,
-        `users/${event.userId}/subjects/${event.subject}`,
-      );
-      const subjectDoc = await getDoc(subjectRef);
+      const data = await response.json();
 
-      if (subjectDoc.exists()) {
-        const subjectData = subjectDoc.data();
-        const totalEvents = subjectData.totalEvents;
-
-        let updatedScores = { ...subjectData.totalScores };
-
-        if (isEventGraded) {
-          // Calculate the difference between the old and new scores
-          const scoreDifferences = {
-            attention: event.scores.attention - previousEvent.scores.attention,
-            memory: event.scores.memory - previousEvent.scores.memory,
-            skill: event.scores.skill - previousEvent.scores.skill,
-            interest: event.scores.interest - previousEvent.scores.interest,
-          };
-
-          // Update the scores by adding the differences
-          updatedScores.attention += scoreDifferences.attention;
-          updatedScores.memory += scoreDifferences.memory;
-          updatedScores.skill += scoreDifferences.skill;
-          updatedScores.interest += scoreDifferences.interest;
-        } else {
-          // Add the new scores if the event was not previously graded
-          updatedScores.attention += event.scores.attention;
-          updatedScores.memory += event.scores.memory;
-          updatedScores.skill += event.scores.skill;
-          updatedScores.interest += event.scores.interest;
-        }
-
-        // Update the subject document
-        await updateDoc(subjectRef, {
-          totalScores: updatedScores,
-          totalEvents: isEventGraded ? totalEvents : totalEvents + 1,
-        });
-      } else {
-        // Create new subject document if it doesn't exist
-        const initialScores = {
-          totalScores: event.scores,
-          totalEvents: 1,
-        };
-        await setDoc(subjectRef, initialScores);
+      if (!response.ok) {
+        throw new Error(
+          data.error || "Failed to update event and subject scores",
+        );
       }
 
-      // Update the MobX state
+      // Handle success and update the MobX state
       runInAction(() => {
         const eventIndex = this.events.findIndex((e) => e.id === event.id);
         if (eventIndex !== -1) {
@@ -1445,8 +1094,8 @@ class Store {
 
       return { success: true };
     } catch (error) {
-      console.log("Error updating event and subject scores:", error);
-      return { error: "Error updating event and subject scores" };
+      console.error("Error updating event and subject scores:", error);
+      return { error: error.message };
     }
   }
 
@@ -1475,32 +1124,34 @@ class Store {
   async signupWithEmail(email, password, name, lastname, academicLevel) {
     try {
       this.loading = true;
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password,
-      );
 
-      // Additional user properties
-      const newUserProfile = {
-        ...DEFAULT_USER,
-        createdAt: new Date(),
-        name: name,
-        lastname: lastname,
-        academicLevel: academicLevel,
-        email: email,
-        uid: userCredential.user.uid,
-      };
+      const response = await fetch("/api/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          password,
+          name,
+          lastname,
+          academicLevel,
+        }),
+      });
 
-      // Create a user profile in Firestore
-      await setDoc(doc(db, "users", userCredential.user.uid), newUserProfile);
+      const data = await response.json();
 
+      if (!response.ok) {
+        throw new Error(data.error || "Signup failed");
+      }
+
+      // Optionally update local state
       runInAction(() => {
-        this.user = newUserProfile;
+        this.user = { email, name, lastname, academicLevel };
         this.loading = false;
       });
+
+      return { success: true };
     } catch (error) {
-      console.log("Error signing up:", error);
+      console.error("Error signing up:", error);
       runInAction(() => {
         this.loading = false;
       });

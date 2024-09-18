@@ -134,7 +134,10 @@ const Calendar = observer(({ schedule, professor, isAdmin = false }) => {
         console.log("Time range is already scheduled");
         return;
       }
-      const result = await MobxStore.deleteTimeRange(selectedDate, timeRange);
+      const result = await MobxStore.deleteScheduleEntry(
+        selectedDate,
+        timeRange,
+      );
       if (result.success) {
         console.log(
           `Time range ${timeRange.from} - ${timeRange.to} deleted successfully`,

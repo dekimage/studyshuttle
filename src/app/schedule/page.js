@@ -72,27 +72,51 @@ const CalendarView = observer(() => {
       return day;
     });
 
-    const formatDayWithSuffix = (date) => {
-      const day = date.getDate();
-      const suffix =
-        day % 10 === 1 && day !== 11
-          ? "st"
-          : day % 10 === 2 && day !== 12
-            ? "nd"
-            : day % 10 === 3 && day !== 13
-              ? "rd"
-              : "th";
-      const dayName = dayNames[date.getDay()];
-      return `${dayName}, ${day}${suffix}`;
-    };
+    const formatWeekRange = (date) => {
+      // Get the current day of the week (0 is Sunday, 1 is Monday, etc.)
+      const currentDay = date.getDay();
 
+      // Calculate the offset to Monday (1) from the current day
+      const offset = currentDay === 0 ? -6 : 1 - currentDay; // Adjust if it's Sunday
+
+      // Get the start (Monday) of the week
+      const startOfWeek = new Date(date);
+      startOfWeek.setDate(date.getDate() + offset);
+
+      // Get the end (Sunday) of the week
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 6);
+
+      // Format the dates
+      const formatDateWithSuffix = (d) => {
+        const day = d.getDate();
+        const suffix =
+          day % 10 === 1 && day !== 11
+            ? "st"
+            : day % 10 === 2 && day !== 12
+              ? "nd"
+              : day % 10 === 3 && day !== 13
+                ? "rd"
+                : "th";
+        return `${day}${suffix}`;
+      };
+
+      const monthName = startOfWeek.toLocaleString("default", {
+        month: "long",
+      });
+      const year = startOfWeek.getFullYear();
+
+      return `${formatDateWithSuffix(startOfWeek)} - ${formatDateWithSuffix(
+        endOfWeek,
+      )} ${monthName} ${year}`;
+    };
     return (
       <div>
         <div className="mb-4 flex  items-center justify-center gap-3">
           <Button onClick={handlePrevWeek}>
             <ArrowLeft />
           </Button>
-          <div>{formatDayWithSuffix(currentWeek)}</div>
+          <div>{formatWeekRange(currentWeek)}</div>
           <Button onClick={handleNextWeek}>
             <ArrowRight />
           </Button>
@@ -122,16 +146,20 @@ const CalendarView = observer(() => {
                     </div>
                   ))}
                 {/* Render Academy Groups */}
-                {MobxStore.academyGroups
+                {MobxStore.nextAcademyGroups
                   .filter((group) =>
                     group.schedule.some(
-                      (schedule) => schedule.day === dayNames[day.getDay()],
+                      (schedule) =>
+                        schedule.day.toLowerCase() ===
+                        dayNames[day.getDay()].toLowerCase(),
                     ),
                   )
                   .map((group) =>
                     group.schedule
                       .filter(
-                        (schedule) => schedule.day === dayNames[day.getDay()],
+                        (schedule) =>
+                          schedule.day.toLowerCase() ===
+                          dayNames[day.getDay()].toLowerCase(),
                       )
                       .map((schedule, i) => (
                         <div
@@ -225,7 +253,7 @@ const CalendarView = observer(() => {
                       </div>
                     ))}
                   {/* Render Academy Groups */}
-                  {MobxStore.academyGroups
+                  {MobxStore.nextAcademyGroups
                     .filter((group) =>
                       group.schedule.some(
                         (schedule) => schedule.day === dayNames[day.getDay()],
