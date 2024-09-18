@@ -210,7 +210,7 @@ const PaymentDialog = ({}) => {
             onChange={handleInputChange}
             required
           /> */}
-          <button type="submit">Pay Now</button>
+          <Button type="submit">Pay Now</Button>
         </form>
       </DialogContent>
     </Dialog>

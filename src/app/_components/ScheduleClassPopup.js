@@ -105,12 +105,12 @@ const ScheduleClassPopup = ({
           </div>
         )}
         <div className="flex justify-end space-x-4">
-          <button
+          <Button
             onClick={onClose}
             className="rounded bg-gray-500 px-4 py-2 text-white hover:bg-gray-600"
           >
             Откажи ги промените
-          </button>
+          </Button>
           <Button
             disabled={!subject || !classType || user.yellowTokens <= 0}
             onClick={() => {

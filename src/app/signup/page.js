@@ -166,7 +166,7 @@ export const SignupForm = observer(() => {
               <FormLabel>Академско ниво</FormLabel>
               <FormControl>
                 <div className="relative">
-                  <button
+                  <Button
                     type="button"
                     className="flex w-full items-center justify-between rounded border bg-white px-2 py-1 hover:bg-gray-100"
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -181,7 +181,7 @@ export const SignupForm = observer(() => {
                     ) : (
                       <ChevronDown className="h-4 w-4" />
                     )}
-                  </button>
+                  </Button>
                   {isDropdownOpen && (
                     <div className="absolute z-10 mt-1 w-full rounded-md border bg-white shadow-lg">
                       <div

@@ -825,12 +825,12 @@ const TerminiComponent = observer(() => {
               }
               className="rounded border px-3 py-2"
             />
-            <button
+            <Button
               onClick={() => handleRemoveTimeRange(index)}
               className="rounded bg-red-500 px-3 py-1 text-white hover:bg-red-600"
             >
               Избриши
-            </button>
+            </Button>
           </div>
         ))}
         <Button onClick={handleAddTimeRange} variant="outline">
@@ -838,12 +838,12 @@ const TerminiComponent = observer(() => {
         </Button>
       </div>
       {error && <p className="mb-4 text-red-500">{error}</p>}
-      <button
+      <Button
         onClick={() => handleAddScheduleEntry()}
         className="rounded bg-green-500 px-4 py-2 text-white hover:bg-green-600"
       >
         Зачувај ги сите термини
-      </button>
+      </Button>
       <h2 className="mb-5 mt-16 text-2xl font-bold">Tермини</h2>
     </div>
   );
@@ -870,7 +870,7 @@ const ProfessorAdminPage = () => {
     <div className="flex flex-col">
       {/* Tab Navigation */}
       <div className="flex border-b border-gray-300">
-        <button
+        <Button
           className={`px-4 py-2 text-sm font-medium ${
             !(activeTab === "academyGroup")
               ? "border-b-2 border-transparent text-blue-600"
@@ -879,8 +879,8 @@ const ProfessorAdminPage = () => {
           onClick={() => setActiveTab("academyGroup")}
         >
           Академии
-        </button>
-        <button
+        </Button>
+        <Button
           className={`px-4 py-2 text-sm font-medium ${
             !(activeTab === "termini")
               ? "border-b-2 border-transparent text-blue-600"
@@ -889,8 +889,8 @@ const ProfessorAdminPage = () => {
           onClick={() => setActiveTab("termini")}
         >
           Термини
-        </button>
-        <button
+        </Button>
+        <Button
           className={`px-4 py-2 text-sm font-medium ${
             !(activeTab === "events")
               ? "border-b-2 border-transparent text-blue-600"
@@ -899,7 +899,7 @@ const ProfessorAdminPage = () => {
           onClick={() => setActiveTab("events")}
         >
           Настани
-        </button>
+        </Button>
       </div>
 
       {/* Render the active component */}

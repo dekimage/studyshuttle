@@ -231,12 +231,12 @@ const AcademyGroupsPage = observer(() => {
                     {group.activeUsers} / {group.maxUsers}
                   </div>
                   <div>
-                    <button
+                    <Button
                       onClick={() => openDetails(group)}
                       className="rounded-full bg-sky px-3 py-1 text-white"
                     >
                       Види детали
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ))

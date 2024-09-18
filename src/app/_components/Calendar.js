@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { DialogContent } from "@radix-ui/react-dialog";
 import { TerminiComponent } from "../professor-admin/page";
+import { Button } from "@/components/ui/button";
 
 function getDayFromDate(dateString) {
   // Split the date string by hyphens and return the last element
@@ -116,9 +117,9 @@ const Calendar = observer(({ schedule, professor, isAdmin = false }) => {
     //     return (
     //       <Dialog>
     //         <DialogTrigger>
-    //           <button className="rounded bg-sky px-3 py-1 text-white">
+    //           <Button className="rounded bg-sky px-3 py-1 text-white">
     //             Додади слободен термин
-    //           </button>
+    //           </Button>
     //         </DialogTrigger>
     //         <DialogContent>
     //           <TerminiComponent />
@@ -190,7 +191,7 @@ const Calendar = observer(({ schedule, professor, isAdmin = false }) => {
                 </span>
                 <div className="flex items-center space-x-2">
                   {MobxStore.user?.role === "student" && (
-                    <button
+                    <Button
                       onClick={() => handleScheduleClick(range)}
                       disabled={range.isScheduled || isPast}
                       className={`rounded px-3 py-1 text-white ${
@@ -202,7 +203,7 @@ const Calendar = observer(({ schedule, professor, isAdmin = false }) => {
                       }`}
                     >
                       {buttonText}
-                    </button>
+                    </Button>
                   )}
 
                   {MobxStore.user?.role === "professor" && (
@@ -210,7 +211,7 @@ const Calendar = observer(({ schedule, professor, isAdmin = false }) => {
                   )}
 
                   {isAdmin && (
-                    <button
+                    <Button
                       disabled={range.isScheduled}
                       onClick={() =>
                         handleDeleteTimeRange(range, range.isScheduled)
@@ -222,7 +223,7 @@ const Calendar = observer(({ schedule, professor, isAdmin = false }) => {
                       }`}
                     >
                       Избриши настан
-                    </button>
+                    </Button>
                   )}
                 </div>
               </li>
@@ -244,18 +245,18 @@ const Calendar = observer(({ schedule, professor, isAdmin = false }) => {
             })}
           </h3>
           <div className="flex gap-2">
-            <button
+            <Button
               onClick={handlePrevMonth}
               className="rounded bg-gray-500 px-4 py-2 text-white hover:bg-gray-600"
             >
               <ChevronLeft size={24} />
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={handleNextMonth}
               className="rounded bg-gray-500 px-4 py-2 text-white hover:bg-gray-600"
             >
               <ChevronRight size={24} />
-            </button>
+            </Button>
           </div>
         </div>
         <div className="grid grid-cols-7 gap-1 text-center font-semibold">

@@ -52,7 +52,7 @@ const AnalyticsPage = observer(() => {
 
   useEffect(() => {
     const fetchData = async () => {
-      await MobxStore.userReady; // Ensure user is ready before fetching grades
+      // await MobxStore.userReady;
 
       if (MobxStore.user && MobxStore.user.role === "student") {
         const result = await MobxStore.fetchUserGrades();
@@ -67,7 +67,7 @@ const AnalyticsPage = observer(() => {
     if (MobxStore.user?.role === "student") {
       fetchData();
     }
-  }, [MobxStore.userReady, MobxStore.user]);
+  }, [selectedSubject]);
 
   const calculateChartData = (subjectId, userGrades = null) => {
     const subjectData = userGrades
@@ -129,7 +129,7 @@ const AnalyticsPage = observer(() => {
     } else if (fetchedUserGrades) {
       calculateChartData(selectedSubject, fetchedUserGrades);
     }
-  }, [selectedSubject, fetchedUserGrades, MobxStore.analytics]);
+  }, [selectedSubject, fetchedUserGrades]);
 
   const handleLoadProfile = async () => {
     try {

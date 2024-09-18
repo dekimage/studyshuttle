@@ -157,18 +157,18 @@ const Event = observer(({ event, showGraded, ignored = false }) => {
               ></textarea>
             </div>
             <div className="mt-4 flex justify-end space-x-4">
-              <button
+              <Button
                 onClick={handleCancel}
                 className="rounded bg-gray-500 px-4 py-2 text-white hover:bg-gray-600"
               >
                 Откажи
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={handleSave}
                 className="rounded bg-green-500 px-4 py-2 text-white hover:bg-green-600"
               >
                 Зачувај
-              </button>
+              </Button>
             </div>
           </div>
         </div>

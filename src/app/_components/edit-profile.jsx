@@ -2,6 +2,7 @@
 import { useUser } from "@clerk/nextjs";
 
 import { dbAssignEducationLevel, getSupabaseTables } from "../../util/requests";
+import { Button } from "@/components/ui/button";
 
 const EditProfile = ({
   educationLevels,
@@ -89,12 +90,12 @@ const EditProfile = ({
         </div>
 
         <div className="mt-6 flex items-center justify-end gap-x-6">
-          <button type="button" className="text-sm font-semibold leading-6 ">
+          <Button type="button" className="text-sm font-semibold leading-6 ">
             Cancel
-          </button>
-          <button type="submit" className="btn">
+          </Button>
+          <Button type="submit" className="btn">
             Save
-          </button>
+          </Button>
         </div>
       </form>
     </div>

@@ -317,12 +317,12 @@ const CalendarView = observer(() => {
           )}
 
           {/* Close button */}
-          <button
+          <Button
             onClick={() => setSelectedEvent(null)}
             className="mt-4 rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600"
           >
             Close
-          </button>
+          </Button>
         </div>
       </div>
     );

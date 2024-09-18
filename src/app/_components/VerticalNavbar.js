@@ -88,6 +88,7 @@ export function VerticalNavbar({ links }) {
           if (link.action == "logout") {
             return (
               <DialogLogout
+                key={index}
                 link={link}
                 open={dialogOpen}
                 onOpenChange={setDialogOpen}

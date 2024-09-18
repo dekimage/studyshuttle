@@ -34,13 +34,13 @@ import { Title } from "../_components/ReusableDivs";
 const DateNavigator = () => {
   return (
     <div className="mb-6 flex w-full items-center justify-between border p-4">
-      <button className="rounded bg-gray-200 p-2">
+      <Button className="rounded bg-gray-200 p-2">
         <ChevronLeft />
-      </button>
+      </Button>
       <div className="text-2xl">22.01.24 - 28.01.24</div>
-      <button className="rounded bg-gray-200 p-2">
+      <Button className="rounded bg-gray-200 p-2">
         <ChevronRight />
-      </button>
+      </Button>
     </div>
   );
 };
