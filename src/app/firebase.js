@@ -1,6 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -12,8 +11,6 @@ const firebaseConfig = {
   appId: "1:527519082041:web:87d6e8039a0b76582b4fe8",
   measurementId: "G-V0FZQ175LD",
 };
-
-// const analytics = getAnalytics(app);
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);

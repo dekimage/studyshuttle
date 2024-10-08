@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import MobxStore from "../app/mobx";
 import { observer } from "mobx-react-lite";
 import Loader from "../app/_components/Loader";
-import { toJS } from "mobx";
+
 
 const withProfAuth = (WrappedComponent) => {
   const AuthComponent = observer((props) => {
