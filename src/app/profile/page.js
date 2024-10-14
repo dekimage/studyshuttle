@@ -6,7 +6,7 @@ import logoImg from "../../assets/logo.png";
 import { Button } from "@/components/ui/button";
 import MobxStore from "../mobx";
 import { observer } from "mobx-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Loader from "../_components/Loader";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import crypto from "crypto";
@@ -108,6 +108,7 @@ function generateUUID() {
 }
 
 const PaymentDialog = ({}) => {
+  const formRef = useRef(null);
   const [formValues, setFormValues] = useState({
     pan: "",
     expYear: "",
@@ -122,19 +123,22 @@ const PaymentDialog = ({}) => {
   const clientId = "180000166";
   // const oid = generateUUID();
   const oid = "1291899411421";
-  const amount = "3000.00";
-  const okUrl = "http://localhost/api/payment-success";
-  const failUrl = "http://localhost/api/payment-fail";
+  const amount = "3000";
+  const okUrl = "http://localhost:3000/api/payment-success";
+  const failUrl = "http://localhost:3000/api/payment-fail";
   const trantype = "Auth";
   // const rnd = generateRandomString(10);
-  const rnd = "asdf";
+  const rnd = "aisoapleif";
   const storeKey = "TEST1777";
   // const storeKey = "TEST1787";
+  const handleSubmit = (event) => {
+    // Ensure the event is available
+    if (event) {
+      event.preventDefault(); // Prevent form submission if the event is present
+    }
 
-  const handleSubmit = () => {
-    // Generate hash for form submission
-    // return "ZTMwMjE2MmQzNjI5MDRlODU2YjhmMTk2ZmI3NzU5YjI0MWFiYzMzZg==";
-    return generateHash({
+    console.log("Form is being submitted with the following values:");
+    console.log({
       clientId,
       oid,
       amount,
@@ -143,8 +147,38 @@ const PaymentDialog = ({}) => {
       trantype,
       rnd,
       storeKey,
+      hash: generateHash({
+        clientId,
+        oid,
+        amount,
+        okUrl,
+        failUrl,
+        trantype,
+        rnd,
+        storeKey,
+      }),
     });
+
+    // Manually submit the form
+    if (formRef.current) {
+      formRef.current.submit(); // Submit the form using the reference
+    } // Only submit if the event is present
   };
+  // const handleSubmit = (event) => {
+  //   event.preventDefault();
+  //   // Generate hash for form submission
+  //   // return "ZTMwMjE2MmQzNjI5MDRlODU2YjhmMTk2ZmI3NzU5YjI0MWFiYzMzZg==";
+  //   return generateHash({
+  //     clientId,
+  //     oid,
+  //     amount,
+  //     okUrl,
+  //     failUrl,
+  //     trantype,
+  //     rnd,
+  //     storeKey,
+  //   });
+  // };
 
   return (
     <Dialog>
@@ -153,7 +187,9 @@ const PaymentDialog = ({}) => {
       </DialogTrigger>
       <DialogContent>
         <form
+          ref={formRef}
           method="POST"
+          onSubmit={handleSubmit}
           action="https://torus-stage-halkbankmacedonia.asseco-see.com.tr/fim/est3Dgate"
         >
           <input type="hidden" name="clientid" value={clientId} />
@@ -167,12 +203,12 @@ const PaymentDialog = ({}) => {
           <input
             type="hidden"
             name="okUrl"
-            value="http://localhost/api/payment-success"
+            value="http://localhost:3000/api/payment-success"
           />
           <input
             type="hidden"
             name="failUrl"
-            value="http://localhost/api/payment-fail"
+            value="http://localhost:3000/api/payment-fail"
           />
           <input type="hidden" name="lang" value="en" />
           <input type="hidden" name="rnd" value={rnd} />
@@ -210,7 +246,7 @@ const PaymentDialog = ({}) => {
             onChange={handleInputChange}
             required
           /> */}
-          <Button type="submit">Pay Now</Button>
+          <Button onClick={(e) => handleSubmit(e)}>Pay Now</Button>
         </form>
       </DialogContent>
     </Dialog>
