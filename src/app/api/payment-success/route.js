@@ -1,71 +1,143 @@
-// pages/api/payment-success.js
+// app/api/payment-success/route.js
 import crypto from "crypto";
-// import { db } from "../../firebase";
+import { NextResponse } from "next/server";
+import { db } from "../../firebaseAdmin";
 
-function verifyHash(params, storeKey) {
-  const hashParams = params.HASHPARAMS;
-  const hashParamsVal = params.HASHPARAMSVAL;
-  const hashParam = params.HASH;
-  let paramsVal = "";
+async function verifyHash(params, storeKey) {
+  const hashParam = params.HASH || "";
 
-  // Extract values for hash calculation
-  hashParams.split(":").forEach((param) => {
-    paramsVal += params[param] || "";
-  });
+  // Retrieve the stored rnd from the user document using the oid
+  const userSnapshot = await db
+    .collection("users")
+    .where("temporaryOid", "==", params.oid)
+    .get();
 
-  // Compare the concatenated values
-  if (paramsVal !== hashParamsVal) {
-    return false; // If concatenated values do not match, hash is invalid
+  if (userSnapshot.empty) {
+    console.error("No user found with oid:", params.oid);
+    return false;
   }
 
-  // Generate the hash for verification
-  const hashString = paramsVal + storeKey;
+  const userDoc = userSnapshot.docs[0];
+  const storedRnd = userDoc.data().temporaryRnd;
+
+  if (!storedRnd) {
+    console.error("Stored rnd not found for oid:", params.oid);
+    return false;
+  }
+
+  console.log("Retrieved stored rnd value:", storedRnd);
+
+  console.log("Backend hash verification:");
+  console.log("amount:", params.amount);
+  console.log("clientid:", params.clientid);
+  console.log("currency:", params.currency);
+  console.log("failUrl:", params.failUrl);
+  console.log("hashAlgorithm:", params.hashAlgorithm);
+  console.log("lang:", params.lang);
+  console.log("oid:", params.oid);
+  console.log("okUrl:", params.okUrl);
+  console.log("refreshtime:", params.refreshtime);
+  console.log("rnd:", storedRnd);
+  console.log("storetype:", params.storetype);
+  console.log("trantype:", params.trantype);
+  console.log("storeKey:", storeKey);
+
+  const plaintext = `${params.amount}|${params.clientid}|${params.currency}|${params.failUrl}|${params.hashAlgorithm}|${params.lang}|${params.oid}|${params.okUrl}|${params.refreshtime}|${storedRnd}|${params.storetype}|${params.trantype}|${storeKey}`;
+
+  console.log("Plaintext for hash verification (backend):", plaintext);
+
   const calculatedHash = crypto
-    .createHash("sha1")
-    .update(hashString)
+    .createHash("sha512")
+    .update(plaintext, "utf8")
     .digest("base64");
 
-  // Compare the calculated hash with the received hash
+  console.log("Calculated hash (backend):", calculatedHash);
+  console.log("Received hash (from gateway):", hashParam);
+
   return calculatedHash === hashParam;
 }
 
-export async function POST(req, res) {
-  console.log(222, req, 333, res);
-  if (req.method !== "POST") {
-    return res.status(405).send("Method Not Allowed");
+async function verifyTransaction(params) {
+  console.log("Verifying transaction with params:", params);
+
+  const userSnapshot = await db
+    .collection("users")
+    .where("temporaryOid", "==", params.oid)
+    .get();
+
+  if (userSnapshot.empty) {
+    console.error("No user found with oid:", params.oid);
+    return false;
   }
 
-  const storeKey = "TEST1787";
-  const params = req.body;
+  const userDoc = userSnapshot.docs[0];
+  const storedData = userDoc.data();
 
-  // Verify the hash to ensure the response is valid
-  if (!verifyHash(params, storeKey)) {
-    return res
-      .status(400)
-      .json({ error: "Invalid hash. Potential tampering detected." });
+  console.log("Stored data:", storedData);
+
+  if (!storedData.temporaryRnd || !storedData.temporaryOid) {
+    console.error("Stored rnd or oid not found for oid:", params.oid);
+    return false;
+  }
+
+  if (params.oid !== storedData.temporaryOid) {
+    console.error("Received oid does not match stored oid");
+    return false;
+  }
+
+  console.log("Transaction verified successfully");
+  return true;
+}
+
+export async function POST(req) {
+  const formData = await req.formData();
+
+  const params = {};
+  for (const [key, value] of formData.entries()) {
+    params[key] = value;
+  }
+
+  console.log("Received payment response:", params);
+
+  // Verify the transaction using our stored data
+  if (!(await verifyTransaction(params))) {
+    return new NextResponse(
+      JSON.stringify({ error: "Invalid transaction. Verification failed." }),
+      { status: 400, headers: { "Content-Type": "application/json" } },
+    );
   }
 
   if (params.Response === "Approved") {
     try {
       // Create order in Firestore
-      // await db.collection("orders").add({
-      //   orderId: params.oid,
-      //   amount: params.amount,
-      //   status: "Approved",
-      //   transactionId: params.TransId,
-      //   authCode: params.AuthCode,
-      //   date: new Date(),
-      // });
-      console.log("creating order...");
-      return res
-        .status(200)
-        .json({ message: "Payment successful and order created." });
+      await db.collection("orders").add({
+        orderId: params.oid,
+        amount: params.amount,
+        status: "Approved",
+        transactionId: params.TransId,
+        authCode: params.AuthCode,
+        date: new Date(),
+      });
+
+      console.log("Order created successfully.");
+
+      return new NextResponse(
+        JSON.stringify({
+          message: "Payment successful and order created.",
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      );
     } catch (error) {
-      return res
-        .status(500)
-        .json({ error: "Error creating order in Firestore." });
+      console.error("Error creating order:", error);
+      return new NextResponse(
+        JSON.stringify({ error: "Error creating order in Firestore." }),
+        { status: 500, headers: { "Content-Type": "application/json" } },
+      );
     }
   } else {
-    return res.status(400).json({ error: "Payment not approved." });
+    return new NextResponse(
+      JSON.stringify({ error: "Payment not approved." }),
+      { status: 400, headers: { "Content-Type": "application/json" } },
+    );
   }
 }

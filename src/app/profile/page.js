@@ -6,10 +6,11 @@ import logoImg from "../../assets/logo.png";
 import { Button } from "@/components/ui/button";
 import MobxStore from "../mobx";
 import { observer } from "mobx-react";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import Loader from "../_components/Loader";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import crypto from "crypto";
+import { v4 as uuidv4 } from "uuid";
 
 const CheckmarkIcon = ({ isBlack = false }) => {
   return isBlack ? (
@@ -67,24 +68,29 @@ const BalanceBox = ({ amount, label, color, isBluecoin }) => {
   );
 };
 
-function generateHash({
-  clientid,
-  oid,
+function generateHashVersion3({
   amount,
-  okUrl,
+  clientid,
+  currency,
   failUrl,
-  trantype,
+  hashAlgorithm,
+  lang,
+  oid,
+  okUrl,
   rnd,
+  storetype, // Changed from storeType to storetype
+  trantype,
   storeKey,
+  refreshtime,
 }) {
-  // Construct the plaintext string
-  const plaintext = `${clientid}${oid}${amount}${okUrl}${failUrl}${trantype}${rnd}${storeKey}`;
+  const plaintext = `${amount}|${clientid}|${currency}|${failUrl}|${hashAlgorithm}|${lang}|${oid}|${okUrl}|${refreshtime}|${rnd}|${storetype}|${trantype}|${storeKey}`;
 
-  // Create the SHA1 hash and encode it in Base64
   const hash = crypto
-    .createHash("sha1")
+    .createHash("sha512")
     .update(plaintext, "utf8")
     .digest("base64");
+
+  console.log("Generated hash (frontend):", hash);
 
   return hash;
 }
@@ -107,78 +113,69 @@ function generateUUID() {
   });
 }
 
-const PaymentDialog = ({}) => {
+const PaymentDialog = observer(() => {
   const formRef = useRef(null);
-  const [formValues, setFormValues] = useState({
-    pan: "",
-    expYear: "",
-    expMonth: "",
-    cv2: "",
-  });
+  const [rnd, setRnd] = useState("");
+  const { user } = MobxStore;
 
-  const handleInputChange = (e) => {
-    setFormValues({ ...formValues, [e.target.name]: e.target.value });
-  };
+  useEffect(() => {
+    setRnd(generateRandomString(10));
+  }, []);
+
+  console.log("User object:", user); // Add this line to check the user object
 
   const clientId = "180000166";
-  // const oid = generateUUID();
-  const oid = "1291899411421";
+  const oid = generateUUID();
   const amount = "3000";
   const okUrl = "http://localhost:3000/api/payment-success";
   const failUrl = "http://localhost:3000/api/payment-fail";
   const trantype = "Auth";
-  // const rnd = generateRandomString(10);
-  const rnd = "aisoapleif";
+  const currency = "807";
   const storeKey = "TEST1777";
-  // const storeKey = "TEST1787";
-  const handleSubmit = (event) => {
-    // Ensure the event is available
-    if (event) {
-      event.preventDefault(); // Prevent form submission if the event is present
+  const storeType = "3d_pay_hosting";
+  const refreshtime = "3";
+
+  const handleSubmit = async (event) => {
+    console.log("handleSubmit called");
+    event.preventDefault();
+
+    if (!user || !user.uid) {
+      console.log("User ID is not available");
+      alert("User ID is not available. Please try logging in again.");
+      return;
     }
 
-    console.log("Form is being submitted with the following values:");
-    console.log({
-      clientId,
-      oid,
-      amount,
-      okUrl,
-      failUrl,
-      trantype,
-      rnd,
-      storeKey,
-      hash: generateHash({
-        clientId,
-        oid,
-        amount,
-        okUrl,
-        failUrl,
-        trantype,
-        rnd,
-        storeKey,
-      }),
-    });
+    try {
+      // Store oid and rnd
+      const response = await fetch("/api/store-rnd", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ oid, rnd, userId: user.uid }),
+      });
 
-    // Manually submit the form
-    if (formRef.current) {
-      formRef.current.submit(); // Submit the form using the reference
-    } // Only submit if the event is present
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      console.log("Payment info stored successfully");
+
+      // Update the form data to use the generated oid and rnd
+      if (formRef.current) {
+        formRef.current.oid.value = oid;
+        formRef.current.rnd.value = rnd;
+        formRef.current.submit();
+      } else {
+        console.error("Form reference is null");
+      }
+    } catch (error) {
+      console.error("Error preparing payment:", error);
+      alert(
+        "An error occurred while processing your payment. Please try again.",
+      );
+    }
   };
-  // const handleSubmit = (event) => {
-  //   event.preventDefault();
-  //   // Generate hash for form submission
-  //   // return "ZTMwMjE2MmQzNjI5MDRlODU2YjhmMTk2ZmI3NzU5YjI0MWFiYzMzZg==";
-  //   return generateHash({
-  //     clientId,
-  //     oid,
-  //     amount,
-  //     okUrl,
-  //     failUrl,
-  //     trantype,
-  //     rnd,
-  //     storeKey,
-  //   });
-  // };
 
   return (
     <Dialog>
@@ -189,69 +186,50 @@ const PaymentDialog = ({}) => {
         <form
           ref={formRef}
           method="POST"
-          onSubmit={handleSubmit}
           action="https://torus-stage-halkbankmacedonia.asseco-see.com.tr/fim/est3Dgate"
         >
           <input type="hidden" name="clientid" value={clientId} />
-          <input type="hidden" name="storetype" value="3d_pay_hosting" />
-          <input type="hidden" name="hash" value={handleSubmit()} />
+          <input type="hidden" name="storetype" value={storeType} />
+          <input type="hidden" name="currency" value={currency} />
+          <input type="hidden" name="refreshtime" value={refreshtime} />
+          <input
+            type="hidden"
+            name="hash"
+            value={generateHashVersion3({
+              clientid: clientId,
+              oid,
+              amount,
+              okUrl,
+              failUrl,
+              trantype,
+              rnd,
+              currency,
+              storeType,
+              hashAlgorithm: "ver3",
+              lang: "en",
+              storeKey,
+              refreshtime,
+              storetype: storeType,
+            })}
+          />
           <input type="hidden" name="trantype" value={trantype} />
           <input type="hidden" name="amount" value={amount} />
-          <input type="hidden" name="currency" value="807" />
           <input type="hidden" name="oid" value={oid} />
           <input type="hidden" name="encoding" value="utf-8" />
-          <input
-            type="hidden"
-            name="okUrl"
-            value="http://localhost:3000/api/payment-success"
-          />
-          <input
-            type="hidden"
-            name="failUrl"
-            value="http://localhost:3000/api/payment-fail"
-          />
+          <input type="hidden" name="hashAlgorithm" value="ver3" />
+          <input type="hidden" name="okUrl" value={okUrl} />
+          <input type="hidden" name="failUrl" value={failUrl} />
           <input type="hidden" name="lang" value="en" />
           <input type="hidden" name="rnd" value={rnd} />
 
-          {/* Payment form fields */}
-          {/* <input
-            type="text"
-            name="pan"
-            placeholder="Card Number"
-            value={formValues.pan}
-            onChange={handleInputChange}
-            required
-          />
-          <input
-            type="text"
-            name="expYear"
-            placeholder="Expiry Year"
-            value={formValues.expYear}
-            onChange={handleInputChange}
-            required
-          />
-          <input
-            type="text"
-            name="expMonth"
-            placeholder="Expiry Month"
-            value={formValues.expMonth}
-            onChange={handleInputChange}
-            required
-          />
-          <input
-            type="text"
-            name="cv2"
-            placeholder="CVV"
-            value={formValues.cv2}
-            onChange={handleInputChange}
-            required
-          /> */}
-          <Button onClick={(e) => handleSubmit(e)}>Pay Now</Button>
+          <Button type="button" onClick={handleSubmit}>
+            Pay Now
+          </Button>
         </form>
       </DialogContent>
     </Dialog>
   );
-};
+});
 
 const InitPaymentForm = ({ setSelectedPlan }) => {
   return (
@@ -441,7 +419,7 @@ const ProfilePage = observer(() => {
                 height={40}
                 className="absolute left-[-25px] top-[-25px] h-[70px] w-[70px]"
               />
-              <div className="text-[29px] font-semibold ">Академски Групи</div>
+              <div className="text-[29px] font-semibold ">Академски групи</div>
               <div className="mb-2 mt-6 flex h-[48px] items-center gap-2">
                 <div className="h-[24px]">
                   <CheckmarkIcon isBlack />
@@ -575,7 +553,7 @@ const ProfilePage = observer(() => {
               <div className="h-[24px]">
                 <CheckmarkIcon />
               </div>
-              <div>Целосен пристап до алатките за учење</div>
+              <div>Целосен пристап до алатките за учењ</div>
             </div>
 
             <div className="b-white my-6 w-full  border border-dashed"></div>
