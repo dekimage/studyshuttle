@@ -1,7 +1,7 @@
-// app/api/payment-success/route.js
 import crypto from "crypto";
 import { NextResponse } from "next/server";
 import { db } from "../../firebaseAdmin";
+import { FieldValue } from "firebase-admin/firestore";
 
 async function verifyHash(params, storeKey) {
   const hashParam = params.HASH || "";
@@ -85,9 +85,19 @@ async function verifyTransaction(params) {
     return false;
   }
 
+  // Verify the amount
+  const validAmounts = [1250, 36000, 72000];
+  if (!validAmounts.includes(Number(params.amount))) {
+    console.error("Invalid amount:", params.amount);
+    return false;
+  }
+
   console.log("Transaction verified successfully");
   return true;
 }
+
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+console.log("BASE_URL:", BASE_URL);
 
 export async function POST(req) {
   const formData = await req.formData();
@@ -101,43 +111,177 @@ export async function POST(req) {
 
   // Verify the transaction using our stored data
   if (!(await verifyTransaction(params))) {
-    return new NextResponse(
-      JSON.stringify({ error: "Invalid transaction. Verification failed." }),
-      { status: 400, headers: { "Content-Type": "application/json" } },
+    return new Response(
+      `<html>
+        <head>
+          <meta http-equiv="refresh" content="0;url=/payment-result?status=error&message=${encodeURIComponent(
+            "Invalid transaction",
+          )}">
+        </head>
+      </html>`,
+      {
+        headers: { "Content-Type": "text/html" },
+      },
     );
   }
 
   if (params.Response === "Approved") {
     try {
-      // Create order in Firestore
-      await db.collection("orders").add({
-        orderId: params.oid,
-        amount: params.amount,
-        status: "Approved",
-        transactionId: params.TransId,
-        authCode: params.AuthCode,
-        date: new Date(),
-      });
+      // Fetch the user document
+      const userSnapshot = await db
+        .collection("users")
+        .where("temporaryOid", "==", params.oid)
+        .get();
 
-      console.log("Order created successfully.");
+      if (!userSnapshot.empty) {
+        const userDoc = userSnapshot.docs[0];
+        const userData = userDoc.data();
+        let tokensToAdd = {};
+        let tokenType = "";
+        let tokenAmount = 0;
 
-      return new NextResponse(
-        JSON.stringify({
-          message: "Payment successful and order created.",
-        }),
-        { status: 200, headers: { "Content-Type": "application/json" } },
-      );
+        switch (Number(params.amount)) {
+          case 1250:
+            tokensToAdd = { yellowTokens: FieldValue.increment(1) };
+            tokenType = "yellowTokens";
+            tokenAmount = 1;
+            break;
+          case 36000:
+            tokensToAdd = { yellowTokens: FieldValue.increment(48) };
+            tokenType = "yellowTokens";
+            tokenAmount = 48;
+            break;
+          case 72000:
+            tokensToAdd = { blueTokens: FieldValue.increment(1) };
+            tokenType = "blueTokens";
+            tokenAmount = 1;
+            break;
+        }
+
+        const tokenSummary = {
+          before: {
+            yellowTokens: userData.yellowTokens || 0,
+            blueTokens: userData.blueTokens || 0,
+          },
+          after: {
+            yellowTokens:
+              (userData.yellowTokens || 0) +
+              (tokenType === "yellowTokens" ? tokenAmount : 0),
+            blueTokens:
+              (userData.blueTokens || 0) +
+              (tokenType === "blueTokens" ? tokenAmount : 0),
+          },
+        };
+
+        // Create order in Firestore
+        await db.collection("orders").add({
+          userId: userDoc.id,
+          orderId: params.oid,
+          amount: params.amount,
+          status: "Approved",
+          transactionId: params.TransId,
+          authCode: params.AuthCode,
+          date: new Date(),
+          tokenSummary: tokenSummary,
+          tokenType: tokenType,
+          tokenAmount: tokenAmount,
+        });
+
+        console.log("Order created successfully.");
+
+        // Update user's tokens
+        await userDoc.ref.update(tokensToAdd);
+        console.log("User tokens updated successfully.");
+
+        // No need to fetch updated user data, we already calculated the correct values
+
+        return new Response(
+          `<html>
+            <head>
+              <meta http-equiv="refresh" content="5;url=/payment-result?status=success&tokenType=${tokenType}&tokenAmount=${tokenAmount}">
+              <style>
+                body {
+                  font-family: Arial, sans-serif;
+                  display: flex;
+                  justify-content: center;
+                  align-items: center;
+                  height: 100vh;
+                  margin: 0;
+                  background-color: #f0f0f0;
+                }
+                .container {
+                  text-align: center;
+                  padding: 20px;
+                  background-color: white;
+                  border-radius: 10px;
+                  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+                }
+                h1 {
+                  color: #4CAF50;
+                  font-size: 24px;
+                }
+                p {
+                  font-size: 18px;
+                  margin-bottom: 20px;
+                }
+                .button {
+                  background-color: #4CAF50;
+                  border: none;
+                  color: white;
+                  padding: 15px 32px;
+                  text-align: center;
+                  text-decoration: none;
+                  display: inline-block;
+                  font-size: 16px;
+                  margin: 4px 2px;
+                  cursor: pointer;
+                  border-radius: 5px;
+                }
+              </style>
+            </head>
+            <body>
+              <div class="container">
+                <h1>Payment Successful!</h1>
+                <p>You've earned ${tokenAmount} ${
+                  tokenType === "yellowTokens" ? "Yellow" : "Blue"
+                } Token(s).</p>
+                <p>Redirecting to payment result page...</p>
+                <a href="/payment-result?status=success&tokenType=${tokenType}&tokenAmount=${tokenAmount}" class="button">Go to Result Page</a>
+              </div>
+            </body>
+          </html>`,
+          {
+            headers: { "Content-Type": "text/html" },
+          },
+        );
+      }
     } catch (error) {
-      console.error("Error creating order:", error);
-      return new NextResponse(
-        JSON.stringify({ error: "Error creating order in Firestore." }),
-        { status: 500, headers: { "Content-Type": "application/json" } },
+      console.error("Error processing payment:", error);
+      return new Response(
+        `<html>
+          <head>
+            <meta http-equiv="refresh" content="0;url=/payment-result?status=error&message=${encodeURIComponent(
+              "Error processing payment",
+            )}">
+          </head>
+        </html>`,
+        {
+          headers: { "Content-Type": "text/html" },
+        },
       );
     }
   } else {
-    return new NextResponse(
-      JSON.stringify({ error: "Payment not approved." }),
-      { status: 400, headers: { "Content-Type": "application/json" } },
+    return new Response(
+      `<html>
+        <head>
+          <meta http-equiv="refresh" content="0;url=/payment-result?status=error&message=${encodeURIComponent(
+            "Payment not approved",
+          )}">
+        </head>
+      </html>`,
+      {
+        headers: { "Content-Type": "text/html" },
+      },
     );
   }
 }

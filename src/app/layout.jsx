@@ -1,5 +1,5 @@
 "use client";
-import { Inter as FontSans, Montserrat } from "next/font/google";
+import { Inter as FontSans, Montserrat, Noto_Sans } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import ReusableLayout from "./_components/ReusableLayout";
@@ -12,6 +12,12 @@ export const fontSans = Montserrat({
   subsets: ["latin"],
   variable: "--font-sans",
   weights: [400, 500, 600, 700, 800, 900],
+});
+
+export const fontCyrillic = Noto_Sans({
+  subsets: ["cyrillic"],
+  variable: "--font-cyrillic",
+  weight: ["400", "700"],
 });
 
 export default function RootLayout({ children }) {
@@ -30,6 +36,7 @@ export default function RootLayout({ children }) {
     "/",
   ].includes(pathname); // Example: Hide layout on login and register routes
   const showHeaderFooter = ![
+    "/payment-result",
     "/pocetna",
     "/professor-admin",
     "/professors",
@@ -45,6 +52,7 @@ export default function RootLayout({ children }) {
         className={cn(
           "min-h-screen w-full bg-background font-sans antialiased",
           fontSans.variable,
+          fontCyrillic.variable,
         )}
       >
         <ThemeProvider attribute="class" defaultTheme="system">

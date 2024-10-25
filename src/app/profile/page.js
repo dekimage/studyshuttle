@@ -113,7 +113,7 @@ function generateUUID() {
   });
 }
 
-const PaymentDialog = observer(() => {
+const PaymentDialog = observer(({ selectedPlan }) => {
   const formRef = useRef(null);
   const [rnd, setRnd] = useState("");
   const { user } = MobxStore;
@@ -122,11 +122,24 @@ const PaymentDialog = observer(() => {
     setRnd(generateRandomString(10));
   }, []);
 
-  console.log("User object:", user); // Add this line to check the user object
+  console.log("User object:", user);
 
   const clientId = "180000166";
   const oid = generateUUID();
-  const amount = "3000";
+  let amount;
+  switch (selectedPlan) {
+    case "red":
+      amount = "1250";
+      break;
+    case "blue":
+      amount = "36000";
+      break;
+    case "yellow":
+      amount = "72000";
+      break;
+    default:
+      amount = "0";
+  }
   const okUrl = "http://localhost:3000/api/payment-success";
   const failUrl = "http://localhost:3000/api/payment-fail";
   const trantype = "Auth";
@@ -222,8 +235,12 @@ const PaymentDialog = observer(() => {
           <input type="hidden" name="lang" value="en" />
           <input type="hidden" name="rnd" value={rnd} />
 
-          <Button type="button" onClick={handleSubmit}>
-            Pay Now
+          <Button
+            type="button"
+            className="w-full bg-sky hover:bg-sky"
+            onClick={handleSubmit}
+          >
+            Наплата со картичка
           </Button>
         </form>
       </DialogContent>
@@ -231,7 +248,7 @@ const PaymentDialog = observer(() => {
   );
 });
 
-const InitPaymentForm = ({ setSelectedPlan }) => {
+const InitPaymentForm = ({ setSelectedPlan, selectedPlan }) => {
   return (
     <div>
       <div className="mb-4 text-[25px] font-bold">
@@ -252,8 +269,7 @@ const InitPaymentForm = ({ setSelectedPlan }) => {
         >
           Врати се назад
         </Button>
-        {/* <Button className="bg-sky hover:bg-sky">Избери план</Button> */}
-        <PaymentDialog />
+        <PaymentDialog selectedPlan={selectedPlan} />
       </div>
     </div>
   );
@@ -365,7 +381,10 @@ const ProfilePage = observer(() => {
                 </ul>
               </div>
             </div>
-            <InitPaymentForm setSelectedPlan={setSelectedPlan} />
+            <InitPaymentForm
+              setSelectedPlan={setSelectedPlan}
+              selectedPlan={selectedPlan}
+            />
           </div>
         )}
         {/* BLUE BIG */}
@@ -405,7 +424,10 @@ const ProfilePage = observer(() => {
                 </ul>
               </div>
             </div>
-            <InitPaymentForm setSelectedPlan={setSelectedPlan} />
+            <InitPaymentForm
+              setSelectedPlan={setSelectedPlan}
+              selectedPlan={selectedPlan}
+            />
           </div>
         )}
         {/* YELLOW BIG */}
@@ -448,7 +470,10 @@ const ProfilePage = observer(() => {
                 </ul>
               </div>
             </div>
-            <InitPaymentForm setSelectedPlan={setSelectedPlan} />
+            <InitPaymentForm
+              setSelectedPlan={setSelectedPlan}
+              selectedPlan={selectedPlan}
+            />
           </div>
         )}
       </div>
@@ -553,7 +578,7 @@ const ProfilePage = observer(() => {
               <div className="h-[24px]">
                 <CheckmarkIcon />
               </div>
-              <div>Целосен пристап до алатките за учењ</div>
+              <div>Целосен пристап до алатките за учење</div>
             </div>
 
             <div className="b-white my-6 w-full  border border-dashed"></div>
