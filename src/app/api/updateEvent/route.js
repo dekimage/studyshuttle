@@ -18,9 +18,12 @@ export async function PUT(req) {
     const userId = decodedToken.uid;
 
     // Get user data to verify role and professor ID
+    console.log(userId);
     const userDocRef = db.collection("users").doc(userId);
     const userDoc = await userDocRef.get();
     const userData = userDoc.data();
+
+    console.log(userData);
 
     if (userData.role !== "professor") {
       return NextResponse.json(
@@ -43,6 +46,7 @@ export async function PUT(req) {
     const previousEvent = eventDoc.data();
 
     // Check if the event belongs to the authenticated professor
+    console.log(previousEvent.professorId, userData.professorId);
     if (previousEvent.professorId !== userData.professorId) {
       return NextResponse.json(
         { success: false, error: "Access denied: Not your event" },

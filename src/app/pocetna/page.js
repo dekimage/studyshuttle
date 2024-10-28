@@ -187,13 +187,21 @@ export const AcademyGroupModal = ({
 
 const AcademyGroupsPage = observer(() => {
   const [selectedGroup, setSelectedGroup] = useState(null);
+  const [isLoading, setIsLoading] = useState(true); // Add loading state
 
   useEffect(() => {
     const fetchData = async () => {
-      await MobxStore.userReady; // Wait for user to be loaded
-      const result = await MobxStore.fetchAcademyGroupsForUser();
-      if (!result.success) {
-        console.log(result.error);
+      try {
+        setIsLoading(true);
+        await MobxStore.userReady; // Wait for user to be loaded
+        const result = await MobxStore.fetchAcademyGroupsForUser();
+        if (!result.success) {
+          console.error("Failed to fetch academy groups:", result.error);
+        }
+      } catch (error) {
+        console.error("Error in fetchData:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -208,7 +216,16 @@ const AcademyGroupsPage = observer(() => {
     setSelectedGroup(null);
   };
 
-  console.log(toJS(MobxStore.academyGroups));
+  // Only log when loading is complete
+  useEffect(() => {
+    if (!isLoading) {
+      console.log("Academy Groups:", toJS(MobxStore.academyGroups));
+    }
+  }, [isLoading]);
+
+  if (isLoading) {
+    return <Loader />; // Show loading state while data is being fetched
+  }
 
   return (
     <div>

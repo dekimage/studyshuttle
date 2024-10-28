@@ -9,18 +9,34 @@ import logoImg from "../../assets/logo.png";
 import Image from "next/image";
 import { AcademyGroupModal } from "../pocetna/page";
 import withAuth from "@/src/Components/AuthHoc";
+import { toJS } from "mobx";
 
 const CalendarView = observer(() => {
   const [viewMode, setViewMode] = useState("week"); // "week" or "month"
   const [currentWeek, setCurrentWeek] = useState(new Date()); // The start date of the current week
   const [currentMonth, setCurrentMonth] = useState(new Date()); // The current month
   const [selectedEvent, setSelectedEvent] = useState(null); // For modal display
+  const [isLoading, setIsLoading] = useState(true); // Add loading state
 
   useEffect(() => {
     const fetchData = async () => {
-      await MobxStore.userReady;
-      await MobxStore.fetchUpcomingEventsForUser();
-      await MobxStore.fetchAcademyGroupsForUser(); // Fetch Academy Groups
+      try {
+        setIsLoading(true);
+        await MobxStore.userReady; // Wait for user to be ready
+
+        // Fetch both events and academy groups
+        await Promise.all([
+          MobxStore.fetchUpcomingEventsForUser(),
+          MobxStore.fetchAcademyGroupsForUser(),
+        ]);
+
+        console.log("Fetched academy groups:", toJS(MobxStore.academyGroups));
+        console.log("Fetched upcoming events:", toJS(MobxStore.upcomingEvents));
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     fetchData();
@@ -146,9 +162,9 @@ const CalendarView = observer(() => {
                     </div>
                   ))}
                 {/* Render Academy Groups */}
-                {MobxStore.nextAcademyGroups
+                {MobxStore.academyGroups
                   .filter((group) =>
-                    group.schedule.some(
+                    group.schedule?.some(
                       (schedule) =>
                         schedule.day.toLowerCase() ===
                         dayNames[day.getDay()].toLowerCase(),
@@ -156,7 +172,7 @@ const CalendarView = observer(() => {
                   )
                   .map((group) =>
                     group.schedule
-                      .filter(
+                      ?.filter(
                         (schedule) =>
                           schedule.day.toLowerCase() ===
                           dayNames[day.getDay()].toLowerCase(),
@@ -253,16 +269,20 @@ const CalendarView = observer(() => {
                       </div>
                     ))}
                   {/* Render Academy Groups */}
-                  {MobxStore.nextAcademyGroups
+                  {MobxStore.academyGroups
                     .filter((group) =>
-                      group.schedule.some(
-                        (schedule) => schedule.day === dayNames[day.getDay()],
+                      group.schedule?.some(
+                        (schedule) =>
+                          schedule.day.toLowerCase() ===
+                          dayNames[day.getDay()].toLowerCase(),
                       ),
                     )
                     .map((group) =>
                       group.schedule
-                        .filter(
-                          (schedule) => schedule.day === dayNames[day.getDay()],
+                        ?.filter(
+                          (schedule) =>
+                            schedule.day.toLowerCase() ===
+                            dayNames[day.getDay()].toLowerCase(),
                         )
                         .map((schedule, i) => (
                           <div
@@ -327,6 +347,10 @@ const CalendarView = observer(() => {
       </div>
     );
   };
+
+  if (isLoading) {
+    return <div>Loading...</div>; // Or your custom loader component
+  }
 
   return (
     <div className="h-full min-h-screen bg-lightGrey p-2 lg:p-6">

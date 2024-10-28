@@ -110,7 +110,7 @@ class Store {
 
     onAuthStateChanged(auth, async (user) => {
       runInAction(() => {
-        this.setLoading(true); // Start with loading
+        this.setLoading(true);
       });
 
       if (user) {
@@ -129,27 +129,32 @@ class Store {
 
             if (!professorSnapshot.empty) {
               const professorData = professorSnapshot.docs[0].data();
-              userData = { ...userData, ...professorData };
+              // Include the professor document ID as professorId
+              userData = {
+                ...userData,
+                ...professorData,
+                professorId: professorSnapshot.docs[0].id, // Add this line
+              };
             }
           }
 
           runInAction(() => {
             this.setUser(userData);
-            this.setLoading(false); // Finished loading
-            this.userReady = true; // User data is ready
+            this.setLoading(false);
+            this.userReady = true;
           });
         } else {
           runInAction(() => {
             this.setUser(null);
-            this.setLoading(false); // Finished loading
-            this.userReady = true; // User data is ready
+            this.setLoading(false);
+            this.userReady = true;
           });
         }
       } else {
         runInAction(() => {
           this.setUser(null);
-          this.setLoading(false); // Finished loading
-          this.userReady = true; // User data is ready
+          this.setLoading(false);
+          this.userReady = true;
         });
       }
     });
@@ -498,81 +503,52 @@ class Store {
   }
   async fetchAcademyGroupsForUser() {
     try {
-      if (!this.user) throw new Error("User not logged in");
+      if (!this.user) {
+        console.log("No user logged in");
+        throw new Error("User not logged in");
+      }
+
+      console.log("Fetching groups for user:", this.user.uid);
+      console.log("User role:", this.user.role);
 
       let groupsQuery;
 
-      // Determine the query based on the user's role
       if (this.user.role === "professor") {
+        console.log("Querying as professor with ID:", this.user.professorId);
         groupsQuery = query(
           collection(db, "academyGroups"),
-          where("professorId", "==", this.user.professorId), // Use professor ID to get relevant groups
+          where("professorId", "==", this.user.professorId),
         );
       } else {
+        console.log("Querying as student with ID:", this.user.uid);
         groupsQuery = query(
           collection(db, "academyGroups"),
-          where("users", "array-contains", this.user.uid), // Use user ID for students
+          where("users", "array-contains", this.user.uid),
         );
       }
 
       const groupsSnapshot = await getDocs(groupsQuery);
+      console.log("Query returned:", groupsSnapshot.size, "documents");
 
       const groups = groupsSnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
 
-      // console.log(groups);
-
-      // Fetch user details for each group if the user is a professor
-      if (this.user.role === "professor") {
-        for (let group of groups) {
-          const userNames = await Promise.all(
-            group.users.map(async (userId) => {
-              const userDoc = await getDoc(doc(db, "users", userId));
-              if (userDoc.exists()) {
-                const userData = userDoc.data();
-                return `${userData.name} ${userData.lastname}`;
-              } else {
-                return "Unknown User";
-              }
-            }),
-          );
-
-          // Add the list of user names to the group object
-          group.userNames = userNames;
-        }
-      }
-
-      // Fetch professor names (common logic for both roles)
-      const uniqueProfessorIds = [
-        ...new Set(groups.map((group) => group.professorId)),
-      ];
-
-      const professorDetails = {};
-      for (const professorId of uniqueProfessorIds) {
-        const professorDoc = await getDoc(doc(db, "professors", professorId));
-        if (professorDoc.exists()) {
-          professorDetails[professorId] = professorDoc.data().name;
-        } else {
-          professorDetails[professorId] = "Unknown";
-        }
-      }
-
-      // Map professor names back to academy groups
-      const groupsWithDetails = groups.map((group) => ({
-        ...group,
-        professorName: professorDetails[group.professorId],
-      }));
+      console.log("Processed groups:", groups);
 
       runInAction(() => {
-        this.nextAcademyGroups = groupsWithDetails;
+        this.academyGroups = groups;
+        console.log(
+          "Updated MobX store with groups:",
+          this.academyGroups.length,
+        );
       });
 
       return { success: true };
     } catch (error) {
-      console.log("Error fetching academy groups:", error);
-      return { error: "Error fetching academy groups" };
+      console.error("Error fetching academy groups:", error);
+      return { error: error.message };
     }
   }
 
