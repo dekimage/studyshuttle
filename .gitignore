@@ -23,6 +23,7 @@ next-env.d.ts
 # misc
 .DS_Store
 *.pem
+firebase-admin-secret.json
 
 # debug
 npm-debug.log*
