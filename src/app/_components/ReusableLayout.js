@@ -5,13 +5,20 @@ import { Separator } from "@/components/ui/separator";
 import { VerticalNavbar } from "./VerticalNavbar";
 
 import {
+  Activity,
   CalendarDays,
+  CalendarRange,
   CircleUser,
+  FolderLock,
   GaugeCircle,
+  GraduationCap,
+  Headphones,
   LogOut,
   ShieldQuestion,
+  ShieldQuestionIcon,
   ShoppingBag,
   Ticket,
+  UserRound,
   Users,
 } from "lucide-react";
 
@@ -25,66 +32,79 @@ import { observer } from "mobx-react";
 import MobileHeader from "./MobileHeader";
 // import { ClerkLoaded, ClerkLoading, SignedIn, UserButton } from "@clerk/nextjs";
 import { ModeToggle } from "@/components/ui/themeButton";
+import { mixInitials } from "@/src/util/utils";
+import { FaChartBar } from "react-icons/fa";
 
 export const NAVIGATION_LINKS = [
   {
-    title: "Часови",
-    checkUrl: "Events",
-    icon: Ticket,
-    href: "",
+    title: "Почетна",
+    // checkUrl: "Events",
+    icon: Activity,
+    href: "pocetna",
   },
   {
     title: "Распоред",
-    icon: CalendarDays,
+    icon: CalendarRange,
     href: "schedule",
   },
   {
     title: "Професори",
-    icon: Users,
+    icon: GraduationCap,
     href: "professors",
   },
-  {
-    title: "Извештаи",
-    icon: GaugeCircle,
-    href: "reports",
-  },
+
   {
     title: "Профил",
-    icon: CircleUser,
+    icon: UserRound,
     href: "profile",
   },
   {
-    title: "ИТ Поддршка",
-    icon: ShieldQuestion,
-    href: "support",
+    title: "Аналитика",
+    icon: FaChartBar,
+    href: "analytics",
   },
   {
-    title: "Ценовник",
-    icon: ShoppingBag,
-    href: "pricing",
+    title: "ИТ Поддршка",
+    icon: Headphones,
+    href: "support",
   },
   {
     title: "Одјави се",
     icon: LogOut,
-    href: "logout",
+    action: "logout",
+    // href: "logout",
   },
 ];
 
 const defaultLayout = [20, 80];
 
 const ReusableLayout = observer(({ children }) => {
-  const { isMobileOpen, setIsMobileOpen } = MobxStore;
-  const handleSignIn = async () => {
-    await signInAnonymously();
-  };
+  const { user } = MobxStore;
+
   const pathname = usePathname();
+
   const isRoute = (route) => {
     if (route.checkUrl == "Events") {
       return pathname == "/" ? "default" : "ghost";
     }
-    return pathname.endsWith(route.href.toLowerCase()) ? "default" : "ghost";
+    return pathname.endsWith(route.href?.toLowerCase()) ? "default" : "ghost";
   };
 
+  const navigationLinks = NAVIGATION_LINKS.filter((link) => {
+    if (user?.role === "professor" && link.href === "profile") {
+      return false; // Exclude the 'Профил' link for professors
+    }
+    return true; // Include all other links
+  });
+
+  // Add 'Professor Admin' link if the user is a professor
+  if (user?.role === "professor") {
+    navigationLinks.push({
+      title: "Professor Admin",
+      icon: FolderLock,
+      href: "professor-admin",
+    });
+  }
   return (
     <div>
       <div className="hidden sm:block">
@@ -95,20 +115,28 @@ const ReusableLayout = observer(({ children }) => {
           <ResizablePanel
             defaultSize={defaultLayout[0]}
             maxSize={20}
-            className="h-[950px] min-w-[200px] max-w-[200px]"
+            className="h-screen min-w-[290px] max-w-[345px]"
           >
-            <div className="flex h-[52px] items-center justify-center px-2">
-              {/* <Image src={logoImg} width={32} height={32} alt="logo" /> */}
-              <div className="ml-1 text-2xl font-bold">Study Shuttle</div>
+            <div className="flex flex-col items-center justify-center px-2">
+              <div className="my-6 flex h-[95px] w-[95px] items-center justify-center rounded-full bg-chili">
+                <div className="text-[45px] text-white">
+                  {mixInitials(user)}
+                </div>
+              </div>
+
+              <div className="mb-4 text-[25px] font-bold">{user?.name}</div>
+              <div className="my-2 font-bold text-darkGrey">Студент</div>
+              <div className="font-bold text-darkGrey">
+                Токени: {user?.yellowTokens || 0}
+              </div>
             </div>
-            <Separator />
+
             <VerticalNavbar
-              links={NAVIGATION_LINKS.map((link) => ({
+              links={navigationLinks.map((link) => ({
                 ...link,
                 variant: isRoute(link),
               }))}
             />
-            <Separator />
           </ResizablePanel>
 
           <ResizablePanel
@@ -118,19 +146,6 @@ const ReusableLayout = observer(({ children }) => {
             style={{ overflow: "auto" }}
           >
             <div>
-              <div className="flex h-[53px] w-full items-center justify-end gap-4 border-b p-2">
-                <ModeToggle />
-                <>
-                  {/* <ClerkLoading>
-                    <div> Logging in... </div>
-                  </ClerkLoading>
-                  <ClerkLoaded>
-                    <SignedIn>
-                      <UserButton />
-                    </SignedIn>
-                  </ClerkLoaded> */}
-                </>
-              </div>
               <div className="">{children}</div>
             </div>
           </ResizablePanel>

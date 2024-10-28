@@ -1,14 +1,12 @@
-import { Inter as FontSans, Montserrat } from "next/font/google";
-import { cookies } from "next/headers";
+"use client";
+import { Inter as FontSans, Montserrat, Noto_Sans } from "next/font/google";
 import "./globals.css";
-
-import { ClerkProvider } from "@clerk/nextjs";
-import { themes } from "../util/config";
 import { cn } from "@/lib/utils";
 import ReusableLayout from "./_components/ReusableLayout";
 import { ThemeProvider } from "@/theme-provider";
 import { Header } from "../Components/Header";
 import { Footer } from "../Components/Footer";
+import { usePathname } from "next/navigation";
 
 export const fontSans = Montserrat({
   subsets: ["latin"],
@@ -16,26 +14,63 @@ export const fontSans = Montserrat({
   weights: [400, 500, 600, 700, 800, 900],
 });
 
+export const fontCyrillic = Noto_Sans({
+  subsets: ["cyrillic"],
+  variable: "--font-cyrillic",
+  weight: ["400", "700"],
+});
+
 export default function RootLayout({ children }) {
+  const pathname = usePathname();
+
+  // Define your route-specific conditions here
+  const showReusableLayout = ![
+    "/login",
+    "/signup",
+    "/profesori",
+    "/skolarina",
+    "/osnovno",
+    "/sredno",
+    "/univerzitet",
+    "/forgot-password",
+    "/",
+  ].includes(pathname); // Example: Hide layout on login and register routes
+  const showHeaderFooter = ![
+    "/payment-result",
+    "/pocetna",
+    "/professor-admin",
+    "/professors",
+    "/analytics",
+    "/profile",
+    "/schedule",
+    "/support",
+  ].includes(pathname); // Example: Hide header and footer on specific routes
+
   return (
-    // <ClerkProvider>
     <html lang="en">
       <body
         className={cn(
           "min-h-screen w-full bg-background font-sans antialiased",
           fontSans.variable,
+          fontCyrillic.variable,
         )}
       >
         <ThemeProvider attribute="class" defaultTheme="system">
-          {/* <ReusableLayout> */}
-          <Header />
-          {children}
-          <Footer />
-
-          {/* </ReusableLayout> */}
+          {showReusableLayout ? (
+            <ReusableLayout>
+              {showHeaderFooter && <Header />}
+              {children}
+              {showHeaderFooter && <Footer />}
+            </ReusableLayout>
+          ) : (
+            <>
+              {showHeaderFooter && <Header />}
+              {children}
+              {showHeaderFooter && <Footer />}
+            </>
+          )}
         </ThemeProvider>
       </body>
     </html>
-    // </ClerkProvider>
   );
 }

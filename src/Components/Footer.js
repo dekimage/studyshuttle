@@ -8,9 +8,7 @@ import { CtaDialog } from "../app/page";
 
 const socialIcons = [
   {
-    icon: (
-      <Facebook color="#ed1b31" size={18} fill style={{ fill: "#ed1b31" }} />
-    ),
+    icon: <Facebook color="#ed1b31" size={18} fill="#ed1b31" />,
     link: "https://www.facebook.com/profile.php?id=61550298703831",
   },
   {

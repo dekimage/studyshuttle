@@ -48,6 +48,8 @@
     --ring: 222.2 84% 4.9%;
 
     --radius: 0.5rem;
+
+    --font-cyrillic: var(--font-cyrillic), "Noto Sans", sans-serif;
   }
 
   /* .dark {
@@ -88,4 +90,8 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+.cyrillic {
+  font-family: var(--font-cyrillic);
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import Loader from "../_components/Loader";
 import { Title } from "../_components/ReusableDivs";
 import MobxStore from "../mobx";
 import { PricingBox } from "./PricingBox";
@@ -32,8 +33,8 @@ const Pricing = () => {
   const { user, loading } = MobxStore;
 
   if (loading) {
-    // return <LoadingSpinner />;
-    return <div>Loading</div>;
+    
+    return <Loader />;
   }
 
   return (

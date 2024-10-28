@@ -23,7 +23,7 @@ const MobileHeader = observer(() => {
   };
 
   return (
-    <div className="z-10000 relative flex h-[52px] items-center justify-between border-b border-gray-200 p-4">
+    <div className="relative z-50 flex h-[52px] items-center justify-between border-b border-gray-200 p-4">
       <div className="font-bold">Study Shuttle</div>
       <Button onClick={toggleMenu} className="p-2">
         {isMobileOpen ? (
