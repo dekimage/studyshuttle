@@ -21,6 +21,11 @@ function isAvailableEventInNextXDays(schedule, days) {
   const futureDate = new Date();
   futureDate.setDate(now.getDate() + days); // Date 30 days from now
 
+  // Check if schedule is an array
+  if (!Array.isArray(schedule)) {
+    return false; // Return false if schedule is not an array
+  }
+
   // Iterate over the schedule array to find any event in the range
   for (const event of schedule) {
     const eventDate = new Date(event.date);

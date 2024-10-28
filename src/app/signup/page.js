@@ -168,7 +168,7 @@ export const SignupForm = observer(() => {
                 <div className="relative">
                   <Button
                     type="button"
-                    className="flex w-full items-center justify-between rounded border bg-white px-2 py-1 hover:bg-gray-100"
+                    className="flex w-full items-center justify-between rounded border bg-white px-2 py-1 text-black hover:bg-gray-100"
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                   >
                     {academicLevel === "osnovno"

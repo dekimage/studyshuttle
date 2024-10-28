@@ -17,6 +17,11 @@ export function filterAndSortEvents(events) {
   const now = new Date(); // Current date and time
   const twoHoursAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000); // Two hours before now
 
+  // Check if events is an array
+  if (!Array.isArray(events)) {
+    return []; // Return an empty array if events is not an array
+  }
+
   // Convert date and timeRange to actual Date objects for comparison
   const filteredEvents = events.filter((event) => {
     const [fromHours, fromMinutes] = event.timeRange.from.split(":");
@@ -202,6 +207,8 @@ const AcademyGroupsPage = observer(() => {
   const closeModal = () => {
     setSelectedGroup(null);
   };
+
+  console.log(toJS(MobxStore.academyGroups));
 
   return (
     <div>

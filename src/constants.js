@@ -66,7 +66,7 @@ export const OddDropdown = ({ onChange, selectedSubject, academicLevel }) => {
             (subject) =>
               parseInt(subject.id) >= 10 && parseInt(subject.id) <= 13,
           )
-        : []; // Empty array if academic level does not match
+        : [{ id: "15", label: "fax" }]; // Empty array if academic level does not match
   return (
     <div className="">
       <select

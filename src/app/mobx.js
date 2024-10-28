@@ -522,6 +522,8 @@ class Store {
         ...doc.data(),
       }));
 
+      // console.log(groups);
+
       // Fetch user details for each group if the user is a professor
       if (this.user.role === "professor") {
         for (let group of groups) {
