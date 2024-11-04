@@ -3,6 +3,8 @@
 import { ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { Separator } from "@/components/ui/separator";
 import { VerticalNavbar } from "./VerticalNavbar";
+import coinImg from "../../assets/coin.png";
+import blueCoinImg from "../../assets/bluecoin.png";
 
 import {
   Activity,
@@ -34,6 +36,9 @@ import MobileHeader from "./MobileHeader";
 import { ModeToggle } from "@/components/ui/themeButton";
 import { mixInitials } from "@/src/util/utils";
 import { FaChartBar } from "react-icons/fa";
+import { SocialIcons } from "@/src/Components/Footer";
+import { CtaDialog } from "../page";
+import Image from "next/image";
 
 export const NAVIGATION_LINKS = [
   {
@@ -126,8 +131,27 @@ const ReusableLayout = observer(({ children }) => {
 
               <div className="mb-4 text-[25px] font-bold">{user?.name}</div>
               <div className="my-2 font-bold text-darkGrey">Студент</div>
-              <div className="font-bold text-darkGrey">
-                Токени: {user?.yellowTokens || 0}
+              <div className="flex gap-1">
+                <div className="flex gap-1 font-bold text-darkGrey">
+                  {user?.yellowTokens || 0}
+                  <Image
+                    src={coinImg}
+                    alt="coin"
+                    width={40}
+                    height={40}
+                    className="h-[25px] w-[25px]"
+                  />
+                </div>
+                <div className="flex gap-1 font-bold text-darkGrey">
+                  {user?.blueTokens || 0}
+                  <Image
+                    src={blueCoinImg}
+                    alt="coin"
+                    width={40}
+                    height={40}
+                    className="h-[25px] w-[25px]"
+                  />
+                </div>
               </div>
             </div>
 
@@ -137,6 +161,18 @@ const ReusableLayout = observer(({ children }) => {
                 variant: isRoute(link),
               }))}
             />
+            <div className="flex flex-col gap-4 p-4 pt-16">
+              <CtaDialog
+                cta={
+                  <Button variant="outline" className="w-full">
+                    Контакт
+                  </Button>
+                }
+              ></CtaDialog>
+              <div className="flex justify-center">
+                <SocialIcons />
+              </div>
+            </div>
           </ResizablePanel>
 
           <ResizablePanel

@@ -158,7 +158,7 @@ export async function POST(req) {
 
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {
-    console.error("Error creating event:", error);
+    console.log("Error creating event:", error);
     return NextResponse.json(
       { success: false, error: "Error creating event" },
       { status: 500 },

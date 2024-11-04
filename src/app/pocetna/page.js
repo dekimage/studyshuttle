@@ -156,7 +156,7 @@ export const AcademyGroupModal = ({
                         alert("Link copied to clipboard!"); // Optional: Provide feedback to the user
                       })
                       .catch((err) => {
-                        console.error("Failed to copy: ", err);
+                        console.log("Failed to copy: ", err);
                       });
                   }}
                 />
@@ -196,10 +196,10 @@ const AcademyGroupsPage = observer(() => {
         await MobxStore.userReady; // Wait for user to be loaded
         const result = await MobxStore.fetchAcademyGroupsForUser();
         if (!result.success) {
-          console.error("Failed to fetch academy groups:", result.error);
+          console.log("Failed to fetch academy groups:", result.error);
         }
       } catch (error) {
-        console.error("Error in fetchData:", error);
+        console.log("Error in fetchData:", error);
       } finally {
         setIsLoading(false);
       }

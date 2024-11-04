@@ -22,7 +22,7 @@ export async function POST(req) {
       { status: 200, headers: { "Content-Type": "text/html" } },
     );
   } catch (error) {
-    console.error("Error in payment fail handler: ", error);
+    console.log("Error in payment fail handler: ", error);
     return new NextResponse(
       JSON.stringify({
         message: "Error processing the payment fail.",

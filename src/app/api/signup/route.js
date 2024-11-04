@@ -1,33 +1,67 @@
 import { db, admin } from "../../firebaseAdmin";
 import { NextResponse } from "next/server";
+import jwt from "jsonwebtoken";
+import { sendEmailApi } from "@/src/util/sendEmailApi";
 
 export async function POST(req) {
   try {
     const { email, password, name, lastname, academicLevel } = await req.json();
 
+    // Create user in Firebase Auth
     const userRecord = await admin.auth().createUser({
       email,
       password,
     });
 
+    // Generate a verification token with JWT (expires in 1 day for security)
+    const token = jwt.sign(
+      { uid: userRecord.uid, email },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" },
+    );
+
+    // Define the verification URL
+    const verificationUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/verify-email?token=${token}`;
+
+    // Send verification email using the new `sendEmail` function
+    const emailResult = await sendEmailApi({
+      to: email,
+      subject: "Verify your email",
+      text: `Click on the following link to verify your email: ${verificationUrl}`,
+    });
+
+    // Handle potential error from email sending
+    if (emailResult.error) {
+      console.log("Error sending email verification:", emailResult.error);
+      return NextResponse.json(
+        { success: false, error: "Failed to send verification email" },
+        { status: 500 },
+      );
+    }
+
+    // Create user profile in Firestore
     const newUserProfile = {
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
-      name: name,
-      lastname: lastname,
-      academicLevel: academicLevel,
-      email: email,
+      name,
+      lastname,
+      academicLevel,
+      email,
       uid: userRecord.uid,
       role: "student",
       blueTokens: 0,
       yellowTokens: 0,
       redTokens: 0,
+      emailVerified: false, // Set initial verification status to false
     };
 
     await db.collection("users").doc(userRecord.uid).set(newUserProfile);
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({
+      success: true,
+      message: "Signup successful. Please check your email for verification.",
+    });
   } catch (error) {
-    console.error("Error signing up:", error);
+    console.log("Error signing up:", error);
     return NextResponse.json(
       { success: false, error: error.message },
       { status: 500 },

@@ -25,6 +25,18 @@ const socialIcons = [
   },
 ];
 
+export const SocialIcons = () => {
+  return (
+    <div className="flex gap-4">
+      {socialIcons.map((icon, index) => (
+        <a href={icon.link} key={index} className="text-white">
+          {icon.icon}
+        </a>
+      ))}
+    </div>
+  );
+};
+
 export const Footer = () => {
   return (
     <div
@@ -36,13 +48,7 @@ export const Footer = () => {
           <Image src={logoImg} width={200} height={200} alt="logo" />
         </Link>
         <div className="mb-4 text-[22px] font-semibold ">Учиме заедно!</div>
-        <div className="flex gap-4">
-          {socialIcons.map((icon, index) => (
-            <a href={icon.link} key={index} className="text-white">
-              {icon.icon}
-            </a>
-          ))}
-        </div>
+        <SocialIcons />
       </div>
 
       <div className="flex w-full flex-col items-center gap-2 text-center lg:items-start lg:text-start">

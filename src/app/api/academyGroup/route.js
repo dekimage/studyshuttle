@@ -62,7 +62,7 @@ export async function POST(req) {
 
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {
-    console.error("Error creating academy group:", error);
+    console.log("Error creating academy group:", error);
     return NextResponse.json(
       { success: false, error: "Error creating academy group" },
       { status: 500 },
@@ -122,7 +122,7 @@ export async function PUT(req) {
 
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {
-    console.error("Error editing academy group:", error);
+    console.log("Error editing academy group:", error);
     return NextResponse.json(
       { success: false, error: "Error editing academy group" },
       { status: 500 },
@@ -182,7 +182,7 @@ export async function DELETE(req) {
 
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {
-    console.error("Error deleting academy group:", error);
+    console.log("Error deleting academy group:", error);
     return NextResponse.json(
       { success: false, error: "Error deleting academy group" },
       { status: 500 },

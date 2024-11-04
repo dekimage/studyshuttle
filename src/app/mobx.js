@@ -183,7 +183,7 @@ class Store {
 
       return { success: true };
     } catch (error) {
-      console.error("Error sending support message:", error);
+      console.log("Error sending support message:", error);
       return { success: false, error: error.message };
     }
   }
@@ -290,7 +290,7 @@ class Store {
 
       return { success: true, data: academyGroups }; // Return data directly
     } catch (error) {
-      console.error("Error fetching academy groups:", error);
+      console.log("Error fetching academy groups:", error);
       return { success: false, error: "Error fetching academy groups" };
     }
   }
@@ -327,7 +327,7 @@ class Store {
         return { success: false, error: "User not found" };
       }
     } catch (error) {
-      console.error("Error fetching user profile:", error);
+      console.log("Error fetching user profile:", error);
       return { error: "Error fetching user profile" };
     }
   }
@@ -345,7 +345,7 @@ class Store {
 
       return { success: true, data: grades };
     } catch (error) {
-      console.error("Error fetching user grades:", error);
+      console.log("Error fetching user grades:", error);
       return { error: "Error fetching user grades" };
     }
   }
@@ -370,14 +370,14 @@ class Store {
         },
       };
     } catch (error) {
-      console.error("Error fetching user profile with grades:", error);
+      console.log("Error fetching user profile with grades:", error);
       return { error: "Error fetching user profile with grades" };
     }
   }
 
   async fetchUserGrades() {
     if (!this.user) {
-      console.error("User not loaded yet");
+      console.log("User not loaded yet");
       return { success: false, error: "User not loaded yet" };
     }
 
@@ -404,7 +404,7 @@ class Store {
 
       return { success: true };
     } catch (error) {
-      console.error("Error fetching user grades:", error);
+      console.log("Error fetching user grades:", error);
       return { success: false, error: "Error fetching user grades" };
     }
   }
@@ -547,7 +547,7 @@ class Store {
 
       return { success: true };
     } catch (error) {
-      console.error("Error fetching academy groups:", error);
+      console.log("Error fetching academy groups:", error);
       return { error: error.message };
     }
   }
@@ -634,14 +634,14 @@ class Store {
         return { success: true, reviewed: false, review: null };
       }
     } catch (error) {
-      console.error("Error fetching review:", error);
+      console.log("Error fetching review:", error);
       return { success: false, error: "Error fetching review" };
     }
   }
 
   async getIdToken() {
     if (!this.user) {
-      console.error("No user is logged in");
+      console.log("No user is logged in");
       return null;
     }
 
@@ -651,7 +651,7 @@ class Store {
       const token = await user.getIdToken();
       return token;
     } catch (error) {
-      console.error("Error getting ID token:", error);
+      console.log("Error getting ID token:", error);
       return null;
     }
   }
@@ -719,7 +719,7 @@ class Store {
       // Handle success
       return { success: true };
     } catch (error) {
-      console.error("Error creating academy group:", error);
+      console.log("Error creating academy group:", error);
       return { error: error.message };
     }
   }
@@ -758,7 +758,7 @@ class Store {
 
       return { success: true };
     } catch (error) {
-      console.error("Error editing academy group:", error);
+      console.log("Error editing academy group:", error);
       return { error: error.message };
     }
   }
@@ -791,7 +791,7 @@ class Store {
 
       return { success: true };
     } catch (error) {
-      console.error("Error deleting academy group:", error);
+      console.log("Error deleting academy group:", error);
       return { error: error.message };
     }
   }
@@ -920,7 +920,7 @@ class Store {
 
       return { success: true };
     } catch (error) {
-      console.error("Error creating event:", error);
+      console.log("Error creating event:", error);
       return { error: error.message };
     }
   }
@@ -965,7 +965,7 @@ class Store {
 
       return { success: true };
     } catch (error) {
-      console.error("Error adding schedule entry:", error);
+      console.log("Error adding schedule entry:", error);
       return { error: error.message };
     }
   }
@@ -1012,7 +1012,7 @@ class Store {
 
       return { success: true };
     } catch (error) {
-      console.error("Error deleting time range:", error);
+      console.log("Error deleting time range:", error);
       return { error: error.message };
     }
   }
@@ -1020,6 +1020,7 @@ class Store {
   // EVENTS
   async fetchEventsForProfessor(professorId) {
     try {
+      // Step 1: Fetch events for the professor
       const eventsQuery = query(
         collection(db, "events"),
         where("professorId", "==", professorId),
@@ -1030,8 +1031,34 @@ class Store {
         ...doc.data(),
       }));
 
+      // Step 2: Fetch user information for each event based on userId
+      const eventsWithUserData = await Promise.all(
+        eventsList.map(async (event) => {
+          if (event.userId) {
+            // Get the user document by userId
+            const userRef = doc(db, "users", event.userId);
+            const userSnapshot = await getDoc(userRef);
+            if (userSnapshot.exists()) {
+              const userData = userSnapshot.data();
+              // Combine event data with user data
+              return {
+                ...event,
+                user: {
+                  name: userData.name,
+                  email: userData.email,
+                  lastname: userData.lastname,
+                },
+              };
+            }
+          }
+          // If no user data is found, return event as is
+          return { ...event, user: null };
+        }),
+      );
+
+      // Step 3: Store the events with user data in MobX store
       runInAction(() => {
-        this.events = eventsList;
+        this.events = eventsWithUserData;
       });
 
       return { success: true };
@@ -1072,7 +1099,7 @@ class Store {
 
       return { success: true };
     } catch (error) {
-      console.error("Error updating event and subject scores:", error);
+      console.log("Error updating event and subject scores:", error);
       return { error: error.message };
     }
   }
@@ -1086,8 +1113,11 @@ class Store {
         email,
         password,
       );
+      const user = userCredential.user;
+
+      // Set user in MobX store if verified
       runInAction(() => {
-        this.user = userCredential.user;
+        this.user = user;
         this.loading = false;
       });
     } catch (error) {
@@ -1129,7 +1159,7 @@ class Store {
 
       return { success: true };
     } catch (error) {
-      console.error("Error signing up:", error);
+      console.log("Error signing up:", error);
       runInAction(() => {
         this.loading = false;
       });

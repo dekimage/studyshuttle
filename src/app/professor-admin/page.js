@@ -58,7 +58,7 @@ const FeedbackForm = () => {
         setError("Failed to send message.");
       }
     } catch (error) {
-      console.error("Error submitting form:", error);
+      console.log("Error submitting form:", error);
       setError("Error submitting form.");
     } finally {
       setLoading(false);
@@ -136,6 +136,7 @@ function AcademyGroupsList({
 function EditAcademyGroup({ group, onSave, onCancel }) {
   const [error, setError] = useState("");
   const [name, setName] = useState(group.name);
+  const [startDate, setStartDate] = useState(group.startDate || "");
   const [subject, setSubject] = useState(group.subject);
   const [studentType, setStudentType] = useState(group.studentType);
   const [schedule, setSchedule] = useState(group.schedule);
@@ -145,6 +146,7 @@ function EditAcademyGroup({ group, onSave, onCancel }) {
     setSubject(group.subject);
     setStudentType(group.studentType);
     setSchedule(group.schedule);
+    setStartDate(group.startDate || "");
   }, [group]);
 
   const handleScheduleChange = (index, key, value) => {
@@ -179,6 +181,11 @@ function EditAcademyGroup({ group, onSave, onCancel }) {
       return;
     }
 
+    if (!startDate) {
+      setError("Датумот на почеток е задолжителен.");
+      return;
+    }
+
     // Validation for schedule: Check if all slots are valid
     const allValidTimeSlots = schedule.every(
       (slot) => slot.day !== "" && slot.startTime !== "" && slot.endTime !== "",
@@ -199,6 +206,7 @@ function EditAcademyGroup({ group, onSave, onCancel }) {
       subject,
       studentType,
       schedule,
+      startDate,
     });
   };
 
@@ -213,6 +221,15 @@ function EditAcademyGroup({ group, onSave, onCancel }) {
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
+        />
+      </div>
+      <div className="m-2 border p-2">
+        <label>Датум на Почеток</label>
+        <input
+          type="date"
+          className="border p-2"
+          value={startDate}
+          onChange={(e) => setStartDate(e.target.value)}
         />
       </div>
       <div className="m-2 border p-2">
@@ -358,6 +375,7 @@ function EditAcademyGroup({ group, onSave, onCancel }) {
 
 function AddAcademyGroup({ onAdd, setAddingGroup }) {
   const [name, setName] = useState("");
+  const [startDate, setStartDate] = useState(group.startDate || "");
   const [subject, setSubject] = useState(SUBJECTS[0].id);
   const [studentType, setStudentType] = useState([]);
   const [schedule, setSchedule] = useState([
@@ -395,6 +413,11 @@ function AddAcademyGroup({ onAdd, setAddingGroup }) {
       return;
     }
 
+    if (!startDate) {
+      setError("Датумот на почеток е задолжителен.");
+      return;
+    }
+
     if (schedule.length === 0) {
       setError("Потребно е да додадете барем еден термин.");
       return;
@@ -411,7 +434,7 @@ function AddAcademyGroup({ onAdd, setAddingGroup }) {
 
     setError("");
 
-    onAdd({ name, subject, studentType, schedule });
+    onAdd({ name, subject, studentType, schedule, startDate });
   };
 
   return (
@@ -426,6 +449,15 @@ function AddAcademyGroup({ onAdd, setAddingGroup }) {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
+            />
+          </div>
+          <div>
+            <label>Датум на Почеток</label>
+            <input
+              type="date"
+              className="border p-2"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
             />
           </div>
           <div className="">
@@ -588,6 +620,9 @@ const GroupDetails = ({ group, setSelectedGroupDetails }) => {
             {filterSubjectsByIds([group.subject])[0]?.label}
           </p>
           <p>
+            <strong>Датум на Почеток:</strong> {group.startDate}
+          </p>
+          <p>
             <strong>Максимум ученици:</strong> {group.maxUsers}
           </p>
           <p>
@@ -642,7 +677,7 @@ function AcademyGroupManager() {
         if (result.success) {
           setAcademyGroups(MobxStore.academyGroups);
         } else {
-          console.error(result.error);
+          console.log(result.error);
         }
       }
     };
@@ -785,7 +820,7 @@ const TerminiComponent = observer(() => {
     if (result.success) {
       console.log("Schedule entry added successfully");
     } else {
-      console.error("Failed to add schedule entry.");
+      console.log("Failed to add schedule entry.");
     }
   };
 

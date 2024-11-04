@@ -11,6 +11,14 @@ import { AcademyGroupModal } from "../pocetna/page";
 import withAuth from "@/src/Components/AuthHoc";
 import { toJS } from "mobx";
 
+const isWithinOneYearRange = (startDate, itemDate) => {
+  const start = new Date(startDate);
+  const end = new Date(start);
+  end.setFullYear(end.getFullYear() + 1);
+
+  return itemDate >= start && itemDate <= end;
+};
+
 const CalendarView = observer(() => {
   const [viewMode, setViewMode] = useState("week"); // "week" or "month"
   const [currentWeek, setCurrentWeek] = useState(new Date()); // The start date of the current week
@@ -33,7 +41,7 @@ const CalendarView = observer(() => {
         console.log("Fetched academy groups:", toJS(MobxStore.academyGroups));
         console.log("Fetched upcoming events:", toJS(MobxStore.upcomingEvents));
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.log("Error fetching data:", error);
       } finally {
         setIsLoading(false);
       }
@@ -78,6 +86,8 @@ const CalendarView = observer(() => {
 
   const renderWeekView = () => {
     const startOfWeek = new Date(currentWeek);
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
     const currentDay = startOfWeek.getDay();
     const offset = currentDay === 0 ? -6 : 1 - currentDay;
     startOfWeek.setDate(startOfWeek.getDate() + offset);
@@ -164,10 +174,8 @@ const CalendarView = observer(() => {
                 {/* Render Academy Groups */}
                 {MobxStore.academyGroups
                   .filter((group) =>
-                    group.schedule?.some(
-                      (schedule) =>
-                        schedule.day.toLowerCase() ===
-                        dayNames[day.getDay()].toLowerCase(),
+                    group.schedule?.some((schedule) =>
+                      isWithinOneYearRange(group.startDate, day),
                     ),
                   )
                   .map((group) =>
@@ -271,10 +279,8 @@ const CalendarView = observer(() => {
                   {/* Render Academy Groups */}
                   {MobxStore.academyGroups
                     .filter((group) =>
-                      group.schedule?.some(
-                        (schedule) =>
-                          schedule.day.toLowerCase() ===
-                          dayNames[day.getDay()].toLowerCase(),
+                      group.schedule?.some((schedule) =>
+                        isWithinOneYearRange(group.startDate, day),
                       ),
                     )
                     .map((group) =>

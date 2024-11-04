@@ -23,7 +23,7 @@ const ScheduleClassPopup = ({
 
   const handleSubmit = async () => {
     if (!subject || !classType) {
-      console.error("Please fill in all required fields.");
+      console.log("Please fill in all required fields.");
       return;
     }
 

@@ -39,7 +39,7 @@ const Event = observer(({ event, showGraded, ignored = false }) => {
       console.log("Event and user scores updated successfully");
       setIsOpen(false);
     } else {
-      console.error(result.error);
+      console.log(result.error);
     }
   };
 
@@ -67,7 +67,7 @@ const Event = observer(({ event, showGraded, ignored = false }) => {
           <div className="text-xl font-bold text-blue-700">{event.subject}</div>
           <div className="text-sm text-gray-500">{event.classType}</div>
           <div className="break-all text-sm text-gray-700">
-            User ID: {event.userId}
+            {event.user.name} {event.user.lastname}
           </div>
         </div>
         <div className="flex items-center">
@@ -117,6 +117,8 @@ const Event = observer(({ event, showGraded, ignored = false }) => {
               </div>
             </div>
           </div>
+          <div className="text-xs">User ID: {event.userId}</div>
+          <div className="text-xs">User Email: {event.user.email}</div>
           <div className="border-t pt-4">
             <h3 className="mb-4 text-lg font-semibold">Оценување:</h3>
             <div className="grid grid-cols-4 gap-4">

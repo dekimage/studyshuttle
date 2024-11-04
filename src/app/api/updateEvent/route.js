@@ -140,7 +140,7 @@ export async function PUT(req) {
 
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {
-    console.error("Error updating event and subject scores:", error);
+    console.log("Error updating event and subject scores:", error);
     return NextResponse.json(
       { success: false, error: "Error updating event and subject scores" },
       { status: 500 },

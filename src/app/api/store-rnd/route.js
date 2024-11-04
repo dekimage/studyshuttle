@@ -5,7 +5,7 @@ export async function POST(req) {
   const { rnd, userId, oid } = await req.json();
 
   if (!userId) {
-    console.error("Invalid userId received:", userId);
+    console.log("Invalid userId received:", userId);
     return NextResponse.json({ error: "Invalid userId" }, { status: 400 });
   }
 
@@ -18,7 +18,7 @@ export async function POST(req) {
 
     return NextResponse.json({ message: "Payment info stored successfully" });
   } catch (error) {
-    console.error("Error storing payment info:", error);
+    console.log("Error storing payment info:", error);
     return NextResponse.json(
       { error: "Failed to store payment info" },
       { status: 500 },

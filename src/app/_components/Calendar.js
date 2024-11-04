@@ -144,7 +144,7 @@ const Calendar = observer(({ schedule, professor, isAdmin = false }) => {
           `Time range ${timeRange.from} - ${timeRange.to} deleted successfully`,
         );
       } else {
-        console.error(result.error);
+        console.log(result.error);
       }
     };
 

@@ -148,6 +148,7 @@ const AcademyGroups = ({ professor }) => {
             >
               <div className="flex w-full flex-wrap justify-between">
                 <div className="text-lg font-bold">{group.name}</div>
+
                 <div className="flex gap-2 text-xs font-bold">
                   Тип на токен кој ви е потребен:{" "}
                   <Image
@@ -157,6 +158,10 @@ const AcademyGroups = ({ professor }) => {
                     alt="blue token"
                   />
                 </div>
+              </div>
+
+              <div className="text-xs">
+                Почеток на академска група: {group.startDate || "Nan"}
               </div>
 
               <div className="mt-4 flex w-full flex-wrap items-center justify-between gap-2">
@@ -227,7 +232,27 @@ const AcademyGroups = ({ professor }) => {
               {/* Join Group Confirmation Modal */}
               {joinGroupId && joinGroupId === group.id && (
                 <Modal onClose={() => setJoinGroupId(null)}>
-                  <div className="flex h-[300px] w-[300px] flex-col items-center justify-center">
+                  <div className="relative flex h-[300px] w-[300px] flex-col items-center justify-center">
+                    {/* Close button with X icon */}
+                    <button
+                      onClick={() => setJoinGroupId(null)}
+                      className="absolute right-2 top-2 rounded-full p-1 hover:bg-gray-200"
+                      aria-label="Close"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        className="h-6 w-6 text-gray-600"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M6.225 4.811a.75.75 0 011.061 0L12 9.525l4.714-4.714a.75.75 0 111.06 1.061L13.525 12l4.714 4.714a.75.75 0 11-1.06 1.061L12 13.525l-4.714 4.714a.75.75 0 01-1.06-1.061L10.475 12 5.761 7.286a.75.75 0 010-1.061z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </button>
+
                     {user.blueTokens < 1 ? (
                       <div className="flex flex-col items-center justify-center">
                         Имате 0{" "}
@@ -287,6 +312,8 @@ const ProffesorCard = ({
 }) => {
   const { name, lastname, title, scopes, about, languages, subjects, image } =
     professor;
+
+  const { user } = MobxStore;
 
   const [rating, setRating] = useState(
     existingReview ? existingReview.stars : 0,
@@ -407,12 +434,14 @@ const ProffesorCard = ({
             </div>
 
             <div className="mt-2">
-              <Button
-                disabled={rating == existingReview?.stars || rating == 0}
-                onClick={handleReviewSubmit}
-              >
-                {existingReview ? "Промени оценка" : "Поднеси оценка"}
-              </Button>
+              {user.role === "student" && (
+                <Button
+                  disabled={rating == existingReview?.stars || rating == 0}
+                  onClick={handleReviewSubmit}
+                >
+                  {existingReview ? "Зачувај оценка" : "Поднеси оценка"}
+                </Button>
+              )}
             </div>
             <div className="mt-2">
               <Button

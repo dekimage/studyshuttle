@@ -41,7 +41,7 @@ export async function POST(req) {
 
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {
-    console.error("Error sending support message:", error);
+    console.log("Error sending support message:", error);
     return NextResponse.json(
       { success: false, error: "Error sending support message" },
       { status: 500 },

@@ -13,7 +13,7 @@ async function verifyHash(params, storeKey) {
     .get();
 
   if (userSnapshot.empty) {
-    console.error("No user found with oid:", params.oid);
+    console.log("No user found with oid:", params.oid);
     return false;
   }
 
@@ -21,7 +21,7 @@ async function verifyHash(params, storeKey) {
   const storedRnd = userDoc.data().temporaryRnd;
 
   if (!storedRnd) {
-    console.error("Stored rnd not found for oid:", params.oid);
+    console.log("Stored rnd not found for oid:", params.oid);
     return false;
   }
 
@@ -66,7 +66,7 @@ async function verifyTransaction(params) {
     .get();
 
   if (userSnapshot.empty) {
-    console.error("No user found with oid:", params.oid);
+    console.log("No user found with oid:", params.oid);
     return false;
   }
 
@@ -76,19 +76,19 @@ async function verifyTransaction(params) {
   console.log("Stored data:", storedData);
 
   if (!storedData.temporaryRnd || !storedData.temporaryOid) {
-    console.error("Stored rnd or oid not found for oid:", params.oid);
+    console.log("Stored rnd or oid not found for oid:", params.oid);
     return false;
   }
 
   if (params.oid !== storedData.temporaryOid) {
-    console.error("Received oid does not match stored oid");
+    console.log("Received oid does not match stored oid");
     return false;
   }
 
   // Verify the amount
   const validAmounts = [1250, 36000, 72000];
   if (!validAmounts.includes(Number(params.amount))) {
-    console.error("Invalid amount:", params.amount);
+    console.log("Invalid amount:", params.amount);
     return false;
   }
 
@@ -256,7 +256,7 @@ export async function POST(req) {
         );
       }
     } catch (error) {
-      console.error("Error processing payment:", error);
+      console.log("Error processing payment:", error);
       return new Response(
         `<html>
           <head>

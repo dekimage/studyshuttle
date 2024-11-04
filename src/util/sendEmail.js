@@ -1,4 +1,4 @@
-import mailgun from "mailgun-js";
+import mailgun from "mailgun.js";
 
 // Initialize Mailgun
 
@@ -27,7 +27,7 @@ export const sendEmail = async ({ to, subject, text }) => {
     await mg.messages().send(data);
     return { success: true };
   } catch (error) {
-    console.error("Error sending email:", error);
+    console.log("Error sending email:", error);
     return { error: "Failed to send email" };
   }
 };

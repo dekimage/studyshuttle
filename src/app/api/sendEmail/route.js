@@ -39,7 +39,7 @@ export async function POST(req) {
       status: 200,
     });
   } catch (error) {
-    console.error("Error sending email:", error);
+    console.log("Error sending email:", error);
     return new Response(
       JSON.stringify({ error: "Error sending email", details: error.message }),
       { status: 500 },

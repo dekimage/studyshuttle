@@ -78,7 +78,7 @@ export async function POST(req) {
 
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {
-    console.error("Error adding schedule entry:", error);
+    console.log("Error adding schedule entry:", error);
     return NextResponse.json(
       { success: false, error: "Error adding schedule entry" },
       { status: 500 },
@@ -165,7 +165,7 @@ export async function DELETE(req) {
       );
     }
   } catch (error) {
-    console.error("Error deleting time range:", error);
+    console.log("Error deleting time range:", error);
     return NextResponse.json(
       { success: false, error: "Error deleting time range" },
       { status: 500 },

@@ -1,40 +1,45 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import MobxStore from "../app/mobx";
 import { observer } from "mobx-react-lite";
 import Loader from "../app/_components/Loader";
+import { db } from "../app/firebase";
+import { toJS } from "mobx";
 
-// Higher-Order Component for authentication
 const withAuth = (WrappedComponent) => {
   const AuthComponent = observer((props) => {
     const router = useRouter();
     const { user, loading } = MobxStore;
+    const [verified, setVerified] = useState(false);
+    console.log(11, toJS(user));
 
     useEffect(() => {
-      if (!loading && !user) {
-        // Redirect to login if not authenticated
-        router.push("/login");
+      const checkEmailVerification = async () => {
+        console.log(user);
+        if (user) {
+          // Fetch emailVerified status from Firestore
+          // const userDoc = await db.collection("users").doc(user.uid).get();
+          // const userData = userDoc.data();
+
+          if (user && user.emailVerified) {
+            setVerified(true);
+          } else {
+            router.push("/verify-email");
+          }
+        }
+      };
+
+      if (!loading) {
+        checkEmailVerification();
       }
     }, [loading, user, router]);
 
-    // Show loader when loading state is true
-    if (!user) {
-      return (
-        <div className="flex min-h-screen items-center justify-center">
-          <Loader />
-        </div>
-      );
-    }
-
-    if (loading) {
+    if (loading || !verified) {
       return <Loader />;
     }
 
-    // After loading, if the user is not authenticated, show a message and redirect
-
-    // If user is authenticated, render the wrapped component
     return <WrappedComponent {...props} />;
   });
 

@@ -15,7 +15,7 @@ export const fetchUserProfileById = async (userId) => {
       return { success: false, error: "User not found" };
     }
   } catch (error) {
-    console.error("Error fetching user profile:", error);
+    console.log("Error fetching user profile:", error);
     return { success: false, error: "Error fetching user profile" };
   }
 };

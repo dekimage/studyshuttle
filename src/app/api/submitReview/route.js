@@ -75,7 +75,7 @@ export async function POST(req) {
           { status: 200 },
         );
       } catch (error) {
-        console.error("Error updating review:", error);
+        console.log("Error updating review:", error);
         return NextResponse.json(
           { success: false, error: "Error updating review" },
           { status: 500 },
@@ -101,7 +101,7 @@ export async function POST(req) {
           { status: 200 },
         );
       } catch (error) {
-        console.error("Error creating review:", error);
+        console.log("Error creating review:", error);
         return NextResponse.json(
           { success: false, error: "Error creating review" },
           { status: 500 },
@@ -109,7 +109,7 @@ export async function POST(req) {
       }
     }
   } catch (error) {
-    console.error("Error submitting review:", error);
+    console.log("Error submitting review:", error);
     return NextResponse.json(
       { success: false, error: "Error submitting review" },
       { status: 500 },
@@ -155,7 +155,7 @@ async function updateProfessorAverageRating(
 
     return { success: true };
   } catch (error) {
-    console.error("Error updating professor's average rating:", error);
+    console.log("Error updating professor's average rating:", error);
     return { error: "Error updating professor's average rating" };
   }
 }

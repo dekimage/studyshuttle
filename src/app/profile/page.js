@@ -52,13 +52,15 @@ const BalanceBox = ({ amount, label, color, isBluecoin }) => {
     >
       <div className="flex items-center justify-between gap-2">
         <div className="w-fit text-[45px] font-bold">{amount}</div>
-        <Image
-          src={isBluecoin ? blueCoinImg : coinImg}
-          alt="coin"
-          width={40}
-          height={40}
-          className="h-[45px] w-[45px]"
-        />
+        <div className="rounded-full bg-slate-600 p-2">
+          <Image
+            src={isBluecoin ? blueCoinImg : coinImg}
+            alt="coin"
+            width={40}
+            height={40}
+            className="h-[45px] w-[45px]"
+          />
+        </div>
       </div>
       <div>
         <div className="text-[19px]">Токени</div>
@@ -180,10 +182,10 @@ const PaymentDialog = observer(({ selectedPlan }) => {
         formRef.current.rnd.value = rnd;
         formRef.current.submit();
       } else {
-        console.error("Form reference is null");
+        console.log("Form reference is null");
       }
     } catch (error) {
-      console.error("Error preparing payment:", error);
+      console.log("Error preparing payment:", error);
       alert(
         "An error occurred while processing your payment. Please try again.",
       );
@@ -251,7 +253,7 @@ const PaymentDialog = observer(({ selectedPlan }) => {
 const InitPaymentForm = ({ setSelectedPlan, selectedPlan }) => {
   return (
     <div>
-      <div className="mb-4 text-[25px] font-bold">
+      {/* <div className="mb-4 text-[25px] font-bold">
         Доколку имате ваучер, можете да го искористите тука:
       </div>
       <div className="mb-4 flex gap-4">
@@ -261,7 +263,7 @@ const InitPaymentForm = ({ setSelectedPlan, selectedPlan }) => {
           placeholder="Внесете го вашиот ваучер"
         />
         <Button className="bg-chili hover:bg-chili">Искористи ваучер</Button>
-      </div>
+      </div> */}
       <div className="flex justify-center gap-4">
         <Button
           onClick={() => setSelectedPlan(null)}
@@ -291,17 +293,13 @@ const ProfilePage = observer(() => {
             <div className="flex flex-wrap gap-4">
               <BalanceBox
                 amount={yellowTokens || 0}
-                color="chili"
+                color="sun"
                 label="Индивидуални часови"
               />
-              <BalanceBox
-                amount={redTokens || 0}
-                color="sky"
-                label="Годишен план"
-              />
+
               <BalanceBox
                 amount={blueTokens || 0}
-                color="sun"
+                color="sky"
                 label="Академски групи"
                 isBluecoin
               />
