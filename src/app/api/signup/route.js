@@ -5,7 +5,8 @@ import { sendEmailApi } from "@/src/util/sendEmailApi";
 
 export async function POST(req) {
   try {
-    const { email, password, name, lastname, academicLevel } = await req.json();
+    const { email, password, name, lastname, academicLevel, phone } =
+      await req.json();
 
     // Create user in Firebase Auth
     const userRecord = await admin.auth().createUser({
@@ -46,6 +47,7 @@ export async function POST(req) {
       lastname,
       academicLevel,
       email,
+      phone,
       uid: userRecord.uid,
       role: "student",
       blueTokens: 0,

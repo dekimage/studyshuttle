@@ -84,17 +84,22 @@ export const Footer = () => {
         <div className="bolded text-[22px] font-bold">Контакт</div>
         {/* <div className="text-lg">info@studyshuttle.mk</div> */}
         <div className="flex flex-col items-center gap-4 ">
-          <Input
-            className="max-w-[400px] focus:ring-2 focus:ring-blue-500"
-            placeholder="Емаил адреса"
-          />
-          <CtaDialog
+          <Link
+            href="https://calendly.com/studyshuttle"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Button className="h-[45px] rounded-[10px] bg-chili">
+              Закажи онлајн средба
+            </Button>
+          </Link>
+          {/* <CtaDialog
             cta={
               <Button className="h-[45px] rounded-[10px] bg-chili">
-                Пријави се
+                Закажи онлајн средба
               </Button>
             }
-          />
+          /> */}
         </div>
       </div>
     </div>

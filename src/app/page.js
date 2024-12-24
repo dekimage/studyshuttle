@@ -125,7 +125,7 @@ export const Hero = ({ heroData }) => {
 
         {/* Inner Content Positioned Correctly */}
         <div className="relative z-50 my-24 flex w-full flex-col items-center px-16 lg:my-8 lg:px-32">
-          <div className="mb-16 mb-2 pb-8 pt-32 text-center text-[16px] font-semibold lg:text-[24px]">
+          <div className="mb-16 mb-2 mt-4 pb-8 pt-32 text-center text-[16px] font-semibold lg:text-[24px]">
             {description}
           </div>
         </div>
@@ -176,14 +176,29 @@ export const ImageSection = ({ data }) => {
   );
 };
 
-export const YellowSection = ({ text }) => {
+export const YellowSection = ({ text, isBig = false, cta = false }) => {
   return (
-    <div className="mt-8 flex items-center justify-center bg-sun">
-      <SlideInWhenVisible>
-        <div className="mx-4 my-12 max-w-[1000px] text-center text-[21px] font-semibold leading-6 lg:text-[35px] lg:leading-10">
-          {text}
-        </div>
-      </SlideInWhenVisible>
+    <div
+      className={`flex flex-col items-center justify-center bg-sun ${
+        isBig ? "" : "mt-8"
+      }`}
+    >
+      <div
+        className={`mx-4 my-12 max-w-[1000px] text-center ${
+          isBig
+            ? "text-[28px] font-bold lg:text-[42px]"
+            : "text-[21px] font-semibold lg:text-[35px]"
+        } leading-6 lg:leading-10`}
+      >
+        {text}
+      </div>
+      {cta && (
+        <Link href="/skolarina">
+          <Button className="mb-8 h-[60px] rounded-[15px] bg-chili px-8 text-[24px] text-white hover:bg-chili/90">
+            Дознај повеќе
+          </Button>
+        </Link>
+      )}
     </div>
   );
 };
@@ -441,21 +456,21 @@ const SingleStep = ({ isLeft, data }) => {
 const Stats = () => {
   return (
     <div className="bg-sun p-4 lg:p-24">
-      <div className="mb-16 mt-8 text-center text-[24px] font-bold lg:mt-0 lg:text-[48px]">
+      {/* <div className="mb-16 mt-8 text-center text-[24px] font-bold lg:mt-0 lg:text-[48px]">
         Подобрете го Вашето образование
-      </div>
-      <div className="flex flex-col justify-center lg:flex-row lg:gap-32">
-        <div className="my-8 flex flex-col items-center justify-center gap-2 lg:my-0 lg:gap-8">
+      </div> */}
+      <div className="flex flex-col items-center justify-center lg:flex-row lg:gap-32">
+        <div className="my-8 flex w-[200px] flex-col items-center justify-center gap-2 lg:my-0 lg:gap-8">
           <div className="text-center text-[65px] font-bold">19</div>
-          <div className="text-[24px]">Студенти</div>
+          <div className="text-center text-[24px]">Студенти</div>
         </div>
-        <div className="my-8 flex flex-col items-center justify-center gap-2 lg:my-0 lg:gap-8">
+        <div className="my-8 flex w-[200px] flex-col items-center justify-center gap-2 lg:my-0 lg:gap-8">
           <div className="text-center text-[65px] font-bold">6</div>
-          <div className="text-[24px]">Професори</div>
+          <div className="text-center text-[24px]">Професори</div>
         </div>
-        <div className="my-8 flex flex-col items-center justify-center gap-2 lg:my-0 lg:gap-8">
+        <div className="my-8 flex w-[200px] flex-col items-center justify-center gap-2 lg:my-0 lg:gap-8">
           <div className="text-center text-[65px] font-bold">9</div>
-          <div className="text-[24px]">Предмети и Курсеви</div>
+          <div className="text-center text-[24px]">Предмети и Курсеви</div>
         </div>
       </div>
     </div>
@@ -517,7 +532,7 @@ const ProfessorsSection = () => {
       className="flex h-[800px] flex-col items-center justify-center"
       style={{ background: "linear-gradient(to top, white, #ffd02f)" }}
     >
-      <div className="mb-16 border-b border-black text-center  text-[24px] font-bold lg:text-[34px]">
+      <div className="mb-16 border-b border-black text-center  text-[24px] font-bold lg:text-[48px]">
         Запознајте ги нашите професори
       </div>
       {/* <div className="my-8 flex gap-8">
@@ -553,7 +568,7 @@ const LandingPage = () => {
     if (!isOnceClicked) {
       intervalId = setInterval(() => {
         setActive((prevActive) => (prevActive + 1) % (stepsData.length + 1));
-      }, 4500);
+      }, 8000);
     }
 
     return () => clearInterval(intervalId); // Clear on cleanup

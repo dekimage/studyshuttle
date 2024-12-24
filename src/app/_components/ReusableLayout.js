@@ -129,7 +129,9 @@ const ReusableLayout = observer(({ children }) => {
                 </div>
               </div>
 
-              <div className="mb-4 text-[25px] font-bold">{user?.name}</div>
+              <div className="mb-4 text-[25px] font-bold">
+                {user?.name} {user?.lastname}
+              </div>
               <div className="my-2 font-bold text-darkGrey">Студент</div>
               <div className="flex gap-1">
                 <div className="flex gap-1 font-bold text-darkGrey">

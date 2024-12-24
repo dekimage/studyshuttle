@@ -45,6 +45,9 @@ const formSchema = z
     academicLevel: z.enum(["osnovno", "sredno", "visoko"], {
       required_error: "Ве молиме одберете академско ниво.",
     }),
+    phone: z.string().min(9, {
+      message: "Телефонскиот број мора да содржи најмалку 9 броеви.",
+    }),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Лозинките мора да се совпаѓаат.",
@@ -74,16 +77,24 @@ export const SignupForm = observer(() => {
       confirmPassword: "",
       email: "",
       academicLevel: "osnovno",
+      phone: "",
     },
   });
 
   async function onSubmit(values) {
-    const { name, lastname, academicLevel, email, password } = values;
+    const { name, lastname, academicLevel, email, password, phone } = values;
     setIsLoading(true);
 
     try {
       // Regular signup
-      await signupWithEmail(email, password, name, lastname, academicLevel);
+      await signupWithEmail(
+        email,
+        password,
+        name,
+        lastname,
+        academicLevel,
+        phone,
+      );
 
       setIsLoading(false);
       router.push("/pocetna"); // Redirect after successful operation
@@ -217,6 +228,26 @@ export const SignupForm = observer(() => {
                     </div>
                   )}
                 </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="phone"
+          render={({ field }) => (
+            <FormItem className="grid gap-2">
+              <FormLabel>Телефонски број</FormLabel>
+              <FormControl>
+                <Input
+                  id="phone"
+                  type="tel"
+                  placeholder="Внесете го вашиот телефонски број"
+                  disabled={isLoading}
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

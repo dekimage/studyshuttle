@@ -38,7 +38,7 @@ export const Header = () => {
           "0 3px 2px -3px rgba(0, 0, 0, 0.1), 0 4px 1px 0px rgba(0, 0, 0, 0.02)",
       }}
     >
-      <Link href="/" className="flex items-center justify-center">
+      <Link href="/" className="flex flex-col items-center justify-center">
         <Image
           src={logoImg}
           width={200}
@@ -46,6 +46,9 @@ export const Header = () => {
           alt="logo"
           className="w-[100px] lg:w-[147px]"
         />
+        <span className="ml-[-20px] mt-[-10px] text-sm text-gray-500">
+          The Best
+        </span>
       </Link>
       <div
         className="relative flex cursor-pointer items-center justify-center lg:hidden"
