@@ -36,7 +36,7 @@ export async function POST(req) {
       );
     }
 
-    // Calculate total score
+    // Calculate total scores
     const scoreMap = { a: 4, b: 3, c: 2, d: 1 };
     const totalScore = answers.reduce((sum, answer) => sum + scoreMap[answer.toLowerCase()], 0);
 
