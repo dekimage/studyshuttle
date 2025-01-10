@@ -15,13 +15,23 @@ const SCORE_RANGES = {
 };
 
 export async function POST(req) {
+  // Add CORS headers
+  const headers = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+  };
+
   try {
     const { email, answers } = await req.json();
 
     if (!email || !answers || !Array.isArray(answers)) {
       return new Response(
         JSON.stringify({ error: "Invalid submission data" }),
-        { status: 400 }
+        { 
+          status: 400,
+          headers 
+        }
       );
     }
 
@@ -65,7 +75,10 @@ export async function POST(req) {
         pdf: pdfToSend,
         message: "Form submission processed successfully"
       }),
-      { status: 200 }
+      { 
+        status: 200,
+        headers 
+      }
     );
 
   } catch (error) {
@@ -75,7 +88,22 @@ export async function POST(req) {
         error: "Error processing form submission",
         details: error.message
       }),
-      { status: 500 }
+      { 
+        status: 500,
+        headers 
+      }
     );
   }
+}
+
+// Handle OPTIONS request for CORS
+export async function OPTIONS(req) {
+  return new Response(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    },
+  });
 }
