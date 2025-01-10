@@ -5,6 +5,7 @@ import mailgun from "mailgun.js";
 const mg = mailgun({
   apiKey: process.env.MAILGUN_API_KEY,
   domain: process.env.MAILGUN_DOMAIN,
+  url: "https://api.eu.mailgun.net",
 });
 
 export const sendEmail = async ({ to, subject, text }) => {
