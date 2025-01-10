@@ -5,7 +5,7 @@ import Mailgun from "mailgun.js";
 const mailgun = new Mailgun(FormData);
 const mg = mailgun.client({
   username: "api",
-  key: process.env.MAILGUN_API_KEY, // Make sure this environment variable is set
+  key: process.env.MAILGUN_API_KEY, // Make sure this environment variable is sets
   url: "https://api.eu.mailgun.net",
 });
 
