@@ -6,6 +6,7 @@ const DOMAIN = process.env.MAILGUN_DOMAIN; // Add your Mailgun domain here
 const mgClient = mg.client({
   username: "api",
   key: process.env.MAILGUN_API_KEY,
+  url: "https://api.eu.mailgun.net",
 });
 
 export default async function handler(req, res) {
