@@ -34,6 +34,7 @@ export default function RootLayout({ children }) {
     "/univerzitet",
     "/forgot-password",
     "/",
+    "/landing"
   ].includes(pathname); // Example: Hide layout on login and register routes
   const showHeaderFooter = ![
     "/payment-result",
@@ -44,6 +45,7 @@ export default function RootLayout({ children }) {
     "/profile",
     "/schedule",
     "/support",
+    "/landing"
   ].includes(pathname); // Example: Hide header and footer on specific routes
 
   return (
