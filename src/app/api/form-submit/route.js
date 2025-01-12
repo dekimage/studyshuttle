@@ -9,10 +9,21 @@ const mg = mailgun.client({
   url: "https://api.eu.mailgun.net",
 });
 
+// Updated score ranges based on your table
 const SCORE_RANGES = {
-  LOW: { min: 3, max: 6, pdf: "lowPDF" },
-  MEDIUM: { min: 7, max: 10, pdf: "medPDF" },
-  HIGH: { min: 11, max: 12, pdf: "highPDF" },
+  LOW: { min: 0, max: 150, pdf: "lowPDF" },
+  MEDIUM: { min: 151, max: 225, pdf: "mediumPDF" },
+  HIGH: { min: 226, max: 270, pdf: "highPDF" },
+  VERY_HIGH: { min: 271, max: 300, pdf: "veryHighPDF" },
+};
+
+// Mapping of answers to scores
+const ANSWER_SCORES = {
+  "Никогаш": 1,
+  "Ретко": 2,
+  "Понекогаш": 3,
+  "Често": 4,
+  "Секогаш": 5,
 };
 
 export async function POST(req) {
@@ -36,13 +47,19 @@ export async function POST(req) {
       );
     }
 
-    // Calculate total scores
-    const scoreMap = { a: 4, b: 3, c: 2, d: 1 };
-    const totalScore = answers.reduce((sum, answer) => sum + scoreMap[answer.toLowerCase()], 0);
+    // Calculate total score for valid answers
+    let totalScore = 0;
+    answers.forEach(answer => {
+      if (ANSWER_SCORES.hasOwnProperty(answer)) {
+        totalScore += ANSWER_SCORES[answer];
+      }
+    });
 
-    // Determine which PDF to send
+    // Determine which PDF to send based on the score
     let pdfToSend;
-    if (totalScore >= SCORE_RANGES.HIGH.min && totalScore <= SCORE_RANGES.HIGH.max) {
+    if (totalScore >= SCORE_RANGES.VERY_HIGH.min && totalScore <= SCORE_RANGES.VERY_HIGH.max) {
+      pdfToSend = SCORE_RANGES.VERY_HIGH.pdf;
+    } else if (totalScore >= SCORE_RANGES.HIGH.min && totalScore <= SCORE_RANGES.HIGH.max) {
       pdfToSend = SCORE_RANGES.HIGH.pdf;
     } else if (totalScore >= SCORE_RANGES.MEDIUM.min && totalScore <= SCORE_RANGES.MEDIUM.max) {
       pdfToSend = SCORE_RANGES.MEDIUM.pdf;

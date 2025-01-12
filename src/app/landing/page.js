@@ -10,11 +10,11 @@ import { useToast } from "@/components/ui/use-toast";
 import { Loader2 } from "lucide-react";
 
 const validationSchema = Yup.object({
-  name: Yup.string().required("Name is required"),
+  parentName: Yup.string().required("Име на родителот is required"),
+  childName: Yup.string().required("Име на детето is required"),
+  familySurname: Yup.string().required("Семејно презиме is required"),
   email: Yup.string().email("Invalid email address").required("Email is required"),
-  phoneNumber: Yup.string()
-    .matches(/^[0-9+\s-]+$/, "Invalid phone number")
-    .required("Phone number is required"),
+  phone: Yup.string().matches(/^[0-9+\s-]+$/, "Invalid phone number"),
 });
 
 export default function LandingPage() {
@@ -32,9 +32,11 @@ export default function LandingPage() {
 
   const formik = useFormik({
     initialValues: {
-      name: "",
+      parentName: "",
+      childName: "",
+      familySurname: "",
       email: "",
-      phoneNumber: "",
+      phone: "",
     },
     validationSchema,
     onSubmit: async (values) => {
@@ -103,45 +105,92 @@ export default function LandingPage() {
           <div className="bg-white rounded-xl shadow-xl p-8">
             <form onSubmit={formik.handleSubmit} className="space-y-6">
               <div>
-                <Input
-                  id="name"
-                  name="name"
+                <label htmlFor="parentName" className="block font-bold mb-1">Име на родителот (Задолжително):</label>
+                <input
                   type="text"
-                  placeholder="Your Name"
-                  {...formik.getFieldProps("name")}
-                  className={formik.touched.name && formik.errors.name ? "border-red-500" : ""}
+                  id="parentName"
+                  name="parentName"
+                  placeholder="Внесете го вашето име"
+                  required
+                  className="w-full p-2 border border-gray-300 rounded mb-2"
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  value={formik.values.parentName}
                 />
-                {formik.touched.name && formik.errors.name && (
-                  <div className="text-red-500 text-sm mt-1">{formik.errors.name}</div>
-                )}
+                {formik.touched.parentName && formik.errors.parentName ? (
+                  <div className="text-red-600">{formik.errors.parentName}</div>
+                ) : null}
               </div>
 
               <div>
-                <Input
+                <label htmlFor="childName" className="block font-bold mb-1">Име на детето (Задолжително):</label>
+                <input
+                  type="text"
+                  id="childName"
+                  name="childName"
+                  placeholder="Внесете го името на вашето дете"
+                  required
+                  className="w-full p-2 border border-gray-300 rounded mb-2"
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  value={formik.values.childName}
+                />
+                {formik.touched.childName && formik.errors.childName ? (
+                  <div className="text-red-600">{formik.errors.childName}</div>
+                ) : null}
+              </div>
+
+              <div>
+                <label htmlFor="familySurname" className="block font-bold mb-1">Семејно презиме (Задолжително):</label>
+                <input
+                  type="text"
+                  id="familySurname"
+                  name="familySurname"
+                  placeholder="Внесете го семејното презиме"
+                  required
+                  className="w-full p-2 border border-gray-300 rounded mb-2"
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  value={formik.values.familySurname}
+                />
+                {formik.touched.familySurname && formik.errors.familySurname ? (
+                  <div className="text-red-600">{formik.errors.familySurname}</div>
+                ) : null}
+              </div>
+
+              <div>
+                <label htmlFor="email" className="block font-bold mb-1">Е-пошта (Задолжително):</label>
+                <input
+                  type="email"
                   id="email"
                   name="email"
-                  type="email"
-                  placeholder="Your Email"
-                  {...formik.getFieldProps("email")}
-                  className={formik.touched.email && formik.errors.email ? "border-red-500" : ""}
+                  placeholder="Внесете ја вашата е-пошта"
+                  required
+                  className="w-full p-2 border border-gray-300 rounded mb-2"
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  value={formik.values.email}
                 />
-                {formik.touched.email && formik.errors.email && (
-                  <div className="text-red-500 text-sm mt-1">{formik.errors.email}</div>
-                )}
+                {formik.touched.email && formik.errors.email ? (
+                  <div className="text-red-600">{formik.errors.email}</div>
+                ) : null}
               </div>
 
               <div>
-                <Input
-                  id="phoneNumber"
-                  name="phoneNumber"
+                <label htmlFor="phone" className="block font-bold mb-1">Телефонски број (Опционално):</label>
+                <input
                   type="tel"
-                  placeholder="Your Phone Number"
-                  {...formik.getFieldProps("phoneNumber")}
-                  className={formik.touched.phoneNumber && formik.errors.phoneNumber ? "border-red-500" : ""}
+                  id="phone"
+                  name="phone"
+                  placeholder="Внесете го вашиот телефонски број"
+                  className="w-full p-2 border border-gray-300 rounded mb-2"
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  value={formik.values.phone}
                 />
-                {formik.touched.phoneNumber && formik.errors.phoneNumber && (
-                  <div className="text-red-500 text-sm mt-1">{formik.errors.phoneNumber}</div>
-                )}
+                {formik.touched.phone && formik.errors.phone ? (
+                  <div className="text-red-600">{formik.errors.phone}</div>
+                ) : null}
               </div>
 
               <Button

@@ -2,9 +2,21 @@ import { db } from "../../firebaseAdmin";
 
 export async function POST(req) {
   try {
-    const { email, name, phoneNumber, affiliateCode } = await req.json();
+    const { parentName, childName, familySurname, email, phone, affiliateCode } = await req.json();
 
-    if (!email || !name || !phoneNumber) {
+    console.log(
+      {
+        parentName,
+        childName,
+        familySurname,
+        email,
+        phone,
+        affiliateCode,
+      }
+    )
+
+
+    if (!email || !parentName || !childName || !familySurname) {
       return new Response(
         JSON.stringify({ error: "Missing required fields" }),
         { status: 400 }
@@ -17,8 +29,14 @@ export async function POST(req) {
     if (leadDoc.exists) {
       // Update only the affiliateCode if lead exists
       await db.collection("leads").doc(email).update({
+        email,
+        parentName,
+        phone,
+        childName,
+        familySurname,
         affiliateCode: affiliateCode || null,
         updatedAt: new Date().toISOString(),
+        createdAt: leadDoc.data().createdAt || new Date().toISOString(),
       });
 
       return new Response(
@@ -33,8 +51,10 @@ export async function POST(req) {
     // Create new lead with email as document ID
     await db.collection("leads").doc(email).set({
       email,
-      name,
-      phoneNumber,
+      parentName,
+      phone,
+      childName,
+      familySurname,
       affiliateCode: affiliateCode || null,
       isFormSubmitted: false,
       totalScore: null,
