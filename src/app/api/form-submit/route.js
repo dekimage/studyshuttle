@@ -40,20 +40,39 @@ export async function POST(req) {
     if (!email || !answers || !Array.isArray(answers)) {
       return new Response(
         JSON.stringify({ error: "Invalid submission data" }),
-        { 
+        {
           status: 400,
-          headers 
+          headers
         }
       );
     }
 
-    // Calculate total score for valid answers
+    // Calculate total score only for valid multiple choice answers
     let totalScore = 0;
+    let validAnswersCount = 0;
+
     answers.forEach(answer => {
+      // Only process answers that match our scoring system
       if (ANSWER_SCORES.hasOwnProperty(answer)) {
         totalScore += ANSWER_SCORES[answer];
+        validAnswersCount++;
       }
+      // Silently ignore any answer that doesn't match our scoring system
     });
+
+    // Only proceed if we found at least one valid multiple choice answer
+    if (validAnswersCount === 0) {
+      return new Response(
+        JSON.stringify({
+          error: "No valid multiple choice answers found",
+          expectedAnswers: Object.keys(ANSWER_SCORES)
+        }),
+        {
+          status: 400,
+          headers
+        }
+      );
+    }
 
     // Determine which PDF to send based on the score
     let pdfToSend;
@@ -67,11 +86,12 @@ export async function POST(req) {
       pdfToSend = SCORE_RANGES.LOW.pdf;
     }
 
-    // Update lead in Firebase
+    // Update lead in Firebase with the score from valid answers only
     const leadRef = db.collection("leads").doc(email);
     await leadRef.update({
       isFormSubmitted: true,
       totalScore,
+      validAnswersCount, // Optional: store how many valid answers were processed
       formSubmittedAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     });
@@ -93,9 +113,9 @@ export async function POST(req) {
         pdf: pdfToSend,
         message: "Form submission processed successfully"
       }),
-      { 
+      {
         status: 200,
-        headers 
+        headers
       }
     );
 
@@ -106,9 +126,9 @@ export async function POST(req) {
         error: "Error processing form submission",
         details: error.message
       }),
-      { 
+      {
         status: 500,
-        headers 
+        headers
       }
     );
   }

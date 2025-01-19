@@ -2,21 +2,9 @@ import { db } from "../../firebaseAdmin";
 
 export async function POST(req) {
   try {
-    const { parentName, childName, familySurname, email, phone, affiliateCode } = await req.json();
+    const { email, phone, affiliateCode } = await req.json();
 
-    console.log(
-      {
-        parentName,
-        childName,
-        familySurname,
-        email,
-        phone,
-        affiliateCode,
-      }
-    )
-
-
-    if (!email || !parentName || !childName || !familySurname) {
+    if (!email) {
       return new Response(
         JSON.stringify({ error: "Missing required fields" }),
         { status: 400 }
@@ -25,24 +13,21 @@ export async function POST(req) {
 
     // Check if lead already exists
     const leadDoc = await db.collection("leads").doc(email).get();
-    
+
     if (leadDoc.exists) {
       // Update only the affiliateCode if lead exists
       await db.collection("leads").doc(email).update({
         email,
-        parentName,
         phone,
-        childName,
-        familySurname,
         affiliateCode: affiliateCode || null,
         updatedAt: new Date().toISOString(),
         createdAt: leadDoc.data().createdAt || new Date().toISOString(),
       });
 
       return new Response(
-        JSON.stringify({ 
-          success: true, 
-          message: "Lead updated with new affiliate code" 
+        JSON.stringify({
+          success: true,
+          message: "Lead updated with new affiliate code"
         }),
         { status: 200 }
       );
@@ -51,10 +36,7 @@ export async function POST(req) {
     // Create new lead with email as document ID
     await db.collection("leads").doc(email).set({
       email,
-      parentName,
       phone,
-      childName,
-      familySurname,
       affiliateCode: affiliateCode || null,
       isFormSubmitted: false,
       totalScore: null,

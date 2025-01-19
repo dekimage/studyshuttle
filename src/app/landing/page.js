@@ -1,216 +1,109 @@
 "use client";
-
-import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
-import { useFormik } from "formik";
-import * as Yup from "yup";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useToast } from "@/components/ui/use-toast";
 import { Loader2 } from "lucide-react";
-
-const validationSchema = Yup.object({
-  parentName: Yup.string().required("Име на родителот is required"),
-  childName: Yup.string().required("Име на детето is required"),
-  familySurname: Yup.string().required("Семејно презиме is required"),
-  email: Yup.string().email("Invalid email address").required("Email is required"),
-  phone: Yup.string().matches(/^[0-9+\s-]+$/, "Invalid phone number"),
-});
+import logoImg from "../../assets/logo.png";
+import cosmoImg from "../../assets/cosmo.png";
+import Image from "next/image";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 export default function LandingPage() {
   const searchParams = useSearchParams();
-  const { toast } = useToast();
-  const [affiliateCode, setAffiliateCode] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useEffect(() => {
-    const code = searchParams.get("code");
-    if (code) {
-      setAffiliateCode(code);
-    }
-  }, [searchParams]);
-
-  const formik = useFormik({
-    initialValues: {
-      parentName: "",
-      childName: "",
-      familySurname: "",
-      email: "",
-      phone: "",
-    },
-    validationSchema,
-    onSubmit: async (values) => {
-      setIsSubmitting(true);
-      try {
-        // Store lead in Firebase
-        const leadResponse = await fetch("/api/leads", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...values, affiliateCode }),
-        });
-
-        if (!leadResponse.ok) {
-          throw new Error("Failed to store lead");
-        }
-
-        // Send email
-        const emailResponse = await fetch("/api/sendEmail", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            to: values.email,
-            subject: "Thanks for Your Interest!",
-            text: "Hey thanks for showing interest! Here is the link to the google form: [YOUR_GOOGLE_FORM_LINK_HERE]",
-          }),
-        });
-
-        if (!emailResponse.ok) {
-          throw new Error("Failed to send email");
-        }
-
-        toast({
-          title: "Success!",
-          description: "Thank you for your interest. Please check your email for next steps.",
-        });
-
-        formik.resetForm();
-      } catch (error) {
-        console.error("Error:", error);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Something went wrong. Please try again later.",
-        });
-      } finally {
-        setIsSubmitting(false);
-      }
-    },
-  });
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
-      <div className="container mx-auto px-4 py-16">
-        <div className="max-w-3xl mx-auto space-y-12">
-          {/* Hero Section */}
-          <div className="text-center space-y-6">
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900">
-              Transform Your Learning Journey
-            </h1>
-            <p className="text-xl text-gray-600">
-              Join our community of successful students and take your education to the next level
-            </p>
+    <main className="min-h-screen bg-white flex flex-col items-center">
+      <div className="pl-16 py-12">
+        <Image src={logoImg} alt="logo" height={100} width="100" />
+      </div>
+
+
+
+      <div
+        style={{
+          background: `linear-gradient(to bottom, #ffd02f, white)`,
+          clipPath: "polygon(0 0, 100% 20%, 100% 100%, 0% 100%)",
+        }}
+        className="flex flex-col sm:flex-row justify-between px-2 py-6 sm:px-16 pt-48 w-full "
+      >
+        <div className="max-w-[900px]">
+          <div className="max-w-[600px] sm:text-[65px] text-[25px] font-bold sm:mb-4">
+            Откриете го академскиот потенцијал на Вашето дете!
           </div>
-
-          {/* Form Section */}
-          <div className="bg-white rounded-xl shadow-xl p-8">
-            <form onSubmit={formik.handleSubmit} className="space-y-6">
-              <div>
-                <label htmlFor="parentName" className="block font-bold mb-1">Име на родителот (Задолжително):</label>
-                <input
-                  type="text"
-                  id="parentName"
-                  name="parentName"
-                  placeholder="Внесете го вашето име"
-                  required
-                  className="w-full p-2 border border-gray-300 rounded mb-2"
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  value={formik.values.parentName}
-                />
-                {formik.touched.parentName && formik.errors.parentName ? (
-                  <div className="text-red-600">{formik.errors.parentName}</div>
-                ) : null}
-              </div>
-
-              <div>
-                <label htmlFor="childName" className="block font-bold mb-1">Име на детето (Задолжително):</label>
-                <input
-                  type="text"
-                  id="childName"
-                  name="childName"
-                  placeholder="Внесете го името на вашето дете"
-                  required
-                  className="w-full p-2 border border-gray-300 rounded mb-2"
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  value={formik.values.childName}
-                />
-                {formik.touched.childName && formik.errors.childName ? (
-                  <div className="text-red-600">{formik.errors.childName}</div>
-                ) : null}
-              </div>
-
-              <div>
-                <label htmlFor="familySurname" className="block font-bold mb-1">Семејно презиме (Задолжително):</label>
-                <input
-                  type="text"
-                  id="familySurname"
-                  name="familySurname"
-                  placeholder="Внесете го семејното презиме"
-                  required
-                  className="w-full p-2 border border-gray-300 rounded mb-2"
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  value={formik.values.familySurname}
-                />
-                {formik.touched.familySurname && formik.errors.familySurname ? (
-                  <div className="text-red-600">{formik.errors.familySurname}</div>
-                ) : null}
-              </div>
-
-              <div>
-                <label htmlFor="email" className="block font-bold mb-1">Е-пошта (Задолжително):</label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  placeholder="Внесете ја вашата е-пошта"
-                  required
-                  className="w-full p-2 border border-gray-300 rounded mb-2"
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  value={formik.values.email}
-                />
-                {formik.touched.email && formik.errors.email ? (
-                  <div className="text-red-600">{formik.errors.email}</div>
-                ) : null}
-              </div>
-
-              <div>
-                <label htmlFor="phone" className="block font-bold mb-1">Телефонски број (Опционално):</label>
-                <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  placeholder="Внесете го вашиот телефонски број"
-                  className="w-full p-2 border border-gray-300 rounded mb-2"
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  value={formik.values.phone}
-                />
-                {formik.touched.phone && formik.errors.phone ? (
-                  <div className="text-red-600">{formik.errors.phone}</div>
-                ) : null}
-              </div>
-
-              <Button
-                type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Processing...
-                  </>
-                ) : (
-                  "Get Started Now"
-                )}
-              </Button>
-            </form>
+          <div className="max-w-[600px] sm:text-[25px] text-[18px] font-bold">
+            Добијте персонализиран академски план прилагоден на потребите на Вашето дете.
           </div>
         </div>
+        <div>
+          <Image
+            src={cosmoImg}
+            alt="logo"
+            height={500}
+            width="500"
+          // className=" h-[500px] w-[500px]"
+          />
+        </div>
       </div>
+
+      <div className="px-2 py-6 sm:px-16 sm:py-12 sm:max-w-[1140px]">
+        <div className="sm:text-chili sm:text-[65px] text-[25px] mb-4 font-bold">
+          Како функционира?
+        </div>
+        <div className="sm:text-[25px] text-[18px] font-bold">
+          <div>
+            Секое дете има уникатен академски пат. Затоа создадовме лесен процес за да Ви
+            помогнеме да го откриеме целосниот академски потенцијал на Вашето дете:
+          </div>
+          <br />
+          <div>1. Пополнете го Google формуларот (потребни се околу од 20 минути) заедно со Вашето дете.</div>
+          <div>
+            2. Добијте детален, персонализиран академски план и родителски совети како можете да му
+            помогнете во оваа фаза на Вашето дете, во Вашата е-пошта.
+          </div>
+          <div>3. Направете го првиот чекор за да му помогнете на Вашето дете да постигне академски успех.</div>
+        </div>
+      </div>
+
+      <div className="rounded-[20px] bg-chili mx-2 sm:mx-16 flex justify-center items-center p-4 sm:p-10 sm:max-w-[1140px]">
+        <div className="font-bold text-white sm:text-[45px] text-[25px] text-center">
+          Ова е едноставно, бесплатно и засновано на докажана методологија за академски успех.
+        </div>
+      </div>
+      <div className="px-2 py-6 sm:px-16 sm:py-12 sm:max-w-[1140px]">
+        <div className="sm:text-sky sm:text-[65px] text-[25px] font-bold mb-4">
+          Зошто да го пополните ова?
+        </div>
+        <ul className="sm:text-[25px] text-[18px] font-bold">
+          <li>Добијте јасна претстава за моменталната академска состојба на Вашето дете.</li>
+          <li>Добијте конкретни совети прилагодени на неговите силни страни и предизвици.</li>
+          <li>Создадете патоказ за поддршка на неговиот академски раст и иднина.</li>
+        </ul>
+      </div>
+
+      <div className="rounded-tl-[20px] rounded-tr-[20px] bg-gradient-to-b from-sky to-white p-4 text-center mt-24 w-full sm:max-w-[1140px]">
+        <div className="sm:text-[45px] text-[25px] font-bold">
+          Добијте го Вашиот бесплатен персонализиран план веднаш!
+        </div>
+        <Link href={`/landing-form?${searchParams.toString()}`}>
+          <Button
+            className="bg-chili text-white w-[150px] sm:w-[200px] rounded-full px-4 py-4 mt-4"
+          >
+            Започнете тука
+          </Button>
+        </Link>
+      </div>
+      <div className="rounded-b-[20px] bg-gradient-to-t from-sky to-white p-4 pt-24 text-center w-full sm:max-w-[1140px]">
+        <a
+          href="https://www.studyshuttle.mk/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="sm:text-[35px] text-[25px] font-bold underline text-black"
+        >
+          Посетете не на нашата веб-страна
+        </a>
+        <div className="sm:text-[25px] text-[18px] mt-4">© 2025 Стади Шатл ДООЕЛ</div>
+      </div>
+
+
     </main>
   );
 }
