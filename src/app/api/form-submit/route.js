@@ -54,7 +54,7 @@ export async function POST(req) {
       language,
       parentEmail,
       parentPhone,
-      schoolName,
+
     } = body;
 
     // Log the extracted fields for debugging
@@ -68,7 +68,7 @@ export async function POST(req) {
       language,
       parentEmail,
       parentPhone,
-      schoolName,
+
     });
 
     // Validate required fields
@@ -143,7 +143,7 @@ export async function POST(req) {
         city,
         language,
         parentPhone,
-        schoolName,
+
         isFormSubmitted: true,
         totalScore,
         validAnswersCount,
