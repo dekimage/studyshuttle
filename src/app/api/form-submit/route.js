@@ -43,42 +43,8 @@ export async function POST(req) {
       schoolName,
     });
 
-    // Validation
-    if (
-      !email ||
-      !parentEmail ||
-      !answers ||
-      !Array.isArray(answers) ||
-      !studentName ||
-      !parentName ||
-      !surname ||
-      !city ||
-      !language ||
-      !parentPhone ||
-      !schoolName
-    ) {
-      return new Response(
-        JSON.stringify({
-          error: 'Missing required fields',
-          received: {
-            email,
-            parentEmail,
-            answers,
-            studentName,
-            parentName,
-            surname,
-            city,
-            language,
-            parentPhone,
-            schoolName,
-          },
-        }),
-        {
-          status: 400,
-          headers,
-        }
-      );
-    }
+
+
 
     // Calculate total score only for valid multiple-choice answers
     let totalScore = 0;
@@ -92,19 +58,6 @@ export async function POST(req) {
       }
     });
 
-    // Ensure at least one valid multiple-choice answer
-    if (validAnswersCount === 0) {
-      return new Response(
-        JSON.stringify({
-          error: 'No valid multiple-choice answers found',
-          expectedAnswers: Object.keys(ANSWER_SCORES),
-        }),
-        {
-          status: 400,
-          headers,
-        }
-      );
-    }
 
     // Determine which PDF to send based on the score
     let pdfToSend;
