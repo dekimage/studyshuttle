@@ -53,6 +53,7 @@ export async function POST(req) {
       city,
       language,
       parentEmail,
+      studentEmail,
       parentPhone,
 
     } = body;
@@ -67,6 +68,7 @@ export async function POST(req) {
       city,
       language,
       parentEmail,
+      studentEmail,
       parentPhone,
 
     });
@@ -137,13 +139,13 @@ export async function POST(req) {
       {
         email,
         parentEmail,
+        studentEmail,
         studentName,
         parentName,
         surname,
         city,
         language,
         parentPhone,
-
         isFormSubmitted: true,
         totalScore,
         validAnswersCount,
