@@ -56,7 +56,7 @@ export default function LandingPage() {
           body: JSON.stringify({
             to: values.email,
             subject: "Thanks for Your Interest!",
-            text: "Hey thanks for showing interest! Here is the link to the google form: https://docs.google.com/forms/d/e/1FAIpQLScVOIiG7OC5nBafpxL_nn_lkU6Y8aOQKQy8jMeOovpmB24Omw/viewform?fbzx=4642475251541994351",
+            text: "Hey thanks for showing interest! Here is the link to the google form: https://docs.google.com/forms/d/1ByGyaG80p47Q6mZbO1BY3B7G60NOuQ2Y-MLb5T5x_xA/alreadyresponded?pli=1&pli=1&pli=1",
           }),
         });
 
