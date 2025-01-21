@@ -159,8 +159,24 @@ export async function POST(req) {
     const emailData = {
       from: process.env.MAILGUN_SENDER_EMAIL,
       to: email,
-      subject: "Your Personalized Results",
-      text: `Dear ${studentName},\n\nThank you for completing the assessment! Based on your responses, we've prepared a personalized PDF for you.\n\nYour total score was ${totalScore}.\n\nYou can download your personalized PDF here: [Link to ${pdfToSend}].\n\nBest regards,\nStudy Shuttle Team`,
+      subject: "Вашиот персонализиран план – Study Shuttle",
+      text: `Почитуван/а ${studentName},
+
+Ви благодариме што го пополнивте формуларот за академска евалуација за ${studentName}!
+
+По внимателното разгледување на Вашите одговори, нашиот тим подготви план кој најсоодветно ги одговара Вашите потреби и цели.
+
+Во продолжение Ви го испраќаме линкот до препорачаниот план:
+[Link to ${pdfToSend}]
+
+Во планот е наведена и препорачаната фаза во која најдобро се вклопувате според информациите добиени од формуларот. Доколку имате какви било прашања околу чекорите, фазите или сакате дополнителни насоки, слободно контактирајте нè на studyshuttlemk@gmail.com.
+
+Со нетрпение очекуваме да работиме заедно кон постигнување на Вашите академски цели!
+
+Поздрав и пријатен ден,
+Тимот на Study Shuttle
+studyshuttlemk@gmail.com
+www.studyshuttle.mk`,
     };
 
     await mg.messages.create(process.env.MAILGUN_DOMAIN, emailData);

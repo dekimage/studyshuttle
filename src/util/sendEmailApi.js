@@ -9,7 +9,7 @@ export const sendEmailApi = async ({ to, subject, text }) => {
 
   try {
     const response = await axios.post(
-      `https://api.mailgun.net/v3/${process.env.MAILGUN_DOMAIN}/messages`,
+      `https://api.eu.mailgun.net/v3/${process.env.MAILGUN_DOMAIN}/messages`,
       data,
       {
         auth: {

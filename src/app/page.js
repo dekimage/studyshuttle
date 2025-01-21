@@ -75,6 +75,89 @@ export const CtaDialog = ({ cta }) => {
   );
 };
 
+export const CtaInvoiceDialog = ({ cta, ctaNumber }) => {
+  const [email, setEmail] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setIsLoading(true);
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError("Please enter a valid email address");
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/sendInvoiceMail', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, ctaNumber }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Something went wrong');
+      }
+
+      // Success - could add a success message or close dialog
+      setEmail("");
+      setIsLoading(false);
+    } catch (err) {
+      setError(err.message);
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>{cta}</DialogTrigger>
+      <DialogContent>
+        <div className="flex flex-col justify-center gap-4">
+          <div className="text-[35px] font-bold text-sky">
+            Пополнете ги вашите податоци за да го добиете повеќе информации директно на Вашата е-пошта:
+          </div>
+
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="rounded-md border p-2"
+              placeholder="Внесете ја вашата е-пошта"
+            />
+
+            {error && <div className="text-red-500 text-sm">{error}</div>}
+
+            <div className="text-[16px] font-semibold">
+              Откако ќе го поднесете формуларот, проверете го Вашето е-сандаче и spam/junk фолдер.
+            </div>
+
+            <Button
+              type="submit"
+              className="bg-sky text-white"
+              disabled={isLoading}
+            >
+              {isLoading ? "Се процесира..." : "Поднеси"}
+            </Button>
+          </form>
+
+
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 export const Hero = ({ heroData }) => {
   const { color, headline, subheadline, description, image } = heroData;
   return (
@@ -179,21 +262,19 @@ export const ImageSection = ({ data }) => {
 export const YellowSection = ({ text, isBig = false, cta = false }) => {
   return (
     <div
-      className={`flex flex-col items-center justify-center bg-sun ${
-        isBig ? "" : "mt-8"
-      }`}
+      className={`flex flex-col items-center justify-center bg-sun ${isBig ? "" : "mt-8"
+        }`}
     >
       <div
-        className={`mx-4 my-12 max-w-[1000px] text-center ${
-          isBig
-            ? "text-[28px] font-bold lg:text-[42px]"
-            : "text-[21px] font-semibold lg:text-[35px]"
-        } leading-6 lg:leading-10`}
+        className={`mx-4 my-12 max-w-[1000px] text-center ${isBig
+          ? "text-[28px] font-bold lg:text-[42px]"
+          : "text-[21px] font-semibold lg:text-[35px]"
+          } leading-6 lg:leading-10`}
       >
         {text}
       </div>
       {cta && (
-        <Link href="/skolarina">
+        <Link href="/landing">
           <Button className="mb-8 h-[60px] rounded-[15px] bg-chili px-8 text-[24px] text-white hover:bg-chili/90">
             Дознај повеќе
           </Button>
@@ -259,9 +340,8 @@ export const RocketCta = ({ isRed, active, isProf }) => {
     >
       <div className="flex flex-col">
         <div
-          className={`mb-8 text-[35px] font-semibold lg:text-[65px]  ${
-            isProf ? "text-chili" : "text-black lg:text-white"
-          }`}
+          className={`mb-8 text-[35px] font-semibold lg:text-[65px]  ${isProf ? "text-chili" : "text-black lg:text-white"
+            }`}
         >
           Сеуште немаш профил?
         </div>
@@ -417,9 +497,8 @@ const SingleStep = ({ isLeft, data }) => {
   const isMobile = useIsMobile();
   return (
     <div
-      className={`flex flex-col lg:flex-row ${
-        isLeft ? "lg:flex-row-reverse" : "flex-row"
-      } mx-8  my-8 items-center  justify-center text-center lg:my-32 lg:gap-32 lg:px-32 lg:text-start`}
+      className={`flex flex-col lg:flex-row ${isLeft ? "lg:flex-row-reverse" : "flex-row"
+        } mx-8  my-8 items-center  justify-center text-center lg:my-32 lg:gap-32 lg:px-32 lg:text-start`}
     >
       {/* <SlideInRightWhenVisible> */}
       <Image
@@ -485,9 +564,8 @@ export const ProffesorCard = ({ proffesor, isLanding }) => {
       style={isLanding ? { border: "none" } : {}}
     >
       <div
-        className={`mb-4 mt-8 flex h-[120px] w-[120px] items-center justify-center rounded-full border border-[3px] ${
-          isLanding ? "border-chili" : "border-sun"
-        }`}
+        className={`mb-4 mt-8 flex h-[120px] w-[120px] items-center justify-center rounded-full border border-[3px] ${isLanding ? "border-chili" : "border-sun"
+          }`}
       >
         <Image
           src={image}
@@ -508,9 +586,8 @@ export const ProffesorCard = ({ proffesor, isLanding }) => {
             style={{
               boxShadow: "inset 2px 7px 4px -5px rgba(0, 0, 0, 0.49)",
             }}
-            className={`my-2 w-full rounded-[10px] px-8 py-2 text-[12px] font-bold ${
-              isLanding ? "bg-chili text-white" : "bg-sun"
-            }`}
+            className={`my-2 w-full rounded-[10px] px-8 py-2 text-[12px] font-bold ${isLanding ? "bg-chili text-white" : "bg-sun"
+              }`}
           >
             {subject}
           </div>

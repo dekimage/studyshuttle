@@ -4,7 +4,9 @@ import osnovnoImg2 from "../../assets/sredno2.png";
 import osnovnoImg3 from "../../assets/sredno3.png";
 import osnovnoImg4 from "../../assets/sredno4.png";
 import osnovnoImg5 from "../../assets/sredno5.png";
+
 import { Hero, ImageSection, RocketCta, YellowSection } from "../page";
+import Link from 'next/link';
 
 const osnovnoImagesData = [
   {
@@ -44,8 +46,27 @@ const osnovnoImagesData = [
   },
 ];
 
-const text =
-  "Инвестирајте во академскиот успех на Вашето дете со Study Shuttle и ајде да соработуваме за да го оформиме патот до академски успех кај Вашето дете!";
+const text = [
+  'Како да започнете?',
+  '',
+  <p key="1">
+    1. БЕСПЛАТНО пополнете го{' '}
+    <Link href="/landing" className="text-blue-600 hover:text-blue-800 underline">
+      формуларот за академска евалуација на ученици
+    </Link>.
+  </p>,
+  <p key="2">
+    2. Проверете ја Вашата пошта (вклучувајќи го и spam/junk/непосакувани пораки) за линкот до персонализираниот образовен формулар.
+  </p>,
+  <p key="3">
+    3. Пополнете го{' '}
+    <Link href="/landing" className="text-blue-600 hover:text-blue-800 underline">
+      формуларот
+    </Link>{' '}
+    заедно со Вашиот тинејџер и добијте прилагоден план што ќе ги задоволи неговите потреби.
+  </p>
+];
+
 export const whyText = "5 Причини зошто Study Shuttle:";
 const OsnovnoPage = () => {
   return (

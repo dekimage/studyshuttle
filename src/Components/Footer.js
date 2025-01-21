@@ -1,4 +1,4 @@
-import { Facebook, Instagram, Linkedin, Phone, Twitter } from "lucide-react";
+import { Facebook, Instagram, Linkedin, Mail, Phone, Twitter } from "lucide-react";
 import logoImg from "../assets/logo.png";
 import Image from "next/image";
 import Link from "next/link";
@@ -83,16 +83,23 @@ export const Footer = () => {
       <div className="mb-6 flex w-full flex-col gap-2 text-center lg:mb-0 lg:text-start">
         <div className="bolded text-[22px] font-bold">Контакт</div>
         {/* <div className="text-lg">info@studyshuttle.mk</div> */}
-        <div className="flex flex-col items-center gap-4 ">
-          <Link
-            href="https://calendly.com/studyshuttle"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Button className="h-[45px] rounded-[10px] bg-chili">
-              Закажи онлајн средба
-            </Button>
-          </Link>
+        <div className="flex flex-col items-start gap-4 ">
+          <div className="flex gap-2">
+            <Mail />
+            {/* `mailto:` links will open the default email client */}
+            <a
+              href="mailto:studyshuttlemk@gmail.com"
+              className="text-blue-500 hover:underline"
+            >
+              studyshuttlemk@gmail.com
+            </a>
+          </div>
+          <div>
+            БЕСПЛАТЕН{' '}
+            <Link href="/landing" className="text-blue-500 hover:underline">
+              формулар за академска евалуација на ученици
+            </Link>
+          </div>
           {/* <CtaDialog
             cta={
               <Button className="h-[45px] rounded-[10px] bg-chili">

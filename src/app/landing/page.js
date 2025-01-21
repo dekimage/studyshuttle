@@ -12,8 +12,8 @@ export default function LandingPage() {
 
   return (
     <main className="min-h-screen bg-white flex flex-col items-center">
-      <div className="pl-16 py-12">
-        <Image src={logoImg} alt="logo" height={100} width="100" />
+      <div className="pl-16 py-12 flex w-full justify-start">
+        <Image src={logoImg} alt="logo" height={200} width={200} />
       </div>
 
 

@@ -55,8 +55,23 @@ export default function LandingPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             to: values.email,
-            subject: "Thanks for Your Interest!",
-            text: "Hey thanks for showing interest! Here is the link to the google form: https://docs.google.com/forms/d/1ByGyaG80p47Q6mZbO1BY3B7G60NOuQ2Y-MLb5T5x_xA/alreadyresponded?pli=1&pli=1&pli=1",
+            subject: "Формулар за пријавување – Study Shuttle",
+            text: `Почитувани,
+
+Ви благодариме за интересот што го покажавте за програмата на Study Shuttle! Како што веќе разговаравме/добивме информација, подготвени сме да ви понудиме персонализиран план кој ќе ја поддржи Вашата или академската иднина на Вашето дете.
+
+Во продолжение Ви го испраќаме линкот од формуларот што треба да го пополните за да можеме подобро да ги разбереме Вашите потреби и цели: https://docs.google.com/forms/d/1ByGyaG80p47Q6mZbO1BY3B7G60NOuQ2Y-MLb5T5x_xA/alreadyresponded?pli=1&pli=1&pli=1
+
+Штом го добиеме пополнетиот формулар, нашиот тим ќе го анализира и ќе стапи во контакт со Вас за да сподели детално решение и следни чекори.
+
+Доколку Ви се потребни дополнителни информации или имате какви било прашања, слободно контактирајте нè на studyshuttlemk@gmail.com
+
+Ви благодариме уште еднаш за интересот и со нетрпение очекуваме да работиме заедно!
+
+Поздрав и пријатен ден,
+Тимот на Study Shuttle
+studyshuttlemk@gmail.com
+www.studyshuttle.mk`,
           }),
         });
 
