@@ -9,12 +9,28 @@ const mg = mailgun.client({
   url: "https://api.eu.mailgun.net",
 });
 
-// Updated score ranges based on your table
+// Updated score ranges with Google Drive links
 const SCORE_RANGES = {
-  LOW: { min: 0, max: 150, pdf: "lowPDF" },
-  MEDIUM: { min: 151, max: 225, pdf: "mediumPDF" },
-  HIGH: { min: 226, max: 270, pdf: "highPDF" },
-  VERY_HIGH: { min: 271, max: 300, pdf: "veryHighPDF" },
+  LOW: {
+    min: 0,
+    max: 150,
+    pdf: "https://drive.google.com/file/d/1wLPW0vY7Uy50YTGGK72Xj_2V8RLU6BF_/view?usp=sharing"
+  },
+  MEDIUM: {
+    min: 181,
+    max: 225,
+    pdf: "https://drive.google.com/file/d/1RNS0rCza-ES9gQulnqxMjgJYacVKx8dK/view?usp=sharing"
+  },
+  HIGH: {
+    min: 226,
+    max: 270,
+    pdf: "https://drive.google.com/file/d/135akrvktZoXXPYhVDR0IWkyASsaxWT-q/view?usp=sharing"
+  },
+  VERY_HIGH: {
+    min: 271,
+    max: 300,
+    pdf: "https://drive.google.com/file/d/1In1TTRet9uqlt6wcvcvtMzV97OP_HvvY/view?usp=sharing"
+  },
 };
 
 // Mapping of answers to scores
@@ -167,7 +183,7 @@ export async function POST(req) {
 По внимателното разгледување на Вашите одговори, нашиот тим подготви план кој најсоодветно ги одговара Вашите потреби и цели.
 
 Во продолжение Ви го испраќаме линкот до препорачаниот план:
-[Link to ${pdfToSend}]
+${pdfToSend}
 
 Во планот е наведена и препорачаната фаза во која најдобро се вклопувате според информациите добиени од формуларот. Доколку имате какви било прашања околу чекорите, фазите или сакате дополнителни насоки, слободно контактирајте нè на studyshuttlemk@gmail.com.
 
