@@ -46,8 +46,8 @@ export const Header = () => {
           alt="logo"
           className="w-[100px] lg:w-[147px]"
         />
-        <span className="ml-[-20px] mt-[-10px] text-sm text-gray-500">
-          The Best
+        <span className="ml-[-20px] mt-[-10px] text-xs text-gray-500 max-w-[140px] text-center">
+          Едукацијата што ја заслужуваме!
         </span>
       </Link>
       <div

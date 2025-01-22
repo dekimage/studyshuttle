@@ -23,7 +23,7 @@ export default function LandingPage() {
           background: `linear-gradient(to bottom, #ffd02f, white)`,
           clipPath: "polygon(0 0, 100% 20%, 100% 100%, 0% 100%)",
         }}
-        className="flex flex-col sm:flex-row justify-between px-2 py-6 sm:px-16 pt-48 w-full "
+        className="flex flex-col sm:flex-row justify-between px-2 py-6 sm:px-16 pt-48 w-full"
       >
         <div className="max-w-[900px]">
           <div className="max-w-[600px] sm:text-[65px] text-[25px] font-bold sm:mb-4">
