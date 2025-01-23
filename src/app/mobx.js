@@ -453,9 +453,8 @@ class Store {
         for (const userId of uniqueUserIds) {
           const userDoc = await getDoc(doc(db, "users", userId));
           if (userDoc.exists()) {
-            nameDetails[userId] = `${userDoc.data().name} ${
-              userDoc.data().lastname
-            }`;
+            nameDetails[userId] = `${userDoc.data().name} ${userDoc.data().lastname
+              }`;
           } else {
             nameDetails[userId] = "Unknown User";
           }
@@ -475,9 +474,8 @@ class Store {
         for (const professorId of uniqueProfessorIds) {
           const professorDoc = await getDoc(doc(db, "professors", professorId));
           if (professorDoc.exists()) {
-            nameDetails[professorId] = `${professorDoc.data().name} ${
-              professorDoc.data().lastname
-            }`;
+            nameDetails[professorId] = `${professorDoc.data().name} ${professorDoc.data().lastname
+              }`;
             link = professorDoc.data().link;
           } else {
             nameDetails[professorId] = "Unknown Professor";
@@ -846,9 +844,8 @@ class Store {
       for (const userId of uniqueUserIds) {
         const userDoc = await getDoc(doc(db, "users", userId));
         if (userDoc.exists()) {
-          nameDetails[userId] = `${userDoc.data().name} ${
-            userDoc.data().lastname
-          }`;
+          nameDetails[userId] = `${userDoc.data().name} ${userDoc.data().lastname
+            }`;
         } else {
           nameDetails[userId] = "Unknown User";
         }
@@ -1129,7 +1126,7 @@ class Store {
     }
   }
 
-  async signupWithEmail(email, password, name, lastname, academicLevel) {
+  async signupWithEmail(email, password, name, lastname, academicLevel, phone) {
     try {
       this.loading = true;
 
@@ -1142,6 +1139,7 @@ class Store {
           name,
           lastname,
           academicLevel,
+          phone,
         }),
       });
 
@@ -1153,7 +1151,7 @@ class Store {
 
       // Optionally update local state
       runInAction(() => {
-        this.user = { email, name, lastname, academicLevel };
+        this.user = { email, name, lastname, academicLevel, phone };
         this.loading = false;
       });
 

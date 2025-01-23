@@ -5,12 +5,14 @@ import blueCoinImg from "../../assets/bluecoin.png";
 import logoImg from "../../assets/logo.png";
 import { Button } from "@/components/ui/button";
 import MobxStore from "../mobx";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 import { useRef, useState, useEffect } from "react";
 import Loader from "../_components/Loader";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import crypto from "crypto";
 import { v4 as uuidv4 } from "uuid";
+import withAuth from "@/src/Components/AuthHoc";
+import withComingSoon from "@/src/Components/hoc/withComingSoon";
 
 const CheckmarkIcon = ({ isBlack = false }) => {
   return isBlack ? (
@@ -601,4 +603,5 @@ const ProfilePage = observer(() => {
   );
 });
 
-export default ProfilePage;
+// Apply both HOCs
+export default withComingSoon(withAuth(ProfilePage));

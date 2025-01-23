@@ -2,6 +2,8 @@
 import React, { useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 import MobxStore from "../mobx";
+import withAuth from "@/src/Components/AuthHoc";
+import withComingSoon from "@/src/Components/hoc/withComingSoon";
 
 import Loader from "../_components/Loader";
 import { Button } from "@/components/ui/button";
@@ -14,7 +16,6 @@ import confetiImg from "../../assets/confeti.png";
 import { filterSubjectsByIds } from "@/src/constants";
 
 import Link from "next/link";
-import withAuth from "@/src/Components/AuthHoc";
 
 function isAvailableEventInNextXDays(schedule, days) {
   const now = new Date(); // Current date and time
@@ -188,8 +189,8 @@ const AcademyGroups = ({ professor }) => {
 
                 {/* Conditionally render the button based on user's group membership */}
                 {user.role === "student" &&
-                !isUserInGroup &&
-                !(group.users?.length >= group.maxUsers) ? (
+                  !isUserInGroup &&
+                  !(group.users?.length >= group.maxUsers) ? (
                   <Button
                     className="bg-chili text-[18px] text-white hover:bg-chili"
                     onClick={() => setJoinGroupId(group.id)}
@@ -351,9 +352,8 @@ const ProffesorCard = ({
       <div className="flex  w-[290px] flex-col items-center rounded-[20px]  bg-white px-[12px] py-2 text-center">
         {image && (
           <div
-            className={`mb-4 flex h-[120px] w-[120px] items-center justify-center rounded-full border border-[3px] ${
-              isLanding ? "border-chili" : "border-sun"
-            }`}
+            className={`mb-4 flex h-[120px] w-[120px] items-center justify-center rounded-full border border-[3px] ${isLanding ? "border-chili" : "border-sun"
+              }`}
           >
             <Image
               src={`/${image}.png`}
@@ -593,4 +593,5 @@ const ProfPage = observer(() => {
   );
 });
 
-export default withAuth(ProfPage);
+// Apply both HOCs
+export default withComingSoon(withAuth(ProfPage));

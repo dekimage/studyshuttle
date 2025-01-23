@@ -11,6 +11,7 @@ import { filterOddByIds, filterSubjectsByIds } from "@/src/constants";
 import { toJS } from "mobx";
 import Link from "next/link";
 import withAuth from "@/src/Components/AuthHoc";
+import withComingSoon from "@/src/Components/hoc/withComingSoon";
 
 // utils function to sort and filter events for only future
 export function filterAndSortEvents(events) {
@@ -373,4 +374,7 @@ const OverviewPage = observer(() => {
   );
 });
 
-export default withAuth(OverviewPage);
+// Apply both HOCs to the OverviewPage component
+// withAuth ensures user is authenticated
+// withComingSoon shows the "coming soon" overlay
+export default withComingSoon(withAuth(OverviewPage));

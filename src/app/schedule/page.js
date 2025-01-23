@@ -9,6 +9,7 @@ import logoImg from "../../assets/logo.png";
 import Image from "next/image";
 import { AcademyGroupModal } from "../pocetna/page";
 import withAuth from "@/src/Components/AuthHoc";
+import withComingSoon from "@/src/Components/hoc/withComingSoon";
 import { toJS } from "mobx";
 
 const isWithinOneYearRange = (startDate, itemDate) => {
@@ -367,17 +368,15 @@ const CalendarView = observer(() => {
       <div className="mb-4">
         <Button
           onClick={() => setViewMode("week")}
-          className={`hover:bg-300 mr-4 bg-red-300 ${
-            viewMode === "week" ? "bg-chili hover:bg-chili" : ""
-          }`}
+          className={`hover:bg-300 mr-4 bg-red-300 ${viewMode === "week" ? "bg-chili hover:bg-chili" : ""
+            }`}
         >
           Недела
         </Button>
         <Button
           onClick={() => setViewMode("month")}
-          className={`hover:bg-300 mr-4 bg-red-300 ${
-            viewMode === "month" ? "bg-chili hover:bg-chili" : ""
-          }`}
+          className={`hover:bg-300 mr-4 bg-red-300 ${viewMode === "month" ? "bg-chili hover:bg-chili" : ""
+            }`}
         >
           Месец
         </Button>
@@ -388,4 +387,4 @@ const CalendarView = observer(() => {
   );
 });
 
-export default withAuth(CalendarView);
+export default withComingSoon(withAuth(CalendarView));
