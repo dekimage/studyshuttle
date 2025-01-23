@@ -14,22 +14,22 @@ const SCORE_RANGES = {
   LOW: {
     min: 0,
     max: 150,
-    pdf: "https://drive.google.com/file/d/1wLPW0vY7Uy50YTGGK72Xj_2V8RLU6BF_/view?usp=sharing"
+    pdf: "https://drive.google.com/file/d/1dW0DCeTweud2LNDXoyGPXxZmhLFJtjgi/view?usp=drive_link"
   },
   MEDIUM: {
     min: 181,
     max: 225,
-    pdf: "https://drive.google.com/file/d/1RNS0rCza-ES9gQulnqxMjgJYacVKx8dK/view?usp=sharing"
+    pdf: "https://drive.google.com/file/d/1dkFoG03xD5fuk4zy1UaBExQJWQRLsYoS/view?usp=drive_link"
   },
   HIGH: {
     min: 226,
     max: 270,
-    pdf: "https://drive.google.com/file/d/135akrvktZoXXPYhVDR0IWkyASsaxWT-q/view?usp=sharing"
+    pdf: "https://drive.google.com/file/d/1lM2lTu-WXQnbH7hAWqTApJVQ5GeIQRq6/view?usp=drive_link"
   },
   VERY_HIGH: {
     min: 271,
     max: 300,
-    pdf: "https://drive.google.com/file/d/1In1TTRet9uqlt6wcvcvtMzV97OP_HvvY/view?usp=sharing"
+    pdf: "https://drive.google.com/file/d/1DulnpT7aZot1WuHdmn8IzPugXkokwSWO/view?usp=drive_link"
   },
 };
 
