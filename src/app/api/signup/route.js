@@ -14,6 +14,7 @@ export async function POST(req) {
       password,
     });
 
+    /* Commenting out email verification for now
     // Generate a verification token with JWT (expires in 1 day for security)
     const token = jwt.sign(
       { uid: userRecord.uid, email },
@@ -39,6 +40,7 @@ export async function POST(req) {
         { status: 500 },
       );
     }
+    */
 
     // Create user profile in Firestore
     const newUserProfile = {
@@ -53,14 +55,14 @@ export async function POST(req) {
       blueTokens: 0,
       yellowTokens: 0,
       redTokens: 0,
-      emailVerified: false, // Set initial verification status to false
+      emailVerified: true, // Changed to true since we're skipping verification
     };
 
     await db.collection("users").doc(userRecord.uid).set(newUserProfile);
 
     return NextResponse.json({
       success: true,
-      message: "Signup successful. Please check your email for verification.",
+      message: "Signup successful!", // Removed verification message
     });
   } catch (error) {
     console.log("Error signing up:", error);
