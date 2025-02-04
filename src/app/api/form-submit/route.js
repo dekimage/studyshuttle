@@ -149,12 +149,12 @@ export async function POST(req) {
 
     // Create a clean document object with no undefined values
     const documentData = {
-      email: email.trim(),
+      email: email?.trim() || '',
       studentName: studentName?.trim() || '',
       parentName: parentName?.trim() || '',
       surname: surname?.trim() || '',
       city: city?.trim() || '',
-      language: language?.trim() || '',
+      language: Array.isArray(language) ? language[0]?.trim() || '' : language?.trim() || '',
       parentPhone: parentPhone?.trim() || '',
       isFormSubmitted: true,
       totalScore,
