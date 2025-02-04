@@ -151,8 +151,15 @@ export async function POST(req) {
 
     // Update lead in Firebase with the score and additional fields
     const leadRef = db.collection("leads").doc(email);
+
+    // First get the existing document
+    const existingDoc = await leadRef.get();
+    const existingData = existingDoc.exists ? existingDoc.data() : {};
+
+    // Then set the new data while preserving existing fields
     await leadRef.set(
       {
+        ...existingData, // Preserve all existing fields
         email,
         parentEmail,
         studentEmail,
@@ -168,7 +175,7 @@ export async function POST(req) {
         formSubmittedAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       },
-      { merge: true } // Merge ensures existing data isn't overwritten
+      { merge: true }
     );
 
     // Send email with the appropriate PDF
