@@ -59,16 +59,16 @@ export async function POST(req) {
     const body = JSON.parse(rawBody);
     console.log("Parsed body:", body);
 
-    // Destructure the data from the request body
+    // Destructure the data from the request body with default values
     const {
-      email,
-      answers,
-      studentName,
-      parentName,
-      surname,
-      city,
-      language,
-      parentPhone,
+      email = '',
+      answers = [],
+      studentName = '',
+      parentName = '',
+      surname = '',
+      city = '',
+      language = '',
+      parentPhone = '',
     } = body;
 
     // Log the extracted fields for debugging
@@ -94,10 +94,7 @@ export async function POST(req) {
       return new Response(
         JSON.stringify({
           error: "Invalid submission data",
-          received: {
-            email,
-            answers,
-          },
+          received: body,  // Log the entire received body
         }),
         {
           status: 400,
@@ -150,22 +147,27 @@ export async function POST(req) {
     const existingDoc = await leadRef.get();
     const existingData = existingDoc.exists ? existingDoc.data() : {};
 
+    // Create a clean document object with no undefined values
+    const documentData = {
+      email: email.trim(),
+      studentName: studentName?.trim() || '',
+      parentName: parentName?.trim() || '',
+      surname: surname?.trim() || '',
+      city: city?.trim() || '',
+      language: language?.trim() || '',
+      parentPhone: parentPhone?.trim() || '',
+      isFormSubmitted: true,
+      totalScore,
+      validAnswersCount,
+      formSubmittedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
     // Then set the new data while preserving existing fields
     await leadRef.set(
       {
-        ...existingData, // Preserve all existing fields
-        email,
-        studentName,
-        parentName,
-        surname,
-        city,
-        language,
-        parentPhone,
-        isFormSubmitted: true,
-        totalScore,
-        validAnswersCount,
-        formSubmittedAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        ...existingData,
+        ...documentData,
       },
       { merge: true }
     );
