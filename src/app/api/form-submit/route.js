@@ -68,10 +68,7 @@ export async function POST(req) {
       surname,
       city,
       language,
-      parentEmail,
-      studentEmail,
       parentPhone,
-
     } = body;
 
     // Log the extracted fields for debugging
@@ -83,10 +80,7 @@ export async function POST(req) {
       surname,
       city,
       language,
-      parentEmail,
-      studentEmail,
       parentPhone,
-
     });
 
     // Validate required fields
@@ -161,8 +155,6 @@ export async function POST(req) {
       {
         ...existingData, // Preserve all existing fields
         email,
-        parentEmail,
-        studentEmail,
         studentName,
         parentName,
         surname,

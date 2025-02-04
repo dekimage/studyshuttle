@@ -44,6 +44,14 @@ export default function LandingPage() {
         </div>
       </div>
 
+      <div className="flex justify-center"> <Link href={`/landing-form?${searchParams.toString()}`}>
+        <Button
+          className="bg-chili text-white w-[350px] sm:w-[400px] rounded-full px-12 py-8 mt-4 text-[32px]"
+        >
+          Започнете тука
+        </Button>
+      </Link></div>
+
       <div className="px-2 py-6 sm:px-16 sm:py-12 sm:max-w-[1140px]">
         <div className="sm:text-chili sm:text-[65px] text-[25px] mb-4 font-bold">
           Како функционира?
@@ -85,7 +93,7 @@ export default function LandingPage() {
         </div>
         <Link href={`/landing-form?${searchParams.toString()}`}>
           <Button
-            className="bg-chili text-white w-[150px] sm:w-[200px] rounded-full px-4 py-4 mt-4"
+            className="bg-chili text-white w-[350px] sm:w-[400px] rounded-full px-12 py-8 mt-4 text-[32px]"
           >
             Започнете тука
           </Button>

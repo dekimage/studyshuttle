@@ -12,7 +12,9 @@ import { Loader2 } from "lucide-react";
 
 const validationSchema = Yup.object({
   email: Yup.string().email("Погрешен формат на е-пошта").required("E-пошта е задолжителна"),
-  phone: Yup.string().matches(/^[0-9+\s-]+$/, "Invalid phone number"),
+  phone: Yup.string()
+    .matches(/^[0-9+\s-]+$/, "Невалиден телефонски број")
+    .required("Телефонскиот број е задолжителен"),
 });
 
 export default function LandingPage() {
@@ -133,12 +135,13 @@ www.studyshuttle.mk`,
               </div>
 
               <div>
-                <label htmlFor="phone" className="block font-bold mb-1">Телефонски број</label>
+                <label htmlFor="phone" className="block font-bold mb-1">Телефонски број *</label>
                 <input
                   type="tel"
                   id="phone"
                   name="phone"
                   placeholder="Внесете го вашиот телефонски број"
+                  required
                   className="w-full p-2 border border-gray-300 rounded mb-2"
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
