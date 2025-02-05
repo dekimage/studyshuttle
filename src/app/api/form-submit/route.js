@@ -46,7 +46,6 @@ const ANSWER_SCORES = {
 const USE_UNIQUE_EMAIL_ONLY = true;
 
 export async function POST(req) {
-  // Add CORS headers
   const headers = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
@@ -54,15 +53,9 @@ export async function POST(req) {
   };
 
   try {
-    // Log the raw request body
     const rawBody = await req.text();
-    console.log("Raw request body:", rawBody);
-
-    // Parse the JSON
     const body = JSON.parse(rawBody);
-    console.log("Parsed body:", body);
 
-    // Destructure the data from the request body with default values
     const {
       email = '',
       answers = [],
@@ -74,30 +67,12 @@ export async function POST(req) {
       parentPhone = '',
     } = body;
 
-    // Log the extracted fields for debugging
-    console.log("Extracted fields:", {
-      email,
-      answers,
-      studentName,
-      parentName,
-      surname,
-      city,
-      language,
-      parentPhone,
-    });
-
     // Validate required fields
     if (!email || !answers || !Array.isArray(answers)) {
-      console.log("Validation failed:", {
-        hasEmail: !!email,
-        hasAnswers: !!answers,
-        isArray: Array.isArray(answers),
-      });
-
       return new Response(
         JSON.stringify({
           error: "Invalid submission data",
-          received: body,  // Log the entire received body
+          received: body,
         }),
         {
           status: 400,
@@ -106,45 +81,17 @@ export async function POST(req) {
       );
     }
 
-    if (USE_UNIQUE_EMAIL_ONLY) {
-      // Check if email already exists
-      const leadRef = db.collection("leads").doc(email);
-      const docSnapshot = await leadRef.get();
+    // Check if email already exists first
+    const leadRef = db.collection("leads").doc(email);
+    const existingDoc = await leadRef.get();
 
-      if (docSnapshot.exists) {
-        return new Response(
-          JSON.stringify({
-            error: "Email already exists",
-            message: "This email has already been registered",
-          }),
-          {
-            status: 409, // Conflict
-            headers,
-          }
-        );
-      }
-
-      // Create new document data
-      const documentData = {
-        email: email?.trim() || '',
-        studentName: studentName?.trim() || '',
-        parentName: parentName?.trim() || '',
-        surname: surname?.trim() || '',
-        city: city?.trim() || '',
-        language: Array.isArray(language) ? language[0]?.trim() || '' : language?.trim() || '',
-        parentPhone: parentPhone?.trim() || '',
-        isFormSubmitted: true,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-
-      // Create new document
-      await leadRef.set(documentData);
-
+    // If document exists, return early without modifying anything
+    if (existingDoc.exists) {
       return new Response(
         JSON.stringify({
           success: true,
-          message: "New lead created successfully",
+          isNewUser: false,
+          message: "User already exists",
         }),
         {
           status: 200,
@@ -178,26 +125,7 @@ export async function POST(req) {
       );
     }
 
-    // Determine which PDF to send based on the score
-    let pdfToSend;
-    if (totalScore >= SCORE_RANGES.VERY_HIGH.min && totalScore <= SCORE_RANGES.VERY_HIGH.max) {
-      pdfToSend = SCORE_RANGES.VERY_HIGH.pdf;
-    } else if (totalScore >= SCORE_RANGES.HIGH.min && totalScore <= SCORE_RANGES.HIGH.max) {
-      pdfToSend = SCORE_RANGES.HIGH.pdf;
-    } else if (totalScore >= SCORE_RANGES.MEDIUM.min && totalScore <= SCORE_RANGES.MEDIUM.max) {
-      pdfToSend = SCORE_RANGES.MEDIUM.pdf;
-    } else {
-      pdfToSend = SCORE_RANGES.LOW.pdf;
-    }
-
-    // Update lead in Firebase with the score and additional fields
-    const leadRef = db.collection("leads").doc(email);
-
-    // First get the existing document
-    const existingDoc = await leadRef.get();
-    const existingData = existingDoc.exists ? existingDoc.data() : {};
-
-    // Create a clean document object with no undefined values
+    // Create new document data
     const documentData = {
       email: email?.trim() || '',
       studentName: studentName?.trim() || '',
@@ -209,18 +137,24 @@ export async function POST(req) {
       isFormSubmitted: true,
       totalScore,
       validAnswersCount,
-      formSubmittedAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
 
-    // Then set the new data while preserving existing fields
-    await leadRef.set(
-      {
-        ...existingData,
-        ...documentData,
-      },
-      { merge: true }
-    );
+    // Create new document
+    await leadRef.set(documentData);
+
+    // Determine which PDF to send based on the score
+    let pdfToSend;
+    if (totalScore >= SCORE_RANGES.VERY_HIGH.min && totalScore <= SCORE_RANGES.VERY_HIGH.max) {
+      pdfToSend = SCORE_RANGES.VERY_HIGH.pdf;
+    } else if (totalScore >= SCORE_RANGES.HIGH.min && totalScore <= SCORE_RANGES.HIGH.max) {
+      pdfToSend = SCORE_RANGES.HIGH.pdf;
+    } else if (totalScore >= SCORE_RANGES.MEDIUM.min && totalScore <= SCORE_RANGES.MEDIUM.max) {
+      pdfToSend = SCORE_RANGES.MEDIUM.pdf;
+    } else {
+      pdfToSend = SCORE_RANGES.LOW.pdf;
+    }
 
     // Send email with the appropriate PDF
     const emailData = {
@@ -252,7 +186,7 @@ www.studyshuttle.mk`,
       JSON.stringify({
         success: true,
         score: totalScore,
-        pdf: pdfToSend,
+        isNewUser: true,
         message: "Form submission processed successfully",
       }),
       {
