@@ -42,6 +42,9 @@ const ANSWER_SCORES = {
   "Секогаш": 5,
 };
 
+// Feature flag for new behavior
+const USE_UNIQUE_EMAIL_ONLY = true;
+
 export async function POST(req) {
   // Add CORS headers
   const headers = {
@@ -98,6 +101,53 @@ export async function POST(req) {
         }),
         {
           status: 400,
+          headers,
+        }
+      );
+    }
+
+    if (USE_UNIQUE_EMAIL_ONLY) {
+      // Check if email already exists
+      const leadRef = db.collection("leads").doc(email);
+      const docSnapshot = await leadRef.get();
+
+      if (docSnapshot.exists) {
+        return new Response(
+          JSON.stringify({
+            error: "Email already exists",
+            message: "This email has already been registered",
+          }),
+          {
+            status: 409, // Conflict
+            headers,
+          }
+        );
+      }
+
+      // Create new document data
+      const documentData = {
+        email: email?.trim() || '',
+        studentName: studentName?.trim() || '',
+        parentName: parentName?.trim() || '',
+        surname: surname?.trim() || '',
+        city: city?.trim() || '',
+        language: Array.isArray(language) ? language[0]?.trim() || '' : language?.trim() || '',
+        parentPhone: parentPhone?.trim() || '',
+        isFormSubmitted: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      // Create new document
+      await leadRef.set(documentData);
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          message: "New lead created successfully",
+        }),
+        {
+          status: 200,
           headers,
         }
       );
