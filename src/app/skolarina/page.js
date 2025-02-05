@@ -37,15 +37,15 @@ const SkolarinaPage = () => {
               <div className="text-[35px] font-bold">1200 МКД</div></div>
 
             <div className="my-6 flex gap-2">
-              <CheckCircle className="text-black" />
+              <CheckCircle className="text-black min-w-[20px] min-h-[20px]" />
               <div>1 токен - 1 час</div>
             </div>
             <div className="my-6 flex gap-2">
-              <CheckCircle className="text-black" />
+              <CheckCircle className="text-black min-w-[20px] min-h-[20px]" />
               <div>Право на користење од 14 денови</div>
             </div>
             <div className="my-6 flex gap-2">
-              <CheckCircle className="text-black" />
+              <CheckCircle className="text-black min-w-[20px] min-h-[20px]" />
               <div>  Ограничен пристап до платформата</div>
             </div>
 
@@ -62,32 +62,33 @@ const SkolarinaPage = () => {
         <div className="flex gap-8 justify-center lg:flex-row flex-col">
 
           <div className="my-32 mb-64 flex h-[550px] items-center justify-center gap-8">
-            <div className="flex w-[400px] h-[800px] flex-col rounded-xl bg-sun p-8  lg:w-[430px]">
+            <div className="flex w-[400px] h-[900px] flex-col rounded-xl bg-sun p-8  lg:w-[430px] justify-between">
               <div className="text-[35px] font-semibold text-white">
                 ФАЗА 1: Фундаментална фаза
               </div>
               <div className="my-6 flex gap-2">
-                <CheckCircle className="text-black" />
+                <CheckCircle className="text-black min-w-[20px] min-h-[20px]" />
                 <div>48 токени (3 часа неделно)</div>
               </div>
               <div className="my-6 flex gap-2">
-                <CheckCircle className="text-black" />
+                <CheckCircle className="text-black min-w-[20px] min-h-[20px]" />
                 <div>Цел: Да се стекне рутина и здраво гледиште кон едукација</div>
               </div>
 
               <div className="my-6 flex gap-2">
-                <CheckCircle className="text-black" />
+                <CheckCircle className="text-black min-w-[20px] min-h-[20px]" />
                 <div>Целосен Пристап до алатките за учење</div>
               </div>
 
               <div className="my-6 flex gap-2">
-                <CheckCircle className="text-black" />
+                <CheckCircle className="text-black min-w-[20px] min-h-[20px]" />
                 <div> Право на користење од едно полугодие</div>
               </div>
 
 
 
               <div className="b-white my-6 w-full border border-dashed"></div>
+              <div>Право на плаќање на 6 рати, НЕ онлајн плаќање</div>
 
               <div className="mb-8 text-[35px] font-bold">750МКД / час</div>
 
@@ -100,32 +101,33 @@ const SkolarinaPage = () => {
 
 
           <div className="my-32 mb-64 flex h-[550px] items-center justify-center gap-8">
-            <div className="flex w-[400px] h-[800px] flex-col rounded-xl bg-sun p-8  lg:w-[430px]">
+            <div className="flex w-[400px] h-[900px] flex-col rounded-xl bg-sun p-8  lg:w-[430px] justify-between">
               <div className="text-[35px] font-semibold text-white">
                 ФАЗА 2: Фаза на Растење
               </div>
               <div className="my-6 flex gap-2">
-                <CheckCircle className="text-black" />
+                <CheckCircle className="text-black min-w-[20px] min-h-[20px]" />
                 <div>36 токени (2 часа неделно + екстра за пред тестови)</div>
               </div>
               <div className="my-6 flex gap-2">
-                <CheckCircle className="text-black" />
+                <CheckCircle className="text-black min-w-[20px] min-h-[20px]" />
                 <div>Цел: Да се зацврстат навиките и добие јасна слика колку е важна едукацијата</div>
               </div>
 
               <div className="my-6 flex gap-2">
-                <CheckCircle className="text-black" />
+                <CheckCircle className="text-black min-w-[20px] min-h-[20px]" />
                 <div>Целосен пристап до сите алатки</div>
               </div>
 
               <div className="my-6 flex gap-2">
-                <CheckCircle className="text-black" />
+                <CheckCircle className="text-black min-w-[20px] min-h-[20px]" />
                 <div> Право на користење од едно полугодие</div>
               </div>
 
 
 
               <div className="b-white my-6 w-full border border-dashed"></div>
+              <div>Право на плаќање на 6 рати, НЕ онлајн плаќање</div>
 
               <div className="mb-8 text-[35px] font-bold">800МКД / час</div>
 
@@ -140,33 +142,34 @@ const SkolarinaPage = () => {
 
         <div className="flex gap-8 justify-center lg:flex-row flex-col">
           <div className="my-32 mb-64 flex h-[550px] items-center justify-center gap-8">
-            <div className="flex w-[400px] h-[800px] flex-col rounded-xl bg-sun p-8  lg:w-[430px]">
+            <div className="flex w-[400px] h-[900px] flex-col rounded-xl bg-sun p-8  lg:w-[430px] justify-between">
               <div className="text-[35px] font-semibold text-white">
                 ФАЗА 3: Напредна Фаза
 
               </div>
               <div className="my-6 flex gap-2">
-                <CheckCircle className="text-black" />
+                <CheckCircle className="text-black min-w-[20px] min-h-[20px]" />
                 <div>24 токени (1 час неделно + екстра за пред тестови и други предмети)</div>
               </div>
               <div className="my-6 flex gap-2">
-                <CheckCircle className="text-black" />
+                <CheckCircle className="text-black min-w-[20px] min-h-[20px]" />
                 <div>Цел: Тука фокусот е на градење менталитет за како ученикот да се истакне</div>
               </div>
 
               <div className="my-6 flex gap-2">
-                <CheckCircle className="text-black" />
+                <CheckCircle className="text-black min-w-[20px] min-h-[20px]" />
                 <div>Целосен пристап до сите алатки</div>
               </div>
 
               <div className="my-6 flex gap-2">
-                <CheckCircle className="text-black" />
+                <CheckCircle className="text-black min-w-[20px] min-h-[20px]" />
                 <div> Право на користење од едно полугодие</div>
               </div>
 
 
 
               <div className="b-white my-6 w-full border border-dashed"></div>
+              <div>Право на плаќање на 6 рати, НЕ онлајн плаќање</div>
 
               <div className="mb-8 text-[35px] font-bold">900МКД / час</div>
 
@@ -181,33 +184,34 @@ const SkolarinaPage = () => {
 
 
           <div className="my-32 mb-64 flex h-[550px] items-center justify-center gap-8">
-            <div className="flex w-[400px] h-[800px] flex-col rounded-xl bg-sun p-8  lg:w-[430px]">
+            <div className="flex w-[400px] h-[900px] flex-col rounded-xl bg-sun p-8  lg:w-[430px] justify-between">
               <div className="text-[35px] font-semibold text-white">
                 ФАЗА 4: Академска фаза
 
               </div>
               <div className="my-6 flex gap-2">
-                <CheckCircle className="text-black" />
+                <CheckCircle className="text-black min-w-[20px] min-h-[20px]" />
                 <div>1 академски токен = 46 неделна програма од 3 групни предавања/неделно со факултетски професор</div>
               </div>
               <div className="my-6 flex gap-2">
-                <CheckCircle className="text-black" />
+                <CheckCircle className="text-black min-w-[20px] min-h-[20px]" />
                 <div>Цел: Да се стекне рутина и здраво гледиште кон едукацијаЦел: Да се стекне ученикот со знаење надвор од рамките на образовните програми за да може да се натпреварува на национални и интернационални натпревари</div>
               </div>
 
               <div className="my-6 flex gap-2">
-                <CheckCircle className="text-black" />
+                <CheckCircle className="text-black min-w-[20px] min-h-[20px]" />
                 <div>Целосен пристап до сите алатки + консултантски часови 1 на 1 со професорот</div>
               </div>
 
               <div className="my-6 flex gap-2">
-                <CheckCircle className="text-black" />
+                <CheckCircle className="text-black min-w-[20px] min-h-[20px]" />
                 <div> Право на користење од 1 календарска година</div>
               </div>
 
 
 
               <div className="b-white my-6 w-full border border-dashed"></div>
+              <div>(Од Септември учебна 2025/26)! (НЕ онлајн плаќање)</div>
 
               {/* <div className="mb-8 text-[35px] font-bold">750МКД / час</div> */}
 
@@ -236,19 +240,19 @@ const SkolarinaPage = () => {
               <div className="text-[35px] font-bold">4000 МКД</div></div>
 
             <div className="my-6 flex gap-2">
-              <CheckCircle className="text-black" />
+              <CheckCircle className="text-black min-w-[20px] min-h-[20px]" />
               <div>1 студент токен = 1 Подготвителен курс (може да се подели и на колоквиуми)</div>
             </div>
             <div className="my-6 flex gap-2">
-              <CheckCircle className="text-black" />
+              <CheckCircle className="text-black min-w-[20px] min-h-[20px]" />
               <div>Цел: Да го подготви студентот да го положи испитот со реална оцена</div>
             </div>
             <div className="my-6 flex gap-2">
-              <CheckCircle className="text-black" />
+              <CheckCircle className="text-black min-w-[20px] min-h-[20px]" />
               <div> 6 предавања од 120 минути и 1 консултациски час предадени во 7 дена</div>
             </div>
             <div className="my-6 flex gap-2">
-              <CheckCircle className="text-black" />
+              <CheckCircle className="text-black min-w-[20px] min-h-[20px]" />
               <div> Право на користење од 1 семестар</div>
             </div>
 
