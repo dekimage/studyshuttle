@@ -6,10 +6,11 @@ import cosmoImg from "../../assets/cosmo.png";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
 export const dynamic = 'force-dynamic';
 
-export default function LandingPage() {
+function LandingPageContent() {
   const searchParams = useSearchParams();
 
   return (
@@ -115,5 +116,13 @@ export default function LandingPage() {
 
 
     </main>
+  );
+}
+
+export default function LandingPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LandingPageContent />
+    </Suspense>
   );
 }

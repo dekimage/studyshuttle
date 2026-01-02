@@ -1,11 +1,11 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 
 export const dynamic = 'force-dynamic';
 
-export default function PaymentResult() {
+function PaymentResultContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [paymentStatus, setPaymentStatus] = useState(null);
@@ -56,5 +56,13 @@ export default function PaymentResult() {
         {paymentStatus.status === "success" ? "Go to Home" : "Contact Support"}
       </button>
     </div>
+  );
+}
+
+export default function PaymentResult() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <PaymentResultContent />
+    </Suspense>
   );
 }

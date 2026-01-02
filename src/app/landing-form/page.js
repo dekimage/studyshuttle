@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -19,8 +19,7 @@ const validationSchema = Yup.object({
 
 export const dynamic = 'force-dynamic';
 
-export default function LandingPage() {
-
+function LandingFormContent() {
   const searchParams = useSearchParams();
   const { toast } = useToast();
   const [affiliateCode, setAffiliateCode] = useState("");
@@ -175,5 +174,13 @@ www.studyshuttle.mk`,
         </div>
       </div>
     </main>
+  );
+}
+
+export default function LandingPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LandingFormContent />
+    </Suspense>
   );
 }
