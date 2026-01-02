@@ -2,11 +2,12 @@ import { db } from "../../firebaseAdmin";
 import jwt from "jsonwebtoken";
 import { NextResponse } from "next/server";
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req) {
   try {
-    // Use the URL object to get the token from the query parameters
-    const { searchParams } = new URL(req.url);
-    const token = searchParams.get("token");
+    // Get the token from the query parameters using NextRequest's nextUrl
+    const token = req.nextUrl.searchParams.get("token");
 
     if (!token) {
       return NextResponse.json(

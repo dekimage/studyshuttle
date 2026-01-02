@@ -1,4 +1,4 @@
-import crypto from "crypto";
+import crypto from "node:crypto";
 import { NextResponse } from "next/server";
 import { db } from "../../firebaseAdmin";
 import { FieldValue } from "firebase-admin/firestore";

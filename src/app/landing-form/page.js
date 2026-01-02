@@ -17,6 +17,8 @@ const validationSchema = Yup.object({
     .required("Телефонскиот број е задолжителен"),
 });
 
+export const dynamic = 'force-dynamic';
+
 export default function LandingPage() {
 
   const searchParams = useSearchParams();

@@ -9,7 +9,6 @@ import { observer } from "mobx-react-lite";
 import { useRef, useState, useEffect } from "react";
 import Loader from "../_components/Loader";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import crypto from "crypto";
 import { v4 as uuidv4 } from "uuid";
 import withAuth from "@/src/Components/AuthHoc";
 import withComingSoon from "@/src/Components/hoc/withComingSoon";
@@ -72,7 +71,7 @@ const BalanceBox = ({ amount, label, color, isBluecoin }) => {
   );
 };
 
-function generateHashVersion3({
+async function generateHashVersion3({
   amount,
   clientid,
   currency,
@@ -89,10 +88,19 @@ function generateHashVersion3({
 }) {
   const plaintext = `${amount}|${clientid}|${currency}|${failUrl}|${hashAlgorithm}|${lang}|${oid}|${okUrl}|${refreshtime}|${rnd}|${storetype}|${trantype}|${storeKey}`;
 
-  const hash = crypto
-    .createHash("sha512")
-    .update(plaintext, "utf8")
-    .digest("base64");
+  // Use Web Crypto API for client-side hashing
+  const encoder = new TextEncoder();
+  const data = encoder.encode(plaintext);
+  const hashBuffer = await crypto.subtle.digest("SHA-512", data);
+  const hashArray = new Uint8Array(hashBuffer);
+  
+  // Convert to base64 - handle large arrays by chunking
+  let binary = '';
+  const len = hashArray.length;
+  for (let i = 0; i < len; i++) {
+    binary += String.fromCharCode(hashArray[i]);
+  }
+  const hash = btoa(binary);
 
   console.log("Generated hash (frontend):", hash);
 
@@ -120,16 +128,62 @@ function generateUUID() {
 const PaymentDialog = observer(({ selectedPlan }) => {
   const formRef = useRef(null);
   const [rnd, setRnd] = useState("");
+  const [oid, setOid] = useState("");
+  const [hash, setHash] = useState("");
   const { user } = MobxStore;
+
+  const clientId = "180000166";
+  const okUrl = "http://localhost:3000/api/payment-success";
+  const failUrl = "http://localhost:3000/api/payment-fail";
+  const trantype = "Auth";
+  const currency = "807";
+  const storeKey = "TEST1777";
+  const storeType = "3d_pay_hosting";
+  const refreshtime = "3";
 
   useEffect(() => {
     setRnd(generateRandomString(10));
+    setOid(generateUUID());
   }, []);
+
+  useEffect(() => {
+    if (!rnd || !oid) return;
+    
+    let amount;
+    switch (selectedPlan) {
+      case "red":
+        amount = "1250";
+        break;
+      case "blue":
+        amount = "36000";
+        break;
+      case "yellow":
+        amount = "72000";
+        break;
+      default:
+        amount = "0";
+    }
+
+    generateHashVersion3({
+      clientid: clientId,
+      oid,
+      amount,
+      okUrl,
+      failUrl,
+      trantype,
+      rnd,
+      currency,
+      storeType,
+      hashAlgorithm: "ver3",
+      lang: "en",
+      storeKey,
+      refreshtime,
+      storetype: storeType,
+    }).then(setHash);
+  }, [rnd, oid, selectedPlan]);
 
   console.log("User object:", user);
 
-  const clientId = "180000166";
-  const oid = generateUUID();
   let amount;
   switch (selectedPlan) {
     case "red":
@@ -144,13 +198,6 @@ const PaymentDialog = observer(({ selectedPlan }) => {
     default:
       amount = "0";
   }
-  const okUrl = "http://localhost:3000/api/payment-success";
-  const failUrl = "http://localhost:3000/api/payment-fail";
-  const trantype = "Auth";
-  const currency = "807";
-  const storeKey = "TEST1777";
-  const storeType = "3d_pay_hosting";
-  const refreshtime = "3";
 
   const handleSubmit = async (event) => {
     console.log("handleSubmit called");
@@ -212,22 +259,7 @@ const PaymentDialog = observer(({ selectedPlan }) => {
           <input
             type="hidden"
             name="hash"
-            value={generateHashVersion3({
-              clientid: clientId,
-              oid,
-              amount,
-              okUrl,
-              failUrl,
-              trantype,
-              rnd,
-              currency,
-              storeType,
-              hashAlgorithm: "ver3",
-              lang: "en",
-              storeKey,
-              refreshtime,
-              storetype: storeType,
-            })}
+            value={hash}
           />
           <input type="hidden" name="trantype" value={trantype} />
           <input type="hidden" name="amount" value={amount} />
